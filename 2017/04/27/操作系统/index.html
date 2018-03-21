@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="操作系统原理
+CPU核心概念
+中断
+寄存器
+CPU MODE：内核态、用户态
+
+
+实时操作系统
+CPU时间片算法：
+抢占/非抢占
+Timer
+
+
+OS核心功能组件
+内存管理
+I/O管理
+GPU
+网络
+多媒体
+
+
+
+RTOS design
+根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Life Career">
+<meta property="og:url" content="http://yoursite.com/2017/04/27/操作系统/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="操作系统原理
+CPU核心概念
+中断
+寄存器
+CPU MODE：内核态、用户态
+
+
+实时操作系统
+CPU时间片算法：
+抢占/非抢占
+Timer
+
+
+OS核心功能组件
+内存管理
+I/O管理
+GPU
+网络
+多媒体
+
+
+
+RTOS design
+根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU">
+<meta property="og:updated_time" content="2017-04-27T06:08:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Life Career">
+<meta name="twitter:description" content="操作系统原理
+CPU核心概念
+中断
+寄存器
+CPU MODE：内核态、用户态
+
+
+实时操作系统
+CPU时间片算法：
+抢占/非抢占
+Timer
+
+
+OS核心功能组件
+内存管理
+I/O管理
+GPU
+网络
+多媒体
+
+
+
+RTOS design
+根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-操作系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/27/操作系统/" class="article-date">
+  <time datetime="2017-04-27T06:08:59.000Z" itemprop="datePublished">2017-04-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><ul>
+<li>CPU核心概念<ul>
+<li>中断</li>
+<li>寄存器</li>
+<li>CPU MODE：内核态、用户态</li>
+</ul>
+</li>
+<li>实时操作系统<ul>
+<li>CPU时间片算法：</li>
+<li>抢占/非抢占</li>
+<li>Timer</li>
+</ul>
+</li>
+<li>OS核心功能组件<ul>
+<li>内存管理</li>
+<li>I/O管理</li>
+<li>GPU</li>
+<li>网络</li>
+<li>多媒体</li>
+</ul>
+</li>
+</ul>
+<h3 id="RTOS-design"><a href="#RTOS-design" class="headerlink" title="RTOS design"></a>RTOS design</h3><ul>
+<li><font color="blue">根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU等</font></li>
+<li>封装底层硬件、为上层应用提供API，可以查阅<font color="red">Linux Kernel</font>的lib，你们要求application跨平台，可以查阅<font color="red">Java JVM的跨平台设计</font></li>
+<li>realtime的关键应该是抢占式调度，需要基于中断实现</li>
+<li>四核CPU，要实现多核并发，主要是协调四个CPU同时工作。比如给4个CPU各分配一个任务，任务完成后怎么通知其它CPU，并协调下一步指令执行。应该是<font color="red">基于cpu的mailbox去实现</font>，关注一下QA7文档的mailbox部分。另外就是查一下线程/进程的状态转换模型和调度模型</li>
+<li>内存寻址要搞清楚虚拟地址和物理地址之间的转换，再看一下文档的Memory Manage Unit(MMU)和Direct Memory Access（DMA）</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjf0hfjan0008j4qhsaqhpdcr" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/15/servermonitoring/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/03/23/分布式服务监控 - 概述/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/07/15/servermonitoring/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/27/操作系统/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2017/03/23/分布式服务监控 - 概述/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/24/Continuous-Integration-Based-On-Aliyun-Crp/">Continuous Integration Based On Aliyun Crp</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/24/Message-Push/">Message Push</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
