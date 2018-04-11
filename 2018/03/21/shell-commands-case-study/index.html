@@ -21,7 +21,7 @@ cp 使用-">
 
 磁盘与文件基础磁盘文件操作
 cp 使用-">
-<meta property="og:updated_time" content="2018-03-21T03:21:27.000Z">
+<meta property="og:updated_time" content="2018-04-11T13:08:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="shell commands case study">
 <meta name="twitter:description" content="高频shell命令及使用场景总结
@@ -163,7 +163,7 @@ cp 使用-">
 <li>shell parameter expansion。把变量放入${}中，并指定一些特定的操作符，实现对变量的操作，通过这种方式，可以很便捷的对变量做很多常用的操作（比awk代码更简洁易上手，虽然功能没有awk多）<ul>
 <li>如${parameter:7}返回截取字符串或数组第7位以后（不包括第7位）的子串或子集</li>
 <li>${ #parameter}返回parameter的长度</li>
-<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${ #parameter#</em>:}返回的是左数第一个:右边的内容、${ #parameter%%:<em>}返回右数最后一个:左边的内容，${ #parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
+<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${parameter#</em>:}返回的是左数第一个:右边的内容、${parameter%%:<em>}返回右数最后一个:左边的内容，${parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
 <li>IFS=’:’; arr=($line)可以把line数据按分隔符拆分并组织成数组，类似java中是String.split(“:”)。使用echo ${arr[0]}打印数组的第1个元素</li>
 </ul>
 </li>
@@ -244,14 +244,25 @@ cp 使用-">
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjf0iu8qb0001qvqhg70x13kg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjfv497ea0008j4qhkyde1vwu" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li></ul>
+
     </footer>
   </div>
   
     
 <nav id="article-nav">
+  
+    <a href="/2018/03/26/旅行行业基础数据本地管理/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          旅行行业基础数据本地管理
+        
+      </div>
+    </a>
   
   
     <a href="/2017/07/15/servermonitoring/" id="article-nav-older" class="article-nav-link-wrap">
@@ -275,7 +286,7 @@ cp 使用-">
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -285,7 +296,7 @@ cp 使用-">
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -294,7 +305,7 @@ cp 使用-">
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
   </div>
 
@@ -307,6 +318,14 @@ cp 使用-">
       <ul>
         
           <li>
+            <a href="/2018/04/10/java团队code style规范/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/26/旅行行业基础数据本地管理/">旅行行业基础数据本地管理</a>
+          </li>
+        
+          <li>
             <a href="/2018/03/21/shell-commands-case-study/">shell commands case study</a>
           </li>
         
@@ -316,14 +335,6 @@ cp 使用-">
         
           <li>
             <a href="/2017/04/27/操作系统/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2017/03/23/分布式服务监控 - 概述/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/24/Continuous-Integration-Based-On-Aliyun-Crp/">Continuous Integration Based On Aliyun Crp</a>
           </li>
         
       </ul>

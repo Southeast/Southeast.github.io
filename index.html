@@ -61,6 +61,505 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-java团队code style规范" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/10/java团队code style规范/" class="article-date">
+  <time datetime="2018-04-10T01:58:14.000Z" itemprop="datePublished">2018-04-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="java团队code-style规范"><a href="#java团队code-style规范" class="headerlink" title="java团队code style规范"></a>java团队code style规范</h1><ul>
+<li>摘选自《阿里巴巴Java开发手册》（孤尽），主要挑选个人感受最多的，影响代码阅读和维护、易于产生错误或误解的点，期望在团队层面建立良好的、易于接受推进的编码习惯和风格。</li>
+<li>总结了少量重要的java知识点错用、误用的场景，需要在日常coding中避免</li>
+<li>《阿里巴巴Java开发手册》原文可以在<a href="https://m.aliyun.com/yunqi/articles/215391" target="_blank" rel="external">阿里云</a>下载，也可以购买纸质版（略贵）、</li>
+</ul>
+<h2 id="Code-Style"><a href="#Code-Style" class="headerlink" title="Code Style"></a>Code Style</h2><h3 id="命名风格"><a href="#命名风格" class="headerlink" title="命名风格"></a>命名风格</h3><ul>
+<li><font colore="blue">以达到代码自解释为目的</font></li>
+<li>常量全部使用大写，单次之间用下划线”_”隔开；非常量及函数使用UpperCamelCase风格</li>
+<li>不要嫌明明太长，不合理的缩写产生的影响远比多读几个单次要大</li>
+<li>禁止使用拼音英文混合的命名方式，一般也不建议使用全拼音</li>
+<li>数组定义统一使用String[] args的格式，不要使用String args[]</li>
+<li>POJO类的bool类型变量不加is，防止有些框架解析错误（自动去掉is）</li>
+</ul>
+<h3 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h3><ul>
+<li>拒绝magic value</li>
+</ul>
+<h3 id="代码格式"><a href="#代码格式" class="headerlink" title="代码格式"></a>代码格式</h3><ul>
+<li>long类型赋值，用L结尾，不要用l，容易与1产生混淆。long testValue = 0L；不要用做long testValue = 0l</li>
+<li>关于换行<ul>
+<li>第二行相对第一行缩进4个空格，第三行开始不再持续缩进</li>
+<li>运算符与下文一起缩进。<pre><code><br>boolean testFlag = aVeryLongNameMethodWithBoolReturnValueFoo1()<pre><code>&amp;&amp; anotherVeryLongNameMethodWithBoolReturnValueFoo2()
+&amp;&amp; anotherVeryLongNameMethodWithBoolReturnValueFoo3();
+</code></pre>  </code></pre></li>
+<li>.与下文一起缩进。<pre><code><br>StringBuilder testStringBuilder = new StringBuilder()<pre><code>.append(&quot;test&quot;)
+.append(&quot;test1&quot;);
+</code></pre></code></pre></li>
+</ul>
+</li>
+<li>不同逻辑、不同语义、不同业务的代码之间插入一个空行分隔开</li>
+</ul>
+<h3 id="OOP"><a href="#OOP" class="headerlink" title="OOP"></a>OOP</h3><ul>
+<li>复写方法必须加@Override</li>
+<li>开放出去的接口不允许修改或删除接口签名（包括类名、方法名、常量名）</li>
+<li>禁止使用@Deprecated方法</li>
+<li>Object.equals()，为防止NPE，使用”test”.equals(aStr)替代aStr.equals(“test”)</li>
+<li>注意primitive类型比较时，注意auto box和unbox的规则，如不了解，全部是primitive时使用==，涉及包装类对象时，使用equals</li>
+<li>POJO属性全部使用包装类对象，RPC方法参数、返回值使用包装类对象</li>
+<li>类内部的方法定义顺序：public方法/protected方法 &gt; private方法 &gt; getter/setter</li>
+<li>集合初始化时指定集合初始大小</li>
+<li>Map遍历使用entrySet，不要使用keySet</li>
+</ul>
+<h3 id="控制语句"><a href="#控制语句" class="headerlink" title="控制语句"></a>控制语句</h3><ul>
+<li>多重嵌套的if-else语句使用卫语句代替</li>
+</ul>
+<h3 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h3><ul>
+<li>通过好的命名来达到自解释</li>
+<li>类、类属性、类方法注释必须使用Javadoc规范，功能复杂的难以做到self descriptive的需要说明类和方法分别做什么事情，根据需要也应该增加复杂逻辑的解释</li>
+<li>所有类都要添加创建者和创建日期</li>
+</ul>
+<h3 id="日志规约"><a href="#日志规约" class="headerlink" title="日志规约"></a>日志规约</h3><ul>
+<li>使用占位符替代字符串拼接，特别注意debug日志，可以防止不必要的字符串拼接<pre><code><br>// 使用<br>log.debug(“processing trade, id={}, name={}”, id, name);<br>// 不使用<br>log.debug(“processing trade, id=” + id + “, name=” + name);<br></code></pre></li>
+</ul>
+<h3 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h3><ul>
+<li>索引命名<ul>
+<li>主键 PK_${fieldName}</li>
+<li>唯一索引 UK_${fieldName}</li>
+<li>普通索引 IDX_${fieldName}</li>
+</ul>
+</li>
+<li>小数类型使用decimal，禁止使用double和float</li>
+<li>表必备字段id，gmt_create, gmt_modified</li>
+<li>varchar字段建索引时要指定长度，不需要全部索引</li>
+<li>不要使用count(1), count(列名)替代count（*）</li>
+<li>POJO类bool属性命名不能加is前缀，而数据库字段需加is</li>
+<li>更新时指定字段更新，不要传入对象全部更新</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/10/java团队code style规范/" data-id="cjfv497e20004j4qhdh7yixb0" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-旅行行业基础数据本地管理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/26/旅行行业基础数据本地管理/" class="article-date">
+  <time datetime="2018-03-26T08:06:52.000Z" itemprop="datePublished">2018-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/26/旅行行业基础数据本地管理/">旅行行业基础数据本地管理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
+<li>旅行行业有许多稳定的、要查询反复使用的数据，如火车票的站点信息、航路信息，酒店的基础信息等。且这些数据往往单体数据较大，在频繁查询过程中要占用大量的网络带宽。</li>
+<li>鉴于以上特点，我们考虑把这些数据放到其所在服务之中，不用再通过网络访问，由于数据稳定，使用定期同步（外加手动同步）的方式进行更新</li>
+</ul>
+<h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><ul>
+<li>解决核心基础数据就（country,province,city,district,landmark,guide,intro等）的数据单点问题，减少其服务压力(20个系统依赖一个数据服务)</li>
+<li>使用服务器上的本地存储，维护旅行行业基础信息，减少不必要的网络带宽占用，提高访问速度</li>
+</ul>
+<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><h2 id="内存缓存"><a href="#内存缓存" class="headerlink" title="内存缓存"></a>内存缓存</h2><ul>
+<li>在服务启动时，将数据库中存储的数据加载到内存中，并根据使用需要建立map，查询数据时用相关的key从map中取数据</li>
+</ul>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><pre><code>
+    private static volatile Map<integer, hotelbrand=""> _hotelBrandResult = Maps.newHashMap();
+
+    // 数据初始化，注意如果不使用ConcurrentMap，不能并发写数据
+    protected boolean handle_DataInit() {
+        boolean isSuccess = true;
+
+        try {
+            // 计算数据，填充数据
+            Map<integer, hotelbrand=""> hotelBrandMap = Maps.newHashMap();
+            List<hotelbrand> dataList = hotelBrandDao.queryListAll();
+            for (HotelBrand data : dataList) {
+                hotelBrandMap.put(data.getBrandID(), data);
+            }
+
+            _hotelBrandResult = hotelBrandMap;
+
+            // 设置数据加载成功标识
+            _isDataLoaded = true;
+
+        } catch (Throwable ex) {
+            isSuccess = false;
+            getLogger().error(String.format(LogInfoUtils.HAS_DATA_TMPL, methodName, logData), ex);
+        }
+
+        return isSuccess;
+    }
+
+    /** ==================== 读取数据部分 ==================== **/
+    /**
+     * 读取酒店品牌数据
+     * 
+     * @param brandID
+     * @return
+     */
+    public HotelBrand getHotelBrand(int brandID) {
+        //缓存加载完成前查询，需要等待缓存加载完成
+        if (checkLocalDataIsLoaded()) {
+            if (_hotelBrandResult.containsKey(brandID)) {
+                return _hotelBrandResult.get(brandID);
+            }
+        }
+
+        return null;
+    }
+</hotelbrand></integer,></integer,></code></pre>
+
+<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><ul>
+<li>优点<ul>
+<li>现成的对象存储，无需ORMapping</li>
+<li>访问速度最快</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>需要在服务启动时初始化，拖累启动速度；</li>
+<li>只能KV存储，同一份数据，如果需要多个key，就需要建立多个map</li>
+<li>如不阻塞服务，在服务上线时缓存可能仍未加载完成，导致服务长时间阻塞</li>
+<li>当数据增长到一定规模，服务启动时间会长到无法接受</li>
+</ul>
+</li>
+</ul>
+<h2 id="BerkeleyDB"><a href="#BerkeleyDB" class="headerlink" title="BerkeleyDB"></a>BerkeleyDB</h2><h3 id="bdb简介"><a href="#bdb简介" class="headerlink" title="bdb简介"></a>bdb简介</h3><ul>
+<li>设计思想：简单、小巧、可靠、高性能</li>
+<li>kv存储，支持k-List<v>存储，支持secondary key，不支持sql，不需要sql编译解析</v></li>
+<li>支持1000并发，最大256T存储</li>
+<li>嵌入式数据库，不支持网络访问，与应用程序运行在一个地址空间，不需要进程间通信</li>
+<li><a href="https://www.cnblogs.com/chenny7/p/4864547.html" target="_blank" rel="external">bdb架构设计分析</a></li>
+<li>我们使用bdb java edition，<a href="http://www.oracle.com/technetwork/database/berkeleydb/overview/index-093405.html" target="_blank" rel="external">使用文档</a></li>
+</ul>
+<h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><ul>
+<li>从基础数据源（一般是mysql或分库分表的mysql）</li>
+<li>数据存储与访问</li>
+<li>数据更新策略<ul>
+<li>增量模式，通过数据时间戳（不支持物理删除）或数据库binlog</li>
+<li>全量重新构建（时间较长，只在服务启动时检查）</li>
+</ul>
+</li>
+<li>从PrimaryIndex可以进行K-V读取</li>
+<li>从SubIndex可以进行</li>
+</ul>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>多个服务不能同时使用同一个数据库文件</li>
+<li>注意cursor打开后需要手动关闭</li>
+</ul>
+<h3 id="代码示例-1"><a href="#代码示例-1" class="headerlink" title="代码示例"></a>代码示例</h3><ul>
+<li>bdb java edition的DPL API可以方便的使用注解实现</li>
+<li><p>数据对象,通过Persistent（在基类中使用）和Entity标示bdb的数具实体，@PrimaryKey和@SecondaryKey分别标示主键和外键。通常主键是1对1的（k-v），外键可以指定1对1，1对多，多对1，多对多等不同关系<pre><code><br>@Entity<br>@Getter@Setter<br>@ToString<br>public class HotelBasic extends HotelBase implements Serializable {</code></pre></p>
+<p>  /**</p>
+<ul>
+<li><p>酒店类型枚举<br>*/<br>private HotelTypeEnum hotelType;</p>
+<p>/**</p>
+</li>
+<li><p>酒店名称<br>*/<br>private String name = “”;</p>
+<p>/**</p>
+</li>
+<li><p>酒店英文名称<br>*/<br>private String enName = “”;</p>
+<p>/**</p>
+</li>
+<li>酒店地址<br>*/<br>private String address = “”;</li>
+</ul>
+</li>
+</ul>
+<p>}</p>
+<p>@Persistent<br>@Getter@Setter<br>@ToString<br>public class HotelBase implements Serializable {<br>    private static final long serialVersionUID = 3692698826181676533L;</p>
+<pre><code>/** =============== field =============== */
+/**
+ * hotelID
+ */
+@PrimaryKey
+private int hotelID;
+
+/**
+ * 国家ID
+ */
+private int countryID;
+
+/**
+ * cityID
+ */
+@SecondaryKey(relate = MANY_TO_ONE)
+private int cityID;
+
+/**
+ * 酒店级别
+ */
+private HotelSeriesEnum hotelSeries = HotelSeriesEnum.ECONOMY;
+</code></pre><p>}</p>
+<p></p>
+<ul>
+<li><p>数据操作</p>
+<ul>
+<li>依赖方引入包依赖，并加入服务开机启动配置（如servlet）。如果需要默认启用该缓存，也可以直接实现InitializingBean，但是因为数据量较大，且不同系统的依赖不同，因此都没有直接做默认启用。</li>
+<li>同一个数据库文件不能被多服务并发访问。如果单机部署不同服务，可以配置环境变量来建立多个DbEnvironment。如HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/$projectName/hotel/hotelbasic”)</li>
+<li><p><pre><code><br>/**</code></pre></p>
+<ul>
+<li>Created by tomxiaodong on 17/4/6.<br>*/<br>@Slf4j<br>@Component<br>public class HotelBasic_BdbProxy extends HotelBdbProxyBase {</li>
+</ul>
+<p>private static File HOTEL_BDB_DATA_DIRECTORY;<br>private static EnvironmentConfig envConfig = (EnvironmentConfig) new EnvironmentConfig().setAllowCreate(true).setCacheSize(100<em>1024</em>1024);<br>private static StoreConfig storeConfig = new StoreConfig().setAllowCreate(true);<br>private Environment env;</p>
+<p>static {<br>  HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/hotel/hotelbasic”);</p>
+<p>  if(!HOTEL_BDB_DATA_DIRECTORY.exists()) {</p>
+<pre><code>HOTEL_BDB_DATA_DIRECTORY.mkdirs();
+</code></pre><p>  }<br>}</p>
+<p>private EntityStore hotelBasicStore;<br>private PrimaryIndex<integer, hotelbasic=""> pIdx;<br>private SecondaryIndex<integer, integer,="" hotelbasic=""> sIdx;</integer,></integer,></p>
+<p>private final ExecutorService _dataInitExecutorPool = Executors.newCachedThreadPool();</p>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>private Random rand = new Random();
+
+@Resource
+private BdbUpdateTime_BdbProxy bdbUpdateTime_BdbProxy;
+
+@Resource
+private SysCityDao sysCityDao;
+
+@Resource
+private HotelBasic_CacheProxy hotelBasic_CacheProxy;
+
+@Resource
+private HotelComment_CacheProxy hotelComment_CacheProxy;
+
+/**
+ * 读取某城市下的 HotelBasic 列表（全部）
+ *
+ * @param cityID
+ * @return
+ */
+
+public List&lt;HotelBasic&gt; getHotelBasicList(int cityID) {
+    List&lt;HotelBasic&gt; result = Lists.newArrayList();
+    EntityCursor&lt;HotelBasic&gt; cursor = sIdx.subIndex(cityID).entities();
+    cursor.forEach(x -&gt; result.add(x));
+    cursor.close();
+    return result;
+}
+
+/**
+ * 读取某城市下的 HotelBasic 列表（每个酒店的评论必须大于minCommentCount，并且评分&gt;0）
+ *
+ * @param cityID
+ * @param minCommentCount
+ * @return
+ */
+public List&lt;HotelBasic&gt; getHotelBasicListHasComment(int cityID, int minCommentCount) {
+
+    long now = System.currentTimeMillis();
+    List&lt;HotelBasic&gt; result = Lists.newArrayList();
+
+    List&lt;HotelBasic&gt; hotelBasics = getHotelBasicList(cityID);
+    for (HotelBasic hotelBasic : hotelBasics) {
+        if (hotelBasic.getCommentCount() &gt; minCommentCount &amp;&amp; hotelBasic.getScore() &gt; 0) {
+            result.add(hotelBasic);
+        }
+    }
+    return result;
+}
+
+/**
+ * 读取 HotelBasic 对象
+ *
+ * @param hotelID
+ * @return
+ */
+public HotelBasic getHotelBasic(int hotelID) {
+    return pIdx.get(hotelID);
+}
+
+private void putHotelBasic(HotelBasic hotelBasic){
+    pIdx.put(hotelBasic);
+}
+
+@Override
+/**
+* 从源数据同步
+*/
+public void syncData(boolean replace){
+    long startTimeMillis = System.currentTimeMillis();
+    Date lastUpdateTime = bdbUpdateTime_BdbProxy.getLastUpdateTime(getClass().getSimpleName());
+    if(lastUpdateTime!=null){
+        LocalDateTime ldt = LocalDateTime.ofEpochSecond(lastUpdateTime.getTime()/1000, 0, ZoneOffset.UTC);
+        if(ldt.plusHours(getRefreshInterval()).isAfter(LocalDateTime.now())) {
+            log.warn(&quot;sync hotelbasic bdb skipped!&quot;);
+            return;
+        }
+    }
+
+    try {
+        Map&lt;Integer, List&lt;HotelBasic&gt;&gt; hotelBasicsMap = Maps.newHashMap();
+        int total = 0;
+
+        // 计算自由行目的城市ID列表
+        //List&lt;Integer&gt; arrCityIDs = (!DebugConfigUtils.isDebug()) ? sysCityDao.querySolutionArrCityIDs() : new DebugCityConfigDaoProtoImpl().getDebugToCityIDs();
+        List&lt;Integer&gt; arrCityIDs =sysCityDao.querySolutionArrCityIDs();
+
+        // 多线程分批读取缓存数据
+        List&lt;List&lt;Integer&gt;&gt; arrCityIDsList = CustomListMathUtils.splitToListsByListItemCount(arrCityIDs, 10);
+        for (List&lt;Integer&gt; cityIDs : arrCityIDsList) {
+            List&lt;Callable&lt;List&lt;HotelBasic&gt;&gt;&gt; tasks = Lists.newArrayList();
+            for (final int cityID : cityIDs) {
+                tasks.add(() -&gt; hotelBasic_CacheProxy.getCityHotelBasicList(cityID));
+            }
+
+            // 执行 Callable 线程，取得结果
+            List&lt;Future&lt;List&lt;HotelBasic&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
+            for (Future&lt;List&lt;HotelBasic&gt;&gt; future : futures) {
+                List&lt;HotelBasic&gt; hotelBasics = future.get();
+                if(hotelBasics.size()&gt;0){
+                    hotelBasicsMap.put(hotelBasics.get(0).getCityID(), hotelBasics);
+                    total+=hotelBasics.size();
+                }
+            }
+        }
+
+        // 多线程分批读取酒店评论数
+        int hasCommentCount = 0;
+        for (Map.Entry&lt;Integer, List&lt;HotelBasic&gt;&gt; entry : hotelBasicsMap.entrySet()) {
+            Map&lt;Integer, Integer&gt; hotelListCommentCountMap = getHotelListCommentCountMap(entry.getValue());
+
+            for (HotelBasic hotelBasic : entry.getValue()) {
+                if (hotelListCommentCountMap.containsKey(hotelBasic.getHotelID())) {
+                    hasCommentCount++;
+                    hotelBasic.setCommentCount(hotelListCommentCountMap.get(hotelBasic.getHotelID()));
+                    putHotelBasic(hotelBasic);
+                }
+            }
+        }
+
+        bdbUpdateTime_BdbProxy.setLastUpdateTime(getClass().getSimpleName());
+
+        log.warn(&quot;sync hotelbasic bdb success! totalCount:{}, hasCommentCount:{}, time consumed:{}&quot;, total, hasCommentCount, System.currentTimeMillis()-startTimeMillis);
+    } catch (Throwable ex) {
+        log.error(&quot;sync hotelbasic bdb failed!&quot;, ex);
+    }
+
+}
+
+public long count(){
+    return pIdx.count();
+}
+
+@Override
+public long getRefreshInterval() {
+    return 24*150;
+}
+
+@Override
+public TimeUnit getIntervalTimeUnit() {
+    return TimeUnit.HOURS;
+}
+
+/**
+ * 多线程分批读取酒店评论数
+ *
+ * @param hotelBasics
+ * @return
+ */
+private Map&lt;Integer, Integer&gt; getHotelListCommentCountMap(List&lt;HotelBasic&gt; hotelBasics) {
+    Map&lt;Integer, Integer&gt; result = Maps.newHashMap();
+
+    try {
+        List&lt;Integer&gt; allHotelIDs = hotelBasics.stream().map(x -&gt; x.getHotelID()).collect(Collectors.toList());
+        List&lt;List&lt;Integer&gt;&gt; hotelIDsList = CustomListMathUtils.splitToListsByListCount(allHotelIDs, PagingUtils.calPageCount(allHotelIDs.size(), 50));
+
+        // 分批读取酒店评论数
+        for (final List&lt;Integer&gt; hotelIDs : hotelIDsList) {
+            List&lt;Callable&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; tasks = Lists.newArrayList();
+            for (final int hotelID : hotelIDs) {
+                tasks.add(() -&gt; new KeyValuePair(hotelID, hotelComment_CacheProxy.getHotelCommentCount_All(hotelID)));
+            }
+
+            // 执行 Callable 线程，取得结果
+            List&lt;Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
+            for (Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt; future : futures) {
+                KeyValuePair&lt;Integer, Integer&gt; kv = future.get();
+                result.put(kv.getKey(), kv.getValue());
+            }
+        }
+    } catch (Throwable ex) {
+        log.error(&quot;getHotelListCommentCountMap failed!&quot;, ex);
+    }
+
+    return result;
+}
+
+public PrimaryIndex&lt;Integer, HotelBasic&gt; getpIdx() {
+    return pIdx;
+}
+
+public void close(){
+    if(hotelBasicStore!=null){
+        hotelBasicStore.close();
+        hotelBasicStore = null;
+    }
+    if(env!=null) {
+        env.close();
+        env = null;
+    }
+}
+
+public void init(){
+    env = new Environment(HOTEL_BDB_DATA_DIRECTORY, envConfig);
+    hotelBasicStore = new EntityStore(env, &quot;hotelBasic&quot;, storeConfig);
+    pIdx = hotelBasicStore.getPrimaryIndex(Integer.class, HotelBasic.class);
+    sIdx = hotelBasicStore.getSecondaryIndex(pIdx, Integer.class, &quot;cityID&quot;);
+}
+</code></pre><p>}<br></p>
+<h3 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h3><ul>
+<li>百万数据量，100M bdb缓存，K-V访问平均小于1ms，K-List<v>访问在1-5ms之间，峰值qps&gt;500</v></li>
+<li>收集一组日志，通过ELK做图</li>
+</ul>
+<h1 id="深入BerkeleyDB"><a href="#深入BerkeleyDB" class="headerlink" title="深入BerkeleyDB"></a>深入BerkeleyDB</h1><ul>
+<li>并发支持</li>
+<li>cache</li>
+<li>index<ul>
+<li>secondary key</li>
+<li>secondary database</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/26/旅行行业基础数据本地管理/" data-id="cjfv497eg000dj4qhxbyqvou0" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="shellcommands-shell-commands-case-study" class="article article-type-shellcommands" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/03/21/shell-commands-case-study/" class="article-date">
@@ -146,7 +645,7 @@
 <li>shell parameter expansion。把变量放入${}中，并指定一些特定的操作符，实现对变量的操作，通过这种方式，可以很便捷的对变量做很多常用的操作（比awk代码更简洁易上手，虽然功能没有awk多）<ul>
 <li>如${parameter:7}返回截取字符串或数组第7位以后（不包括第7位）的子串或子集</li>
 <li>${ #parameter}返回parameter的长度</li>
-<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${ #parameter#</em>:}返回的是左数第一个:右边的内容、${ #parameter%%:<em>}返回右数最后一个:左边的内容，${ #parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
+<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${parameter#</em>:}返回的是左数第一个:右边的内容、${parameter%%:<em>}返回右数最后一个:左边的内容，${parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
 <li>IFS=’:’; arr=($line)可以把line数据按分隔符拆分并组织成数组，类似java中是String.split(“:”)。使用echo ${arr[0]}打印数组的第1个元素</li>
 </ul>
 </li>
@@ -227,9 +726,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjf0iu8qb0001qvqhg70x13kg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjfv497ea0008j4qhkyde1vwu" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li></ul>
+
     </footer>
   </div>
   
@@ -280,7 +781,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/15/servermonitoring/" data-id="cjf0iu8qj0003qvqh7n0gs4cx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/15/servermonitoring/" data-id="cjfv497e60005j4qhc0ngqx7l" class="article-share-link">Share</a>
       
       
     </footer>
@@ -335,7 +836,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjf0iu8qw0009qvqhl9f14so3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjfv497ee000bj4qheil6gabw" class="article-share-link">Share</a>
       
       
     </footer>
@@ -499,7 +1000,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/23/分布式服务监控 - 概述/" data-id="cjf0iu8qs0007qvqhec1bpeyc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/23/分布式服务监控 - 概述/" data-id="cjfv497ec0009j4qhz8d72f2v" class="article-share-link">Share</a>
       
       
     </footer>
@@ -536,7 +1037,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/09/24/Continuous-Integration-Based-On-Aliyun-Crp/" data-id="cjf0iu8q50000qvqhaw2v7n7i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/09/24/Continuous-Integration-Based-On-Aliyun-Crp/" data-id="cjfv497e00003j4qh9rhipd1v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
@@ -634,7 +1135,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/09/24/Message-Push/" data-id="cjf0iu8qp0005qvqhoi22a8fy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/09/24/Message-Push/" data-id="cjfv497df0000j4qh0xl2to4g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/用户触达/">用户触达</a></li></ul>
@@ -681,7 +1182,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/09/24/hello-world/" data-id="cjf0iu8qm0004qvqhxad74ez6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/09/24/hello-world/" data-id="cjfv497du0001j4qhcnlo1f28" class="article-share-link">Share</a>
       
       
     </footer>
@@ -703,7 +1204,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -713,7 +1214,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -722,7 +1223,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
   </div>
 
@@ -735,6 +1236,14 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       <ul>
         
           <li>
+            <a href="/2018/04/10/java团队code style规范/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/26/旅行行业基础数据本地管理/">旅行行业基础数据本地管理</a>
+          </li>
+        
+          <li>
             <a href="/2018/03/21/shell-commands-case-study/">shell commands case study</a>
           </li>
         
@@ -744,14 +1253,6 @@ assign where match(&quot;check_redis&quot;, service.check_command)
         
           <li>
             <a href="/2017/04/27/操作系统/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2017/03/23/分布式服务监控 - 概述/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/24/Continuous-Integration-Based-On-Aliyun-Crp/">Continuous Integration Based On Aliyun Crp</a>
           </li>
         
       </ul>
