@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="筋斗云ELK集群简介
+本篇只对ELK的各组件做概要介绍，并描述他们可以实现的典型功能。后续的文章会陆续对不同需求场景的实现及服务运维进行陈述总结
+
+
+
+筋斗云ELK集群支撑的功能
+服务运行异常实时监控。收集各服务器上的异常及错误日志，归类统计与展示报警，用于实时的监控系统运行状态，今早发现问题
+旅游内容搜索。国家/地区/城市/景点/餐馆/酒店等内容的全文搜索支持
+业务数据监控。主要是各行业各合作商">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Life Career">
+<meta property="og:url" content="http://yoursite.com/2018/12/19/筋斗云ELK集群/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="筋斗云ELK集群简介
+本篇只对ELK的各组件做概要介绍，并描述他们可以实现的典型功能。后续的文章会陆续对不同需求场景的实现及服务运维进行陈述总结
+
+
+
+筋斗云ELK集群支撑的功能
+服务运行异常实时监控。收集各服务器上的异常及错误日志，归类统计与展示报警，用于实时的监控系统运行状态，今早发现问题
+旅游内容搜索。国家/地区/城市/景点/餐馆/酒店等内容的全文搜索支持
+业务数据监控。主要是各行业各合作商">
+<meta property="og:image" content="http://yoursite.com/../images/ELK-stack.png">
+<meta property="og:image" content="http://yoursite.com/../images/filebeat.png">
+<meta property="og:image" content="http://yoursite.com/../images/logstash-process.png">
+<meta property="og:updated_time" content="2018-12-19T09:44:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Life Career">
+<meta name="twitter:description" content="筋斗云ELK集群简介
+本篇只对ELK的各组件做概要介绍，并描述他们可以实现的典型功能。后续的文章会陆续对不同需求场景的实现及服务运维进行陈述总结
+
+
+
+筋斗云ELK集群支撑的功能
+服务运行异常实时监控。收集各服务器上的异常及错误日志，归类统计与展示报警，用于实时的监控系统运行状态，今早发现问题
+旅游内容搜索。国家/地区/城市/景点/餐馆/酒店等内容的全文搜索支持
+业务数据监控。主要是各行业各合作商">
+<meta name="twitter:image" content="http://yoursite.com/../images/ELK-stack.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-筋斗云ELK集群" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/19/筋斗云ELK集群/" class="article-date">
+  <time datetime="2018-12-19T05:34:12.000Z" itemprop="datePublished">2018-12-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="筋斗云ELK集群简介"><a href="#筋斗云ELK集群简介" class="headerlink" title="筋斗云ELK集群简介"></a>筋斗云ELK集群简介</h1><ul>
+<li><font color="blue">本篇只对ELK的各组件做概要介绍，并描述他们可以实现的典型功能。后续的文章会陆续对不同需求场景的实现及服务运维进行陈述总结</font>
+
+</li>
+</ul>
+<h2 id="筋斗云ELK集群支撑的功能"><a href="#筋斗云ELK集群支撑的功能" class="headerlink" title="筋斗云ELK集群支撑的功能"></a>筋斗云ELK集群支撑的功能</h2><ul>
+<li>服务运行异常实时监控。收集各服务器上的异常及错误日志，归类统计与展示报警，用于实时的监控系统运行状态，今早发现问题</li>
+<li>旅游内容搜索。国家/地区/城市/景点/餐馆/酒店等内容的全文搜索支持</li>
+<li>业务数据监控。主要是各行业各合作商家的API状态监控，即时发现有问题的接口，防止对业务服务造成影响</li>
+<li>全流程业务跟踪。将旅游产品从打包搜索-交易下单-出票出单-售后服务的全流程关键节点进行记录，并按照统一的key进行搜索，</li>
+</ul>
+<h2 id="ELK功能及特点简介"><a href="#ELK功能及特点简介" class="headerlink" title="ELK功能及特点简介"></a>ELK功能及特点简介</h2><ul>
+<li><img src="../images/ELK-stack.png" alt="image"></li>
+</ul>
+<h3 id="Filebeat"><a href="#Filebeat" class="headerlink" title="Filebeat"></a>Filebeat</h3><ul>
+<li>filebeat是一个轻量级的日志收集器（shipper for forwarding and centralizing log data）,在想要收集日志的服务器上，将filebeat作为agent安装，并指定要收集的日志文件路径和名称，指定日志的输出目标（Logstash或ElasticSearch服务）</li>
+<li><img src="../images/filebeat.png" alt="image"></li>
+</ul>
+<h3 id="Logstash"><a href="#Logstash" class="headerlink" title="Logstash"></a>Logstash</h3><ul>
+<li>Logstash通过实时管道（realtime pipelining）对数据进行实时处理，有良好的扩展机制，社区中也有大量实用的input、filter、output插件。能满足不同场景的数据导入和数据处理功能</li>
+<li><img src="../images/logstash-process.png" alt="image"></li>
+</ul>
+<h3 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h3><ul>
+<li>Elasticsearch是一个开源的、高度可扩展的全文检索与数据分析引擎</li>
+<li>有以下重要特点：<ul>
+<li>分布式支持，集群扩展/缩减透明</li>
+<li>海量数据容量</li>
+<li>准实时的索引速度（主要是ES索引可见大约有1s左右的延迟）</li>
+</ul>
+</li>
+</ul>
+<h3 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h3><ul>
+<li>基于ElasticSearch数据进行数据可视化分析与展示</li>
+</ul>
+<h2 id="安装配置"><a href="#安装配置" class="headerlink" title="安装配置"></a>安装配置</h2><h3 id="集群效果"><a href="#集群效果" class="headerlink" title="集群效果"></a>集群效果</h3><ul>
+<li>filebeat属于agent，部署在各个应用服务器上负责收集日志</li>
+<li>logstash<ul>
+<li>1个jdbc节点，处理数据库数据</li>
+<li>3个log节点，处理log数据</li>
+</ul>
+</li>
+<li>elasticsearch<ul>
+<li>1个coordinate节点，类似于一个门面（facade），不存储数据，不做master节点，只负责将请求拆分到各个数据节点，并汇总各个数据节点的搜索结果返回给请求方</li>
+<li>3个数据节点(80G SATA硬盘，8G内存，双核2.5GHz)</li>
+</ul>
+</li>
+<li>elasticsearch性能指标<ul>
+<li>业务数据每个业务一个索引，业务日志按每天一个索引，</li>
+<li>200+索引</li>
+<li>1亿+document</li>
+<li>170G数据（60G/机器，实际落盘可能有压缩）</li>
+<li>峰值document增量1000qps，primary shard 500qps</li>
+<li>保留最近一周的数据</li>
+</ul>
+</li>
+</ul>
+<h3 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h3><ul>
+<li>线上生产系统不能使用root启动ELK（filebeat可以），需要创建用户。另外需要修改最大文件数配置。在CentOS6系统下的配置脚本如下</li>
+<li><pre><code>#!/bin/bash
+useradd jdy
+passwd jdy
+sudo usermod -aG wheel jdy
+sed -i "s/# %wheel\tALL=(ALL)\tALL/%wheel\tALL=(ALL)\tALL/g" /etc/sudoers
+echo -e "\nulimit -n 100000" >> /etc/profile
+sed -i "s/soft nofile 65535/soft nofile 100000/g" /etc/security/limits.conf
+sed -i "s/hard nofile 65535/hard nofile 100000/g" /etc/security/limits.conf
+echo -e "\njdy soft nproc 2048" >> /etc/security/limits.conf
+echo -e "\njdy hard nproc 2048" >> /etc/security/limits.conf
+echo -e "\nvm.max_map_count = 262144" >> /etc/sysctl.conf
+reboot</code></pre>
+
+</li>
+</ul>
+<h3 id="Elastic初始化配置"><a href="#Elastic初始化配置" class="headerlink" title="Elastic初始化配置"></a>Elastic初始化配置</h3><ul>
+<li>配置文件：elasticsearch.yml &amp; log4j2.properties</li>
+<li>重要配置：<ul>
+<li><ol>
+<li>node.name：node-n</li>
+</ol>
+</li>
+<li><ol>
+<li>cluster.name:系统通过广播发现使用相同cluster.name的节点，组成一个cluster（jdy-log）</li>
+</ol>
+</li>
+<li><ol>
+<li>bootstrap.memory_lock:要保证elastic进程内存不被swap到磁盘，需要设置memory_lock</li>
+</ol>
+</li>
+<li><ol>
+<li>设置network.host为<em>site</em></li>
+</ol>
+</li>
+<li><ol>
+<li>设置discovery.zen.ping.unicast.hosts为：[“10.27.246.125”, “10.27.74.199”, “10.27.72.7”, “10.170.247.171”]</li>
+</ol>
+</li>
+<li><ol>
+<li>设置discovery.zen.minimum_master_nodes为：（master_eligible_nodes / 2) + 1</li>
+</ol>
+</li>
+<li><ol>
+<li>堆内存大约设置到虚拟机内存的一半</li>
+</ol>
+</li>
+<li><ol>
+<li>centOS下关闭memory_lock：bootstrap.memory_lock: false, bootstrap.system_call_filter: false</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>配置配置<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node" target="_blank" rel="external">coordinate结点</a>，设置node.data, node.master_eligible, node.ingest为false，该结点不存储数据，只向数据结点分发数据请求，并合并计算结果</li>
+<li>设置network.publish_host和network.bind_host，测试环境单机模式下，可使用network.host同时设置两个值为相同的ip，但在生产环境集群模式下通常这两个值不同。publish_host用于集群内网间监听和数据传输，bind_host用于提供外部网络访问</li>
+</ul>
+<h3 id="Logstash配置"><a href="#Logstash配置" class="headerlink" title="Logstash配置"></a>Logstash配置</h3><ul>
+<li>至少2个logstash服务以保证服务可用性（filebeat有at least once机制保证数据不丢）</li>
+<li>需要在filebeat中配置loadbalance：true，loadbalance模式包括：RoundRobin（default）、lock-step（强制保证多台机器的平均）</li>
+<li>高吞吐量下，建议使用HAProxy做负载均衡</li>
+<li>配置事件处理线程数：pipeline.batch.size=125</li>
+<li>持久化input -&gt; queue -&gt; filter -&gt; output<ul>
+<li><ol>
+<li>防止内存数据丢失；</li>
+</ol>
+</li>
+<li><ol>
+<li>减缓事件峰值对事件处理造成的瞬间压力</li>
+</ol>
+</li>
+<li><ol>
+<li>配置queue.type: persisted, path.queue: $QUEUE_PATH, queue.max_events: 65536, queue.max_bytes:100M</li>
+</ol>
+</li>
+<li><ol>
+<li>基于checkpoint的<a href="https://www.elastic.co/guide/en/logstash/current/persistent-queues.html#durability-persistent-queues" target="_blank" rel="external">commit机制</a>,很多跟磁盘密切相关的操作都使用类似机制</li>
+</ol>
+</li>
+<li><ol>
+<li>注意如果logstash进程终止或硬件失败，队列中未commit（checkpointed）的数据会丢失。可以设置queue.checkpoint.writes=1来避免，但是要考虑由此带来的IO消耗，可能会阻塞logstash本身的运行   </li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="x-pack"><a href="#x-pack" class="headerlink" title="x-pack"></a>x-pack</h3><ul>
+<li>x-pack集成了elk许多高级特性，包括安全、监控、报警等。事实上，原来elasticsearch中许多有用的插件都被转移到了x-pack中，其中许多也变成了收费的功能，比如原来的watcher监控插件集成到x-pack的监控功能中后，需要收费的高级账号才能使用</li>
+<li>由于都是内网运维，为了简单期间，我们关闭了访问密码的使用，在elasticsearch.yml中配置<pre><code><br>xpack.security.enabled: false<br></code></pre></li>
+<li>监控功能默认是打开的，也可以在上述文件中配置关闭</li>
+</ul>
+<h2 id="运维"><a href="#运维" class="headerlink" title="运维"></a>运维</h2><h3 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h3><ul>
+<li>不同版本之间的升级方案可能各不相同，具体请参考官方文档，这里仅给出我们一次升级过程</li>
+<li>elastic 5.2-5.3 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/5.3/rolling-upgrades.html" target="_blank" rel="external">https://www.elastic.co/guide/en/elasticsearch/reference/5.3/rolling-upgrades.html</a></li>
+<li>logstash 5.2-5.3  <a href="https://www.elastic.co/guide/en/logstash/current/upgrading-logstash.html" target="_blank" rel="external">https://www.elastic.co/guide/en/logstash/current/upgrading-logstash.html</a><ul>
+<li><ol>
+<li>解压缩logstash安装包</li>
+</ol>
+</li>
+<li><ol>
+<li>复制原路径config目录到新的安装位置</li>
+</ol>
+</li>
+<li><ol>
+<li>复制原data目录到新安装路径</li>
+</ol>
+</li>
+<li><ol>
+<li>重启logstash</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>kibana 5.2-5.3:<br><a href="https://www.elastic.co/guide/en/kibana/current/upgrade-standard.html" target="_blank" rel="external">https://www.elastic.co/guide/en/kibana/current/upgrade-standard.html</a><ul>
+<li><ol>
+<li>解压缩kibana安装包</li>
+</ol>
+</li>
+<li><ol>
+<li>复制原路径config目录到新的安装位置</li>
+</ol>
+</li>
+<li><ol>
+<li>复制原路径data目录到新的安装位置</li>
+</ol>
+</li>
+<li><ol>
+<li>重启kibana</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>x-pack license升级<ul>
+<li>x-pack运行需要license，免费的license包括1年的basic和30天完整试用，免费的可以支持monitoring，目前我们的需求可以满足，因此需要每隔1年替换一次basic license。<font color="red">而且阿里云的ES集群价格对我们来说还是挺高的，相比我自己购买ECS部署，价格大约是3-4倍</font></li>
+<li>查看license<pre><code><br>curl –user elastic:${password} -XGET <a href="http://localhost:9200/_xpack/license/" target="_blank" rel="external">http://localhost:9200/_xpack/license/</a><br></code></pre></li>
+<li>申请新的license<br><a href="https://register.elastic.co/" target="_blank" rel="external">https://register.elastic.co/</a></li>
+<li>license upgrade（在线执行，不需要停elastic服务）<pre><code><br>curl -XPUT -u elastic ‘<a href="http://localhost:9200/_xpack/license" target="_blank" rel="external">http://localhost:9200/_xpack/license</a>‘ -H “Content-Type: application/json” -d @/root/wang-xiaodong-a7d09d57-aab5-41b4-8b23-f185c899d10e-v5.json<br></code></pre></li>
+</ul>
+</li>
+</ul>
+<h2 id="重点问题："><a href="#重点问题：" class="headerlink" title="重点问题："></a>重点问题：</h2><ul>
+<li>数据一致性<ul>
+<li>filebeat-&gt;logstash：At Least Once机制，filebeat通过维护日志文件已处理行数的偏移量，确保Output对event进行confirm之后才不会重发。会导致重复接收。</li>
+<li>logstash-&gt;elastic：At Least Once机制，logstash可以通过queue.type: persisted选项配置使用<a href="https://www.elastic.co/guide/en/logstash/current/persistent-queues.html" target="_blank" rel="external">persisted queue</a>或redis/kafka等消息中间件，实现at least once保证，并提供削峰平谷的功能。也可能会导致重复接收。</li>
+<li><font color="red">checkpoint机制下，在checkpoint文件完成fsync前，logstash异常退出或硬件故障时，已进队列，但是未写入checkpoint的数据会丢失</font></li>
+<li>如果document有唯一id，可以通过mapping制定id，来保证唯一性，防止接收重复数据导致的问题</li>
+</ul>
+</li>
+<li>各节点的延迟问题<ul>
+<li>filebeat收集。日志落地到文件后，filebeat默认的扫描间隔是1s，最小数据处理间隔filebeat.idle_timeout默认5s，可以按需求配置缩小扫描间隔和最小处理间隔。比如日志量很大时，缩小扫描间隔；日志量很小时，缩小filebeat.idle_timeout</li>
+<li>logstash处理。当事件qps较高时，会有秒级的延迟，grok插件的使用非常消耗cpu，在每台机器用满的情况下，可以考虑扩展logstash集群。目前我们业务组的3台集群，在峰值1000qps时约有2-3秒的延迟</li>
+<li>elasticsearch延迟。es构建索引的延迟是很小的，一般在1毫米以内，但是索引构建完成到索引可见仍有大约1s左右的延迟</li>
+<li><font color="red">总的来说，elk是一套准实时的流式数据处理机制，数据从产生到可见，客观上会有大约1s-10s的延迟。可以满足绝大多数需求的实时性要求</font>
+
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="refernce"><a href="#refernce" class="headerlink" title="refernce"></a>refernce</h2><ul>
+<li><a href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-overview.html" target="_blank" rel="external">filebeat官方文档</a></li>
+<li><a href="https://www.elastic.co/guide/en/logstash/current/persistent-queues.html" target="_blank" rel="external">logstash persistent queue</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/19/筋斗云ELK集群/" data-id="cjpuzqwvv0000e7qhfzzm8vz0" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/12/17/lucene数据结构解析/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/17/lucene数据结构解析/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/17/git命令行常用总结/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/11/27/Time-Series-Data-Introduction/">Time-Series Data Introduction</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/20/持续交付/">旅行行业基础数据本地管理</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
