@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="旅行基础数据搜索
+支持旅行基础数据的全文搜索
+支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等
+支持的行业数据包括
+地理数据：国家/地区/省份/城市
+POI数据：餐厅/景点/地标/酒店
+
+
+
+索引构建
+使用logstash jdbc input plugin从数据库导入数据
+数据导入。配置驱动、user、password、sql
+指定doc_id保证数据唯一性，比如用表明+id拼">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Life Career">
+<meta property="og:url" content="http://yoursite.com/2018/12/20/旅行基础数据搜索/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="旅行基础数据搜索
+支持旅行基础数据的全文搜索
+支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等
+支持的行业数据包括
+地理数据：国家/地区/省份/城市
+POI数据：餐厅/景点/地标/酒店
+
+
+
+索引构建
+使用logstash jdbc input plugin从数据库导入数据
+数据导入。配置驱动、user、password、sql
+指定doc_id保证数据唯一性，比如用表明+id拼">
+<meta property="og:updated_time" content="2018-12-20T09:40:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Life Career">
+<meta name="twitter:description" content="旅行基础数据搜索
+支持旅行基础数据的全文搜索
+支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等
+支持的行业数据包括
+地理数据：国家/地区/省份/城市
+POI数据：餐厅/景点/地标/酒店
+
+
+
+索引构建
+使用logstash jdbc input plugin从数据库导入数据
+数据导入。配置驱动、user、password、sql
+指定doc_id保证数据唯一性，比如用表明+id拼">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-旅行基础数据搜索" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/旅行基础数据搜索/" class="article-date">
+  <time datetime="2018-12-20T09:40:59.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="旅行基础数据搜索"><a href="#旅行基础数据搜索" class="headerlink" title="旅行基础数据搜索"></a>旅行基础数据搜索</h1><ul>
+<li>支持旅行基础数据的全文搜索</li>
+<li>支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等</li>
+<li>支持的行业数据包括<ul>
+<li>地理数据：国家/地区/省份/城市</li>
+<li>POI数据：餐厅/景点/地标/酒店</li>
+</ul>
+</li>
+</ul>
+<h2 id="索引构建"><a href="#索引构建" class="headerlink" title="索引构建"></a>索引构建</h2><ul>
+<li>使用logstash <a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="external">jdbc input plugin</a>从数据库导入数据</li>
+<li>数据导入。配置驱动、user、password、sql</li>
+<li>指定doc_id保证数据唯一性，比如用表明+id拼一个字段作为document_id，在elasticsearch output插件中指定document_id，防止数据重复导入</li>
+<li>定时调度。配置schedule语句</li>
+<li>实现示例<pre><code><br>jdbc {<pre><code>jdbc_driver_library =&gt; &quot;/home/jdy/jdy-elk/logstash-5.3.0/vendor/jdbc/mysql-connector-java-5.1.35.jar&quot;
+jdbc_driver_class =&gt; &quot;com.mysql.jdbc.Driver&quot;
+jdbc_connection_string =&gt; &quot;jdbc:mysql://59.110.207.194:3306/mytrip_basic&quot;
+jdbc_user =&gt; &quot;jdy_db_admin&quot;
+jdbc_password =&gt; &quot;******&quot;
+schedule =&gt; &quot;0 * * * * &quot;
+statement =&gt; &quot;SELECT p.*, c.name as countryName, &apos;province&apos; as table_name, CONCAT(&apos;PROVINCE-&apos;, provinceID) as doc_id FROM mytrip_basic.sys_province p le
+</code></pre>ft join mytrip_basic.sys_country c on p.countryID=c.countryID where provinceID in (29)”<br>}<br>filter {<br>}<br>output {<br>  elasticsearch {<pre><code>hosts =&gt; &quot;10.30.137.118:9200&quot;
+document_id =&gt; &quot;%{[doc_id]}&quot;
+index =&gt; &quot;logstash-jdbc-basic&quot;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><ul>
+<li>主要的查询语法<ul>
+<li>Match Query。全文检索（full text query），ES会先对请求进行解析(analyze)，得到多个单独的词汇，逐个查询并综合评分，相当于google的搜索机制</li>
+<li>Term Query。直接查询单独的term（要求term完全匹配），主要针对结构化的数据，例如数字、日期、枚举等，这些字段都是.keyword类型的field。</li>
+<li>Bool组合。对多个Match Query和/或TermQuery进行组合查询</li>
+</ul>
+</li>
+<li>前缀查询<ul>
+<li>对Term Query可以支持前缀查询，尤其用户输入过程中一般要实现类似提示的效果，需要通过前缀查询进行支持</li>
+<li>filter。相比Query，filter可以省去评分计算等过程，比Query的速度要更快，因此在不需要评分的场景应尽量使用filter替代query</li>
+</ul>
+</li>
+<li>大小写处理。<ul>
+<li>通过jdbc input插件的lowercase_column_names选项，指定想要小写处理的表属性    - 如果不使用动态mapping（dynamic mapping），可以通过ES mapping，指定某些字段为小写，之后用小写查询</li>
+<li>注意需要显示指定某些字段进行小写处理，有些大小写混用的id类属性，全部转为小写会造成数据错误，例如服务器的hostName，Base64编码的属性等</li>
+<li>我们在实际处理过程中没有改变存储的大小写，而是针对属性值的实际情况将查询串进行特殊处理（如小写、大写、首字母大写等）</li>
+</ul>
+</li>
+<li>全拼音/拼音首字母<ul>
+<li>有条件的进行拼音手工维护，能够保证准确率，如beijing，bj，shanghai，shh</li>
+<li>通过github一些资源来生成拼音</li>
+</ul>
+</li>
+<li>Boost设置。boost&gt;1可以增加某一子查询的评分重要程度。例如，我们认为在查询过程中name匹配应该比其他内容的匹配更重要，因此我们把name的boost设置为5.0</li>
+<li>完整的查询方案<pre><code><br>{<br>  “query”: {<pre><code>&quot;filter&quot;: [
+    {&quot;term&quot;: {&quot;table_name&quot;: &quot;hotel&quot;} }
+],
+&quot;bool: {
+    &quot;should: [
+        {&quot;match&quot;: {&quot;name&quot;: {&quot;query&quot;: keyword, &quot;operator&quot;: &quot;or&quot;}}},
+        {&quot;match&quot;: {&quot;enname&quot;: keyword}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}}
+    ]
+},
+&quot;minimum_should_match&quot;: 1
+</code></pre>  },<br>  “size”:200,<br>  “_source”: true<br>}<br></code></pre></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/12/19/筋斗云ELK集群/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/17/lucene数据结构解析/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/17/git命令行常用总结/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/11/27/Time-Series-Data-Introduction/">Time-Series Data Introduction</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

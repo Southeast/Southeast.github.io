@@ -61,6 +61,102 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-旅行基础数据搜索" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/旅行基础数据搜索/" class="article-date">
+  <time datetime="2018-12-20T09:40:59.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="旅行基础数据搜索"><a href="#旅行基础数据搜索" class="headerlink" title="旅行基础数据搜索"></a>旅行基础数据搜索</h1><ul>
+<li>支持旅行基础数据的全文搜索</li>
+<li>支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等</li>
+<li>支持的行业数据包括<ul>
+<li>地理数据：国家/地区/省份/城市</li>
+<li>POI数据：餐厅/景点/地标/酒店</li>
+</ul>
+</li>
+</ul>
+<h2 id="索引构建"><a href="#索引构建" class="headerlink" title="索引构建"></a>索引构建</h2><ul>
+<li>使用logstash <a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="external">jdbc input plugin</a>从数据库导入数据</li>
+<li>数据导入。配置驱动、user、password、sql</li>
+<li>指定doc_id保证数据唯一性，比如用表明+id拼一个字段作为document_id，在elasticsearch output插件中指定document_id，防止数据重复导入</li>
+<li>定时调度。配置schedule语句</li>
+<li>实现示例<pre><code><br>jdbc {<pre><code>jdbc_driver_library =&gt; &quot;/home/jdy/jdy-elk/logstash-5.3.0/vendor/jdbc/mysql-connector-java-5.1.35.jar&quot;
+jdbc_driver_class =&gt; &quot;com.mysql.jdbc.Driver&quot;
+jdbc_connection_string =&gt; &quot;jdbc:mysql://59.110.207.194:3306/mytrip_basic&quot;
+jdbc_user =&gt; &quot;jdy_db_admin&quot;
+jdbc_password =&gt; &quot;******&quot;
+schedule =&gt; &quot;0 * * * * &quot;
+statement =&gt; &quot;SELECT p.*, c.name as countryName, &apos;province&apos; as table_name, CONCAT(&apos;PROVINCE-&apos;, provinceID) as doc_id FROM mytrip_basic.sys_province p le
+</code></pre>ft join mytrip_basic.sys_country c on p.countryID=c.countryID where provinceID in (29)”<br>}<br>filter {<br>}<br>output {<br>  elasticsearch {<pre><code>hosts =&gt; &quot;10.30.137.118:9200&quot;
+document_id =&gt; &quot;%{[doc_id]}&quot;
+index =&gt; &quot;logstash-jdbc-basic&quot;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><ul>
+<li>主要的查询语法<ul>
+<li>Match Query。全文检索（full text query），ES会先对请求进行解析(analyze)，得到多个单独的词汇，逐个查询并综合评分，相当于google的搜索机制</li>
+<li>Term Query。直接查询单独的term（要求term完全匹配），主要针对结构化的数据，例如数字、日期、枚举等，这些字段都是.keyword类型的field。</li>
+<li>Bool组合。对多个Match Query和/或TermQuery进行组合查询</li>
+</ul>
+</li>
+<li>前缀查询<ul>
+<li>对Term Query可以支持前缀查询，尤其用户输入过程中一般要实现类似提示的效果，需要通过前缀查询进行支持</li>
+<li>filter。相比Query，filter可以省去评分计算等过程，比Query的速度要更快，因此在不需要评分的场景应尽量使用filter替代query</li>
+</ul>
+</li>
+<li>大小写处理。<ul>
+<li>通过jdbc input插件的lowercase_column_names选项，指定想要小写处理的表属性    - 如果不使用动态mapping（dynamic mapping），可以通过ES mapping，指定某些字段为小写，之后用小写查询</li>
+<li>注意需要显示指定某些字段进行小写处理，有些大小写混用的id类属性，全部转为小写会造成数据错误，例如服务器的hostName，Base64编码的属性等</li>
+<li>我们在实际处理过程中没有改变存储的大小写，而是针对属性值的实际情况将查询串进行特殊处理（如小写、大写、首字母大写等）</li>
+</ul>
+</li>
+<li>全拼音/拼音首字母<ul>
+<li>有条件的进行拼音手工维护，能够保证准确率，如beijing，bj，shanghai，shh</li>
+<li>通过github一些资源来生成拼音</li>
+</ul>
+</li>
+<li>Boost设置。boost&gt;1可以增加某一子查询的评分重要程度。例如，我们认为在查询过程中name匹配应该比其他内容的匹配更重要，因此我们把name的boost设置为5.0</li>
+<li>完整的查询方案<pre><code><br>{<br>  “query”: {<pre><code>&quot;filter&quot;: [
+    {&quot;term&quot;: {&quot;table_name&quot;: &quot;hotel&quot;} }
+],
+&quot;bool: {
+    &quot;should: [
+        {&quot;match&quot;: {&quot;name&quot;: {&quot;query&quot;: keyword, &quot;operator&quot;: &quot;or&quot;}}},
+        {&quot;match&quot;: {&quot;enname&quot;: keyword}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}}
+    ]
+},
+&quot;minimum_should_match&quot;: 1
+</code></pre>  },<br>  “size”:200,<br>  “_source”: true<br>}<br></code></pre></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-筋斗云ELK集群" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/12/19/筋斗云ELK集群/" class="article-date">
@@ -187,6 +283,9 @@ reboot</code></pre>
 <li>设置network.publish_host和network.bind_host，测试环境单机模式下，可使用network.host同时设置两个值为相同的ip，但在生产环境集群模式下通常这两个值不同。publish_host用于集群内网间监听和数据传输，bind_host用于提供外部网络访问</li>
 </ul>
 <h3 id="Logstash配置"><a href="#Logstash配置" class="headerlink" title="Logstash配置"></a>Logstash配置</h3><ul>
+<li>主要的配置文件logstash.yml taskitem-pipeline.conf</li>
+<li>通过在taskitem-pipeline.conf中配置input、filter及output，指定数据的输入输出及数据处理过程</li>
+<li><img src="../images/basic_logstash_pipeline.png" alt="image"></li>
 <li>至少2个logstash服务以保证服务可用性（filebeat有at least once机制保证数据不丢）</li>
 <li>需要在filebeat中配置loadbalance：true，loadbalance模式包括：RoundRobin（default）、lock-step（强制保证多台机器的平均）</li>
 <li>高吞吐量下，建议使用HAProxy做负载均衡</li>
@@ -1396,61 +1495,6 @@ public void init(){
 
 
   
-    <article id="post-操作系统" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/04/27/操作系统/" class="article-date">
-  <time datetime="2017-04-27T06:08:59.000Z" itemprop="datePublished">2017-04-27</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><ul>
-<li>CPU核心概念<ul>
-<li>中断</li>
-<li>寄存器</li>
-<li>CPU MODE：内核态、用户态</li>
-</ul>
-</li>
-<li>实时操作系统<ul>
-<li>CPU时间片算法：</li>
-<li>抢占/非抢占</li>
-<li>Timer</li>
-</ul>
-</li>
-<li>OS核心功能组件<ul>
-<li>内存管理</li>
-<li>I/O管理</li>
-<li>GPU</li>
-<li>网络</li>
-<li>多媒体</li>
-</ul>
-</li>
-</ul>
-<h3 id="RTOS-design"><a href="#RTOS-design" class="headerlink" title="RTOS design"></a>RTOS design</h3><ul>
-<li><font color="blue">根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU等</font></li>
-<li>封装底层硬件、为上层应用提供API，可以查阅<font color="red">Linux Kernel</font>的lib，你们要求application跨平台，可以查阅<font color="red">Java JVM的跨平台设计</font></li>
-<li>realtime的关键应该是抢占式调度，需要基于中断实现</li>
-<li>四核CPU，要实现多核并发，主要是协调四个CPU同时工作。比如给4个CPU各分配一个任务，任务完成后怎么通知其它CPU，并协调下一步指令执行。应该是<font color="red">基于cpu的mailbox去实现</font>，关注一下QA7文档的mailbox部分。另外就是查一下线程/进程的状态转换模型和调度模型</li>
-<li>内存寻址要搞清楚虚拟地址和物理地址之间的转换，再看一下文档的Memory Manage Unit(MMU)和Direct Memory Access（DMA）</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjps0hy9p000es6qh1668zcne" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -1499,6 +1543,10 @@ public void init(){
       <ul>
         
           <li>
+            <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
           </li>
         
@@ -1512,10 +1560,6 @@ public void init(){
         
           <li>
             <a href="/2018/11/27/Time-Series-Data-Introduction/">Time-Series Data Introduction</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/20/持续交付/">旅行行业基础数据本地管理</a>
           </li>
         
       </ul>

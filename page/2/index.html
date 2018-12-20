@@ -61,6 +61,61 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-操作系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/27/操作系统/" class="article-date">
+  <time datetime="2017-04-27T06:08:59.000Z" itemprop="datePublished">2017-04-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><ul>
+<li>CPU核心概念<ul>
+<li>中断</li>
+<li>寄存器</li>
+<li>CPU MODE：内核态、用户态</li>
+</ul>
+</li>
+<li>实时操作系统<ul>
+<li>CPU时间片算法：</li>
+<li>抢占/非抢占</li>
+<li>Timer</li>
+</ul>
+</li>
+<li>OS核心功能组件<ul>
+<li>内存管理</li>
+<li>I/O管理</li>
+<li>GPU</li>
+<li>网络</li>
+<li>多媒体</li>
+</ul>
+</li>
+</ul>
+<h3 id="RTOS-design"><a href="#RTOS-design" class="headerlink" title="RTOS design"></a>RTOS design</h3><ul>
+<li><font color="blue">根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU等</font></li>
+<li>封装底层硬件、为上层应用提供API，可以查阅<font color="red">Linux Kernel</font>的lib，你们要求application跨平台，可以查阅<font color="red">Java JVM的跨平台设计</font></li>
+<li>realtime的关键应该是抢占式调度，需要基于中断实现</li>
+<li>四核CPU，要实现多核并发，主要是协调四个CPU同时工作。比如给4个CPU各分配一个任务，任务完成后怎么通知其它CPU，并协调下一步指令执行。应该是<font color="red">基于cpu的mailbox去实现</font>，关注一下QA7文档的mailbox部分。另外就是查一下线程/进程的状态转换模型和调度模型</li>
+<li>内存寻址要搞清楚虚拟地址和物理地址之间的转换，再看一下文档的Memory Manage Unit(MMU)和Direct Memory Access（DMA）</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjps0hy9p000es6qh1668zcne" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-分布式服务监控 - 概述" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/03/23/分布式服务监控 - 概述/" class="article-date">
@@ -455,6 +510,10 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       <ul>
         
           <li>
+            <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
           </li>
         
@@ -468,10 +527,6 @@ assign where match(&quot;check_redis&quot;, service.check_command)
         
           <li>
             <a href="/2018/11/27/Time-Series-Data-Introduction/">Time-Series Data Introduction</a>
-          </li>
-        
-          <li>
-            <a href="/2018/04/20/持续交付/">旅行行业基础数据本地管理</a>
           </li>
         
       </ul>
