@@ -75,7 +75,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/20/服务集群异常监控/">Time-Series Data Introduction</a>
+      <a class="article-title" href="/2018/12/20/服务集群异常监控/">服务监控</a>
     </h1>
   
 
@@ -83,7 +83,138 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="服务集群异常监控"><a href="#服务集群异常监控" class="headerlink" title="服务集群异常监控"></a>服务集群异常监控</h1>
+        <h1 id="服务监控"><a href="#服务监控" class="headerlink" title="服务监控"></a>服务监控</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><ul>
+<li>业务trace<ul>
+<li>按时间顺序追踪业务流程的关键节点，主要包括以下两个部分：</li>
+<li>搜索部分：用户产品选择、验价结果记录等</li>
+<li>订单部分：下单、付款、关单、出单、退改签等</li>
+<li>日志跟踪效果：</li>
+<li><img src="../images/query-trace-log.png" alt="image"></li>
+</ul>
+</li>
+<li>商家接口监控报警<ul>
+<li>每天机票、酒店、火车票商家的接口状态追踪，对异常情况进行通知报警（邮件/短信）</li>
+<li>邮件报警效果：</li>
+<li><img src="../images/task-item-notification.png" alt="image"></li>
+<li>报表效果：</li>
+<li><img src="../images/taskitem-report.png" alt="image"></li>
+</ul>
+</li>
+<li>异常监控<ul>
+<li>服务器异常及错误日志监控报警，超过阈值时进行通知(短信)</li>
+<li><img src="../images/exception-report.png" alt="image"></li>
+</ul>
+</li>
+</ul>
+<h2 id="业务流程trace"><a href="#业务流程trace" class="headerlink" title="业务流程trace"></a>业务流程trace</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>需求：我们的产品有很长的系统流转过程，从用户选择产品，下单，商品的预定与售后等，有些关键数据需要记录下来防止用户纠纷，而系统运维、问题排查等要依赖各个节点的数据（用户/商品快照/价格快照/用户操作记录等）。当给定一个订单或产品时，我们通过订单id或产品标示就可以查到其业务流转过程中的所有关键节点数据日志，从而可以快速定位问题，解决纠纷</li>
+<li>方案：通过ELK，Filebeat收集日志数据，Logstash对日志数据进行处理，ElasticSearch存储处理后的数据。在ElasticSearch数据基础上，通过Kibana进行可视化报表展示，也可以通过watcher插件进行报警通知</li>
+</ul>
+<h3 id="日志生成策略"><a href="#日志生成策略" class="headerlink" title="日志生成策略"></a>日志生成策略</h3><ul>
+<li>统一的key追踪<ul>
+<li>产品搜索key。用户搜索产品时的唯一产品标识，通过URL参数生成UUID，用这个UUID作为产品的唯一标识和日志追踪key</li>
+<li>订单key。用户产品下单后，需要用订单id来追踪日志</li>
+<li>key关联。将产品key和订单key进行关联，从而通过一个key可以看到完整的日志数据</li>
+</ul>
+</li>
+<li>日志结构<pre><code><br>  public static void trace(String key, String secondaryKey, StepEnum step, String msg) {<pre><code>JSONObject traceLog = new JSONObject();
+traceLog.put(&quot;key&quot;, key);
+traceLog.put(&quot;secondaryKey&quot;, secondaryKey);
+traceLog.put(&quot;step&quot;, step.getStepName());
+traceLog.put(&quot;subStep&quot;, step.getSubStepName());
+traceLog.put(&quot;message&quot;, msg);
+traceLog.put(&quot;@timestamp&quot;, LocalDateTime.now());
+log.info(traceLog.toJSONString());
+</code></pre>  }<br></code></pre></li>
+<li>在产品下单时，通过key和secondarykey将产品和订单进行关联</li>
+<li>logstash数据处理。日志是json格式文本，通过json插件来完成数据提取(date插件提取时间戳)<pre><code><br>  json {<pre><code>source =&gt; &quot;message&quot;
+remove_field =&gt; [&quot;message&quot;]
+</code></pre>  }<br>  date {<pre><code>locale=&gt;&quot;en&quot;
+match =&gt; [ &quot;startTime&quot;, &quot;ISO8601&quot; ]
+target =&gt; &quot;startTime&quot;
+</code></pre>  }<br></code></pre></li>
+<li>ElasticSearch存储。按时间rotate数据，每天一个索引，最多保存7天</li>
+<li>搜索<ul>
+<li>排序，只按时间进行排序</li>
+<li>关于分页，日志数量不大，暂时不做分页，后期考虑先在前端分页。最终可以通过doc_id或时间戳进行分页查询</li>
+<li>通过产品链接或订单号查询所有日志</li>
+</ul>
+</li>
+</ul>
+<h2 id="商家接口监控报警"><a href="#商家接口监控报警" class="headerlink" title="商家接口监控报警"></a>商家接口监控报警</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><h3 id="日志收集"><a href="#日志收集" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
+<li>filebeat</li>
+<li>logstash grok</li>
+<li>ElasticSearch按业务线分集群flight/train/hotel，每个业务一个索引，索引每天rotate，每天一个索引</li>
+</ul>
+<h3 id="可视化"><a href="#可视化" class="headerlink" title="可视化"></a>可视化</h3><ul>
+<li>使用kibana配置，<ul>
+<li>注意粒度，一般使用最小一分钟作为最细粒度就可以了</li>
+<li>多维统计可以拆图（split chart）或拆线（split line），也可以组合使用来实现更详尽的图表表达</li>
+<li>酒店status报表，代理商拆图，status拆表。用于监控接口状态</li>
+<li><img src="../images/hotel-taskitem-split.png" alt="image"></li>
+<li>酒店执行时间报表。用于监控接口执行时间</li>
+<li><img src="../images/hotel-taskitem-exectime.png" alt="image"></li>
+</ul>
+</li>
+<li>可以将多个报表iframe嵌入其它系统统一查看（如运营后台）</li>
+</ul>
+<p>### </p>
+<h2 id="异常监控"><a href="#异常监控" class="headerlink" title="异常监控"></a>异常监控</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>需求：对系统运行过程中产生异常和错误日志进行监控和实时通知</li>
+<li>方案：同样通过ELK收集、处理并存储</li>
+</ul>
+<h3 id="日志收集-1"><a href="#日志收集-1" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
+<li>filebeat 多行处理。filebeat默认每行日志作为一个事件来处理，而异常日志多是多行的，需要进行额外的配置<pre><code><br>filebeat:<h1 id="List-of-prospectors-to-fetch-data"><a href="#List-of-prospectors-to-fetch-data" class="headerlink" title="List of prospectors to fetch data."></a>List of prospectors to fetch data.</h1>prospectors:<br>  -<pre><code>paths:
+  - &quot;/opt/jdy-applog/*/*/*/taskitem*.log&quot;
+input_type: log
+</code></pre>  -<pre><code>paths:
+  - &quot;/opt/jdy-applog/*/*/*/error*.log&quot;
+input_type: log
+multiline.pattern: &apos;^[0-9]{4}-[0-9]{2}-[0-9]{2}&apos;
+multiline.negate: true
+multiline.match: after
+</code></pre>output:<br>logstash:<br>  hosts: [“logstash1.jdydev.cn:5043”, “logstash2.jdydev.cn:5043”, “logstash3.jdydev.cn:5043”]<br></code></pre></li>
+<li>Exception/Error 名称。grok有对应的exceptionName正则式，可以在logstash grok filter中使用下列语句进行截取<pre><code><br>filter{<br>  mutate { add_field =&gt; { “businessLine” =&gt; “errorlog” } }<br>  grok {<pre><code>patterns_dir =&gt; [&quot;/home/jdy/jdy-elk/logstash-5.3.0/config/patterns&quot;]
+match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:exceptionName}&quot;]}
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h3 id="可视化-1"><a href="#可视化-1" class="headerlink" title="可视化"></a>可视化</h3><ul>
+<li>用kibana配置报表</li>
+<li>重点异常重点跟踪，例如我们将redis异常的跟踪到每台机器，这样可以从报表中获得更多信息：</li>
+<li><img src="../images/redis-exception-report.png" alt="image"></li>
+</ul>
+<h3 id="报警"><a href="#报警" class="headerlink" title="报警"></a>报警</h3><ul>
+<li>定时程序汇总，例如查询过去5分钟内的异常数量，当超过一定值时进行报警，可以针对某一异常单独配置阈值，也可以自动累积历史数值，创建基线作为阈值。threshold = a * threshold + val(0&lt;a&lt;1, val是当前异常数量)</li>
+<li>短信告警（云片）。异常的通知通常属于紧急事件，需要保证通知触达率及打开率，因此使用短信通知，可以使用邮件额外</li>
+</ul>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><h3 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h3><ul>
+<li>理论上可以实现at least once机制，保证数据不丢失，但是可能会有重复</li>
+<li>logstash需要persistent queue来保证100%的不丢失</li>
+<li>如果进程异常退出或被异常关闭（kill -9），会导致inflight数据丢失，请注意ELK各进程的规范退出</li>
+</ul>
+<h3 id="实时性"><a href="#实时性" class="headerlink" title="实时性"></a>实时性</h3><ul>
+<li>在统一的内网环境部署，忽略网络传输时间</li>
+<li>日志落地。Logback日志本地缓存到异步落盘的时间在毫秒级别</li>
+<li>filebeat生成事件。扫描间隔1s，强制上传时间（事件本地缓存的时间）是5s。</li>
+<li>logstash处理时间。一般是毫秒级，可以通过x-pack查看延迟，可以按需求配置workers数量增加并发，提升排队延迟</li>
+<li>索引延迟及索引可见的时间约1s</li>
+<li>总计有1-10s的延迟，能够满足准实时需求</li>
+<li>@timestamp使用默认的logstash处理时间，日志时间单独存储，可以比较出延迟时间（日志生成event -&gt; grok之间）</li>
+</ul>
+<h3 id="查询速度"><a href="#查询速度" class="headerlink" title="查询速度"></a>查询速度</h3><ul>
+<li>global ordinals<ul>
+<li>global_ordinals 是用于减少string类型的fielddata占用内存的技术。以我们的系统为例一个doc至少有10个keyword类型的field需要用于查询、聚合操作，假设每个keyword类型的平均长度是20个byte，1G（10亿）个doc的所有keyword field所占用的内存是10<em>20</em>1G=200G。global_ordinals对这些keyword的值进行编号，使用整数值来替代原始的字符串，查询计算完成之后，再用对应的字符串值替换序号，从而减小内存占用。由于一个整数值只占一个byte，因此这些field全都加载到内存占用的内存大小是10*1G=20G。只有原来的1/20</li>
+<li>好处：1. 降低内存占用2. 极大提高汇总排序查询的速度</li>
+<li>global ordinals默认在搜索时加载，text和keyword field默认在搜索时构建global ordinals，这样在第一次搜索时，在数据量很大的情况下，用户会感受到明显的延迟。</li>
+<li>可以通过配置eager_global_ordinals将global_ordinals的构建从搜索转移到索引的构建刷新。</li>
+</ul>
+</li>
+<li>缓存</li>
+</ul>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
+<li>日志记录要在侵入性和灵活性之间做权衡，我们处在业务初始阶段，变化较多，因此目前记录的日志都是侵入性日志</li>
+</ul>
+
       
     </div>
     <footer class="article-footer">
@@ -403,6 +534,20 @@ reboot</code></pre>
 <li>查看license<pre><code><br>curl –user elastic:${password} -XGET <a href="http://localhost:9200/_xpack/license/" target="_blank" rel="external">http://localhost:9200/_xpack/license/</a><br></code></pre></li>
 <li>申请新的license<br><a href="https://register.elastic.co/" target="_blank" rel="external">https://register.elastic.co/</a></li>
 <li>license upgrade（在线执行，不需要停elastic服务）<pre><code><br>curl -XPUT -u elastic ‘<a href="http://localhost:9200/_xpack/license" target="_blank" rel="external">http://localhost:9200/_xpack/license</a>‘ -H “Content-Type: application/json” -d @/root/wang-xiaodong-a7d09d57-aab5-41b4-8b23-f185c899d10e-v5.json<br></code></pre></li>
+</ul>
+</li>
+<li>force merge<ul>
+<li>所有数据到位后(read only indices)，强制进行索引merge，可以减小索引文件数量，也有助于解决run out of file handles问题，便于长期数据存储。segment越多查询速度就会越慢，合并也有利于提升查询效率</li>
+<li>进行force merge时所有请求都会被block，只应该用于read only索引</li>
+<li>合并前后比较<ul>
+<li>merge前 641.3mb  merge后634.8mb</li>
+<li>merge前2.3g merge后2.2g</li>
+</ul>
+</li>
+<li>设置crontab任务，调用API每天force merge readonly indices</li>
+<li><pre><code>curl -X POST "http://localhost:9200/logstash-*-`date -d -10days +%Y.%m.%d`/_forcemerge?max_num_segments=1&flush=true&only_expunge_deletes=false"</code></pre>
+
+</li>
 </ul>
 </li>
 </ul>
@@ -1541,7 +1686,7 @@ public void init(){
       <ul>
         
           <li>
-            <a href="/2018/12/20/服务集群异常监控/">Time-Series Data Introduction</a>
+            <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
           </li>
         
           <li>

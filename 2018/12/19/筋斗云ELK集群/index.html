@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://yoursite.com/../images/filebeat.png">
 <meta property="og:image" content="http://yoursite.com/../images/logstash-process.png">
 <meta property="og:image" content="http://yoursite.com/../images/basic_logstash_pipeline.png">
-<meta property="og:updated_time" content="2018-12-20T03:29:19.000Z">
+<meta property="og:updated_time" content="2018-12-25T06:11:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Life Career">
 <meta name="twitter:description" content="筋斗云ELK集群简介
@@ -302,6 +302,20 @@ reboot</code></pre>
 <li>license upgrade（在线执行，不需要停elastic服务）<pre><code><br>curl -XPUT -u elastic ‘<a href="http://localhost:9200/_xpack/license" target="_blank" rel="external">http://localhost:9200/_xpack/license</a>‘ -H “Content-Type: application/json” -d @/root/wang-xiaodong-a7d09d57-aab5-41b4-8b23-f185c899d10e-v5.json<br></code></pre></li>
 </ul>
 </li>
+<li>force merge<ul>
+<li>所有数据到位后(read only indices)，强制进行索引merge，可以减小索引文件数量，也有助于解决run out of file handles问题，便于长期数据存储。segment越多查询速度就会越慢，合并也有利于提升查询效率</li>
+<li>进行force merge时所有请求都会被block，只应该用于read only索引</li>
+<li>合并前后比较<ul>
+<li>merge前 641.3mb  merge后634.8mb</li>
+<li>merge前2.3g merge后2.2g</li>
+</ul>
+</li>
+<li>设置crontab任务，调用API每天force merge readonly indices</li>
+<li><pre><code>curl -X POST "http://localhost:9200/logstash-*-`date -d -10days +%Y.%m.%d`/_forcemerge?max_num_segments=1&flush=true&only_expunge_deletes=false"</code></pre>
+
+</li>
+</ul>
+</li>
 </ul>
 <h2 id="重点问题："><a href="#重点问题：" class="headerlink" title="重点问题："></a>重点问题：</h2><ul>
 <li>数据一致性<ul>
@@ -401,7 +415,7 @@ reboot</code></pre>
       <ul>
         
           <li>
-            <a href="/2018/12/20/服务集群异常监控/">Time-Series Data Introduction</a>
+            <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
           </li>
         
           <li>
