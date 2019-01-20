@@ -61,6 +61,647 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-旅行行业基础数据本地管理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/26/旅行行业基础数据本地管理/" class="article-date">
+  <time datetime="2018-03-26T08:06:52.000Z" itemprop="datePublished">2018-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/26/旅行行业基础数据本地管理/">旅行行业基础数据本地管理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
+<li>旅行行业有许多稳定的、要查询反复使用的数据，如火车票的站点信息、航路信息，酒店的基础信息等。且这些数据往往单体数据较大，在频繁查询过程中要占用大量的网络带宽。</li>
+<li>鉴于以上特点，我们考虑把这些数据放到其所在服务之中，不用再通过网络访问，由于数据稳定，使用定期同步（外加手动同步）的方式进行更新</li>
+</ul>
+<h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><ul>
+<li>解决核心基础数据就（country,province,city,district,landmark,guide,intro等）的数据单点问题，减少其服务压力(20个系统依赖一个数据服务)</li>
+<li>使用服务器上的本地存储，维护旅行行业基础信息，减少不必要的网络带宽占用，提高访问速度</li>
+</ul>
+<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><h2 id="内存缓存"><a href="#内存缓存" class="headerlink" title="内存缓存"></a>内存缓存</h2><ul>
+<li>在服务启动时，将数据库中存储的数据加载到内存中，并根据使用需要建立map，查询数据时用相关的key从map中取数据</li>
+</ul>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><pre><code>
+    private static volatile Map<integer, hotelbrand=""> _hotelBrandResult = Maps.newHashMap();
+
+    // 数据初始化，注意如果不使用ConcurrentMap，不能并发写数据
+    protected boolean handle_DataInit() {
+        boolean isSuccess = true;
+
+        try {
+            // 计算数据，填充数据
+            Map<integer, hotelbrand=""> hotelBrandMap = Maps.newHashMap();
+            List<hotelbrand> dataList = hotelBrandDao.queryListAll();
+            for (HotelBrand data : dataList) {
+                hotelBrandMap.put(data.getBrandID(), data);
+            }
+
+            _hotelBrandResult = hotelBrandMap;
+
+            // 设置数据加载成功标识
+            _isDataLoaded = true;
+
+        } catch (Throwable ex) {
+            isSuccess = false;
+            getLogger().error(String.format(LogInfoUtils.HAS_DATA_TMPL, methodName, logData), ex);
+        }
+
+        return isSuccess;
+    }
+
+    /** ==================== 读取数据部分 ==================== **/
+    /**
+     * 读取酒店品牌数据
+     * 
+     * @param brandID
+     * @return
+     */
+    public HotelBrand getHotelBrand(int brandID) {
+        //缓存加载完成前查询，需要等待缓存加载完成
+        if (checkLocalDataIsLoaded()) {
+            if (_hotelBrandResult.containsKey(brandID)) {
+                return _hotelBrandResult.get(brandID);
+            }
+        }
+
+        return null;
+    }
+</hotelbrand></integer,></integer,></code></pre>
+
+<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><ul>
+<li>优点<ul>
+<li>现成的对象存储，无需ORMapping</li>
+<li>访问速度最快</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>需要在服务启动时初始化，拖累启动速度；</li>
+<li>只能KV存储，同一份数据，如果需要多个key，就需要建立多个map</li>
+<li>如不阻塞服务，在服务上线时缓存可能仍未加载完成，导致服务长时间阻塞</li>
+<li>当数据增长到一定规模，服务启动时间会长到无法接受</li>
+</ul>
+</li>
+</ul>
+<h2 id="BerkeleyDB"><a href="#BerkeleyDB" class="headerlink" title="BerkeleyDB"></a>BerkeleyDB</h2><h3 id="bdb简介"><a href="#bdb简介" class="headerlink" title="bdb简介"></a>bdb简介</h3><ul>
+<li>设计思想：简单、小巧、可靠、高性能</li>
+<li>kv存储，支持k-List<v>存储，支持secondary key，不支持sql，不需要sql编译解析</v></li>
+<li>支持1000并发，最大256T存储</li>
+<li>嵌入式数据库，不支持网络访问，与应用程序运行在一个地址空间，不需要进程间通信</li>
+<li><a href="https://www.cnblogs.com/chenny7/p/4864547.html" target="_blank" rel="external">bdb架构设计分析</a></li>
+<li>我们使用bdb java edition，<a href="http://www.oracle.com/technetwork/database/berkeleydb/overview/index-093405.html" target="_blank" rel="external">使用文档</a></li>
+</ul>
+<h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><ul>
+<li>从基础数据源（一般是mysql或分库分表的mysql）</li>
+<li>数据存储与访问</li>
+<li>数据更新策略<ul>
+<li>增量模式，通过数据时间戳（不支持物理删除）或数据库binlog</li>
+<li>全量重新构建（时间较长，只在服务启动时检查）</li>
+</ul>
+</li>
+<li>从PrimaryIndex可以进行K-V读取</li>
+<li>从SubIndex可以进行</li>
+</ul>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>多个服务不能同时使用同一个数据库文件</li>
+<li>注意cursor打开后需要手动关闭</li>
+</ul>
+<h3 id="代码示例-1"><a href="#代码示例-1" class="headerlink" title="代码示例"></a>代码示例</h3><ul>
+<li>bdb java edition的DPL API可以方便的使用注解实现</li>
+<li><p>数据对象,通过Persistent（在基类中使用）和Entity标示bdb的数具实体，@PrimaryKey和@SecondaryKey分别标示主键和外键。通常主键是1对1的（k-v），外键可以指定1对1，1对多，多对1，多对多等不同关系<pre><code><br>@Entity<br>@Getter@Setter<br>@ToString<br>public class HotelBasic extends HotelBase implements Serializable {</code></pre></p>
+<p>  /**</p>
+<ul>
+<li><p>酒店类型枚举<br>*/<br>private HotelTypeEnum hotelType;</p>
+<p>/**</p>
+</li>
+<li><p>酒店名称<br>*/<br>private String name = “”;</p>
+<p>/**</p>
+</li>
+<li><p>酒店英文名称<br>*/<br>private String enName = “”;</p>
+<p>/**</p>
+</li>
+<li>酒店地址<br>*/<br>private String address = “”;</li>
+</ul>
+</li>
+</ul>
+<p>}</p>
+<p>@Persistent<br>@Getter@Setter<br>@ToString<br>public class HotelBase implements Serializable {<br>    private static final long serialVersionUID = 3692698826181676533L;</p>
+<pre><code>/** =============== field =============== */
+/**
+ * hotelID
+ */
+@PrimaryKey
+private int hotelID;
+
+/**
+ * 国家ID
+ */
+private int countryID;
+
+/**
+ * cityID
+ */
+@SecondaryKey(relate = MANY_TO_ONE)
+private int cityID;
+
+/**
+ * 酒店级别
+ */
+private HotelSeriesEnum hotelSeries = HotelSeriesEnum.ECONOMY;
+</code></pre><p>}</p>
+<p></p>
+<ul>
+<li><p>数据操作</p>
+<ul>
+<li>依赖方引入包依赖，并加入服务开机启动配置（如servlet）。如果需要默认启用该缓存，也可以直接实现InitializingBean，但是因为数据量较大，且不同系统的依赖不同，因此都没有直接做默认启用。</li>
+<li>同一个数据库文件不能被多服务并发访问。如果单机部署不同服务，可以配置环境变量来建立多个DbEnvironment。如HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/$projectName/hotel/hotelbasic”)</li>
+<li><p><pre><code><br>/**</code></pre></p>
+<ul>
+<li>Created by tomxiaodong on 17/4/6.<br>*/<br>@Slf4j<br>@Component<br>public class HotelBasic_BdbProxy extends HotelBdbProxyBase {</li>
+</ul>
+<p>private static File HOTEL_BDB_DATA_DIRECTORY;<br>private static EnvironmentConfig envConfig = (EnvironmentConfig) new EnvironmentConfig().setAllowCreate(true).setCacheSize(100<em>1024</em>1024);<br>private static StoreConfig storeConfig = new StoreConfig().setAllowCreate(true);<br>private Environment env;</p>
+<p>static {<br>  HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/hotel/hotelbasic”);</p>
+<p>  if(!HOTEL_BDB_DATA_DIRECTORY.exists()) {</p>
+<pre><code>HOTEL_BDB_DATA_DIRECTORY.mkdirs();
+</code></pre><p>  }<br>}</p>
+<p>private EntityStore hotelBasicStore;<br>private PrimaryIndex<integer, hotelbasic=""> pIdx;<br>private SecondaryIndex<integer, integer,="" hotelbasic=""> sIdx;</integer,></integer,></p>
+<p>private final ExecutorService _dataInitExecutorPool = Executors.newCachedThreadPool();</p>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>private Random rand = new Random();
+
+@Resource
+private BdbUpdateTime_BdbProxy bdbUpdateTime_BdbProxy;
+
+@Resource
+private SysCityDao sysCityDao;
+
+@Resource
+private HotelBasic_CacheProxy hotelBasic_CacheProxy;
+
+@Resource
+private HotelComment_CacheProxy hotelComment_CacheProxy;
+
+/**
+ * 读取某城市下的 HotelBasic 列表（全部）
+ *
+ * @param cityID
+ * @return
+ */
+
+public List&lt;HotelBasic&gt; getHotelBasicList(int cityID) {
+    List&lt;HotelBasic&gt; result = Lists.newArrayList();
+    EntityCursor&lt;HotelBasic&gt; cursor = sIdx.subIndex(cityID).entities();
+    cursor.forEach(x -&gt; result.add(x));
+    cursor.close();
+    return result;
+}
+
+/**
+ * 读取某城市下的 HotelBasic 列表（每个酒店的评论必须大于minCommentCount，并且评分&gt;0）
+ *
+ * @param cityID
+ * @param minCommentCount
+ * @return
+ */
+public List&lt;HotelBasic&gt; getHotelBasicListHasComment(int cityID, int minCommentCount) {
+
+    long now = System.currentTimeMillis();
+    List&lt;HotelBasic&gt; result = Lists.newArrayList();
+
+    List&lt;HotelBasic&gt; hotelBasics = getHotelBasicList(cityID);
+    for (HotelBasic hotelBasic : hotelBasics) {
+        if (hotelBasic.getCommentCount() &gt; minCommentCount &amp;&amp; hotelBasic.getScore() &gt; 0) {
+            result.add(hotelBasic);
+        }
+    }
+    return result;
+}
+
+/**
+ * 读取 HotelBasic 对象
+ *
+ * @param hotelID
+ * @return
+ */
+public HotelBasic getHotelBasic(int hotelID) {
+    return pIdx.get(hotelID);
+}
+
+private void putHotelBasic(HotelBasic hotelBasic){
+    pIdx.put(hotelBasic);
+}
+
+@Override
+/**
+* 从源数据同步
+*/
+public void syncData(boolean replace){
+    long startTimeMillis = System.currentTimeMillis();
+    Date lastUpdateTime = bdbUpdateTime_BdbProxy.getLastUpdateTime(getClass().getSimpleName());
+    if(lastUpdateTime!=null){
+        LocalDateTime ldt = LocalDateTime.ofEpochSecond(lastUpdateTime.getTime()/1000, 0, ZoneOffset.UTC);
+        if(ldt.plusHours(getRefreshInterval()).isAfter(LocalDateTime.now())) {
+            log.warn(&quot;sync hotelbasic bdb skipped!&quot;);
+            return;
+        }
+    }
+
+    try {
+        Map&lt;Integer, List&lt;HotelBasic&gt;&gt; hotelBasicsMap = Maps.newHashMap();
+        int total = 0;
+
+        // 计算自由行目的城市ID列表
+        //List&lt;Integer&gt; arrCityIDs = (!DebugConfigUtils.isDebug()) ? sysCityDao.querySolutionArrCityIDs() : new DebugCityConfigDaoProtoImpl().getDebugToCityIDs();
+        List&lt;Integer&gt; arrCityIDs =sysCityDao.querySolutionArrCityIDs();
+
+        // 多线程分批读取缓存数据
+        List&lt;List&lt;Integer&gt;&gt; arrCityIDsList = CustomListMathUtils.splitToListsByListItemCount(arrCityIDs, 10);
+        for (List&lt;Integer&gt; cityIDs : arrCityIDsList) {
+            List&lt;Callable&lt;List&lt;HotelBasic&gt;&gt;&gt; tasks = Lists.newArrayList();
+            for (final int cityID : cityIDs) {
+                tasks.add(() -&gt; hotelBasic_CacheProxy.getCityHotelBasicList(cityID));
+            }
+
+            // 执行 Callable 线程，取得结果
+            List&lt;Future&lt;List&lt;HotelBasic&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
+            for (Future&lt;List&lt;HotelBasic&gt;&gt; future : futures) {
+                List&lt;HotelBasic&gt; hotelBasics = future.get();
+                if(hotelBasics.size()&gt;0){
+                    hotelBasicsMap.put(hotelBasics.get(0).getCityID(), hotelBasics);
+                    total+=hotelBasics.size();
+                }
+            }
+        }
+
+        // 多线程分批读取酒店评论数
+        int hasCommentCount = 0;
+        for (Map.Entry&lt;Integer, List&lt;HotelBasic&gt;&gt; entry : hotelBasicsMap.entrySet()) {
+            Map&lt;Integer, Integer&gt; hotelListCommentCountMap = getHotelListCommentCountMap(entry.getValue());
+
+            for (HotelBasic hotelBasic : entry.getValue()) {
+                if (hotelListCommentCountMap.containsKey(hotelBasic.getHotelID())) {
+                    hasCommentCount++;
+                    hotelBasic.setCommentCount(hotelListCommentCountMap.get(hotelBasic.getHotelID()));
+                    putHotelBasic(hotelBasic);
+                }
+            }
+        }
+
+        bdbUpdateTime_BdbProxy.setLastUpdateTime(getClass().getSimpleName());
+
+        log.warn(&quot;sync hotelbasic bdb success! totalCount:{}, hasCommentCount:{}, time consumed:{}&quot;, total, hasCommentCount, System.currentTimeMillis()-startTimeMillis);
+    } catch (Throwable ex) {
+        log.error(&quot;sync hotelbasic bdb failed!&quot;, ex);
+    }
+
+}
+
+public long count(){
+    return pIdx.count();
+}
+
+@Override
+public long getRefreshInterval() {
+    return 24*150;
+}
+
+@Override
+public TimeUnit getIntervalTimeUnit() {
+    return TimeUnit.HOURS;
+}
+
+/**
+ * 多线程分批读取酒店评论数
+ *
+ * @param hotelBasics
+ * @return
+ */
+private Map&lt;Integer, Integer&gt; getHotelListCommentCountMap(List&lt;HotelBasic&gt; hotelBasics) {
+    Map&lt;Integer, Integer&gt; result = Maps.newHashMap();
+
+    try {
+        List&lt;Integer&gt; allHotelIDs = hotelBasics.stream().map(x -&gt; x.getHotelID()).collect(Collectors.toList());
+        List&lt;List&lt;Integer&gt;&gt; hotelIDsList = CustomListMathUtils.splitToListsByListCount(allHotelIDs, PagingUtils.calPageCount(allHotelIDs.size(), 50));
+
+        // 分批读取酒店评论数
+        for (final List&lt;Integer&gt; hotelIDs : hotelIDsList) {
+            List&lt;Callable&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; tasks = Lists.newArrayList();
+            for (final int hotelID : hotelIDs) {
+                tasks.add(() -&gt; new KeyValuePair(hotelID, hotelComment_CacheProxy.getHotelCommentCount_All(hotelID)));
+            }
+
+            // 执行 Callable 线程，取得结果
+            List&lt;Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
+            for (Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt; future : futures) {
+                KeyValuePair&lt;Integer, Integer&gt; kv = future.get();
+                result.put(kv.getKey(), kv.getValue());
+            }
+        }
+    } catch (Throwable ex) {
+        log.error(&quot;getHotelListCommentCountMap failed!&quot;, ex);
+    }
+
+    return result;
+}
+
+public PrimaryIndex&lt;Integer, HotelBasic&gt; getpIdx() {
+    return pIdx;
+}
+
+public void close(){
+    if(hotelBasicStore!=null){
+        hotelBasicStore.close();
+        hotelBasicStore = null;
+    }
+    if(env!=null) {
+        env.close();
+        env = null;
+    }
+}
+
+public void init(){
+    env = new Environment(HOTEL_BDB_DATA_DIRECTORY, envConfig);
+    hotelBasicStore = new EntityStore(env, &quot;hotelBasic&quot;, storeConfig);
+    pIdx = hotelBasicStore.getPrimaryIndex(Integer.class, HotelBasic.class);
+    sIdx = hotelBasicStore.getSecondaryIndex(pIdx, Integer.class, &quot;cityID&quot;);
+}
+</code></pre><p>}<br></p>
+<h3 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h3><ul>
+<li>百万数据量，100M bdb缓存，K-V访问平均小于1ms，K-List<v>访问在1-5ms之间，峰值qps&gt;500</v></li>
+<li>收集一组日志，通过ELK做图</li>
+</ul>
+<h1 id="深入BerkeleyDB"><a href="#深入BerkeleyDB" class="headerlink" title="深入BerkeleyDB"></a>深入BerkeleyDB</h1><ul>
+<li>并发支持</li>
+<li>cache</li>
+<li>index<ul>
+<li>secondary key</li>
+<li>secondary database</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/26/旅行行业基础数据本地管理/" data-id="cjps0hy9v000gs6qhxyzm51sr" class="article-share-link">Delen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="shellcommands-shell-commands-case-study" class="article article-type-shellcommands" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/21/shell-commands-case-study/" class="article-date">
+  <time datetime="2018-03-21T03:12:35.000Z" itemprop="datePublished">2018-03-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/21/shell-commands-case-study/">shell commands case study</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="高频shell命令及使用场景总结"><a href="#高频shell命令及使用场景总结" class="headerlink" title="高频shell命令及使用场景总结"></a>高频shell命令及使用场景总结</h1><ul>
+<li><font color="blue">本文的目的是通过列举一些高频命令的常见使用场景，帮助后端开发或ops快速铺平道路，因此很多命令都只有很基础的使用方式，更多更深入的用法请使用man命令来阅读详尽的使用说明</font></li>
+<li>不必因为自己会的命令不如别人多或不如别人熟练而沮丧，使自己能够高效的围绕linux平台工作学习才是最终的目的，只要通过持续的学习和使用就一定能很快达到</li>
+</ul>
+<h2 id="磁盘与文件"><a href="#磁盘与文件" class="headerlink" title="磁盘与文件"></a>磁盘与文件</h2><h3 id="基础磁盘文件操作"><a href="#基础磁盘文件操作" class="headerlink" title="基础磁盘文件操作"></a>基础磁盘文件操作</h3><ul>
+<li>cp 使用-r选项来复制目录 cp -r a/b a1/b1</li>
+<li>mkdir 使用-p选项创建嵌套的目录 mkdir -p a/b/c/d</li>
+<li>rm -rf 强制静默删除，虽然看起来挺危险的，但是这确实是我最常使用的方式</li>
+<li>mv 用来移动或重命名 mv a b</li>
+<li>ls list directory，文件不多的时候一般我都使用ls -al以便一次性看到全部文件和必要的时间、大小等属性。可以创建一个别名alias ll = ‘ls -al’来更方便的使用</li>
+<li>chmod 给指定文件增减权限 chmod o+x给文件增加可执行权限，写shell时肯定要用到</li>
+<li>chown 改变文件owner， 有时候使用了错误的用户执行创建/复制/下载/安装等操作，会希望改变文件的owner</li>
+</ul>
+<h3 id="文件查找"><a href="#文件查找" class="headerlink" title="文件查找"></a>文件查找</h3><ul>
+<li>find    <ul>
+<li>按名称 -name，如查找当前目录以test加任意三个字符结尾的文件或文件夹find . -name “*test???” </li>
+<li>按类型 -type，如查找当前目录所有文件：find . -type f</li>
+<li>通过-exec来<font color="blue">批量操作</font><ul>
+<li>find . -maxdepth 1 -name “*test” -exec rm -rf {} \;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="scp"><a href="#scp" class="headerlink" title="scp"></a>scp</h3><ul>
+<li>复制远程目录到本地 scp -r root@10.0.0.1:/home/admin/test/ ./</li>
+<li>复制本地文件到远程 scp ./test root@10.0.0.1:/home/admin/test/</li>
+</ul>
+<h2 id="字符处理"><a href="#字符处理" class="headerlink" title="字符处理"></a>字符处理</h2><h3 id="vi文件编辑"><a href="#vi文件编辑" class="headerlink" title="vi文件编辑"></a>vi文件编辑</h3><ul>
+<li>vi<ul>
+<li>上下左右j k l ;</li>
+<li>f下一行 b上一行 Ctrl+f下一页 Ctrl+b上一页</li>
+<li>查找 /</li>
+<li>替换 :s替换当前行，:%s替换全文，可使用正则表达式</li>
+<li>常用正则表达式（只按场景举例，基础规则可以参考<a href="http://qianjigui.iteye.com/blog/368449" target="_blank" rel="external">这里</a>）,学会用[a-zA-Z0-9]{m,n}的语法可以解决很多问题<ul>
+<li>简化的ip地址[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="字符串查找与替换"><a href="#字符串查找与替换" class="headerlink" title="字符串查找与替换"></a>字符串查找与替换</h3><ul>
+<li>grep 查找行。<font color="red">grep、awk、sed号称linux命令三剑客，如果你常年在服务端环境工作，或者你使用基于linux的开发环境（mac、ubuntu等），有必要熟练掌握这3个命令和基本的正则表达式，尽早舍弃那些低效的GUI吧！</font><ul>
+<li>一般查找 grep “content” file</li>
+<li>忽略大小写 grep -i “ConTEnt” file</li>
+<li>反选（查找不包含指定内容的行） grep “inclusiveContent” file | grep -v “exclusiveContent” </li>
+</ul>
+</li>
+<li>sed(stream editor for filtering and transforming text). 如果你经常使用vi，可以把这个命令理解为批量执行的vi命令。如果你man sed头痛的话，可以参考<a href="http://man.linuxde.net/sed" target="_blank" rel="external">这篇文章</a>其中有很多例子<ul>
+<li>替换文件中的内容，类似vi中的:s和:%s。 sed -i “bak” ‘s/originContent/newContent/g’, 注意mac中必须指定 -i选项的备份文件后缀（如上述命令中的bak，自信的人可以直接使用空字符串””）</li>
+<li>删除空白行，sed -i “bak” ‘/^$/d’ fileName</li>
+<li>在第9行插入标记，sed -i “bak” ‘9a/tag’ fileName</li>
+</ul>
+</li>
+</ul>
+<h3 id="字符串截取"><a href="#字符串截取" class="headerlink" title="字符串截取"></a>字符串截取</h3><ul>
+<li>awk类似sed，通常也是逐行接收文件内容，执行命令处理文本。不同的是，awk定义了自己的语言，叫做“样式扫描和处理语言”，通过创建剪短的程序读取文件、对数据进行排序、计算、生成报表等操作。使用方式为 awk ‘{pattern + action}’ {filenames}<ul>
+<li>杀死某个关键字对应的进程 ps aux | grep tomcat | awk ‘{print $2}’ | xargs kill -9</li>
+</ul>
+</li>
+<li>shell parameter expansion。把变量放入${}中，并指定一些特定的操作符，实现对变量的操作，通过这种方式，可以很便捷的对变量做很多常用的操作（比awk代码更简洁易上手，虽然功能没有awk多）<ul>
+<li>如${parameter:7}返回截取字符串或数组第7位以后（不包括第7位）的子串或子集</li>
+<li>${ #parameter}返回parameter的长度</li>
+<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${parameter#</em>:}返回的是左数第一个:右边的内容、${parameter%%:<em>}返回右数最后一个:左边的内容，${parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
+<li>IFS=’:’; arr=($line)可以把line数据按分隔符拆分并组织成数组，类似java中是String.split(“:”)。使用echo ${arr[0]}打印数组的第1个元素</li>
+</ul>
+</li>
+</ul>
+<h2 id="运维"><a href="#运维" class="headerlink" title="运维"></a>运维</h2><h3 id="ssh用于登陆远程linux服务器"><a href="#ssh用于登陆远程linux服务器" class="headerlink" title="ssh用于登陆远程linux服务器"></a>ssh用于登陆远程linux服务器</h3><ul>
+<li>使用其他的linux终端（我使用的是iterm）来登陆远程linux服务器，可以像在本地终端一样使用各种命令操作远程服务器</li>
+<li>通过将本地公钥复制到远程服务器的~/.ssh/authorized_keys文件实现免密登陆。</li>
+<li>公钥的生成使用ssh-keygen -t rsa，密码可以设置为空，生成的公钥位于~/.ssh/id_rsa.pub</li>
+<li>可以通过ssh，在脚本中批量登陆服务器执行命令。如你想一次性为多个服务器复制公钥，全部实现上述的免密登陆<pre><code><br>cat $fileName | while read line<br>do<br>  echo $line<br>  #在远程服务器创建.ssh目录<br>  ssh -n root@$line “mkdir -p /root/.ssh &amp;&amp; touch /root/.ssh/authorized_keys”<br>  #复制key到远程服务器<br>  ssh root@$line  “cat &gt;&gt; /root/.ssh/authorized_keys” &lt; ~/.ssh/id_rsa.pub<br>done<br></code></pre></li>
+<li>-n选项可以防止标准输入打断批量脚本执行</li>
+</ul>
+<h3 id="top-amp-free"><a href="#top-amp-free" class="headerlink" title="top &amp; free"></a>top &amp; free</h3><ul>
+<li>top。查看当前系统状态、各进程的资源（cpu、内存、load等）占用情况，想详细了解各行各列内容可以参考这篇<a href="https://www.cnblogs.com/dragonsuc/p/5512797.html" target="_blank" rel="external">文章</a><ul>
+<li>打开top后，输入M按内存顺序排列进程，查看占用内存最多的进程 </li>
+<li>P按cpu占用排序</li>
+<li>多核状态下，默认显示的是所有cpu平均值，输入1查看多核各cpu的状态</li>
+<li>top -Hp <pid>可以查看指定进程的所有线程的状态</pid></li>
+</ul>
+</li>
+<li>free。top中显示的内存包含了buffer/cache占用，系统一般都会尽量多的占用内存以提升响应速度，所以可以用free命令来查看实际使用中的内存情况。<ul>
+<li>free -m</li>
+<li>考虑JVM占用内存时不能只考虑堆大小，堆大小可能只占整个虚拟机的40%，以一个2G大小堆的java进程为例，通常要预留2G（2M*1000线程）的栈内存，1G的Meta和其它内容。这意味着你要在系统中为java进程预留大约5G的内存</li>
+</ul>
+</li>
+</ul>
+<h3 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h3><ul>
+<li>查看所有进程并按进程号过滤 ps -ef | grep <pid></pid></li>
+<li>同上述命令类似，不过这个命令使用的是bsd格式来展示进程信息，并按关键字过滤，关键字可以是tomcat、项目名称等 ps aux | grep <keyword></keyword></li>
+</ul>
+<h3 id="netstat"><a href="#netstat" class="headerlink" title="netstat"></a>netstat</h3><ul>
+<li>遇到端口被占用情况时可以用netstat -ap查看所有连接的端口和进程号，从而找到未正确退出或重复启动，导致新进程不能启动的进程。 netstat -ap | grep <port></port></li>
+</ul>
+<h3 id="var-logs-message"><a href="#var-logs-message" class="headerlink" title="/var/logs/message"></a>/var/logs/message</h3><ul>
+<li>记录了一些系统级别的记录，比如目前我们遇到的最常见的是oomkill记录，由于服务压力较大，有时候会遇到物理内存耗尽，系统杀死内存大户的情况。如果你遇到一些奇怪的系统问题，比如进程莫名其妙没了，也没有留下退出日志(hs<em>err</em><pid>)，可以在这里查看</pid></li>
+</ul>
+<h3 id="var-logs-security"><a href="#var-logs-security" class="headerlink" title="/var/logs/security"></a>/var/logs/security</h3><ul>
+<li>这个日志记录了一些安全方面的信息，可以查看是否有被暴力ssh登陆；有时候我们的ip被denyhosts误伤，可以在这里查到日志（当然也可以直接在denyhosts中查看）。<h3 id="keygen"><a href="#keygen" class="headerlink" title="keygen"></a>keygen</h3></li>
+<li>keygen用来为系统用户生成密钥对，在ssh免密登陆和git访问等场景经常需要<ul>
+<li>ssh-keygen -t rsa</li>
+</ul>
+</li>
+</ul>
+<h3 id="ulimit"><a href="#ulimit" class="headerlink" title="ulimit"></a>ulimit</h3><ul>
+<li>设置shell环境的系统限制，如最大文件数、进程数、文件映射数等</li>
+</ul>
+<h3 id="du-amp-df"><a href="#du-amp-df" class="headerlink" title="du&amp;df"></a>du&amp;df</h3><ul>
+<li>怀疑磁盘空间不足时，使用df查看</li>
+<li>用du确定当前目录的磁盘占用情况<ul>
+<li>用du -m以MegaByte为单位显示占用量</li>
+<li>如果文件太多，可以用du –max-depth=1只显示当前目录（不递归查看子目录）</li>
+</ul>
+</li>
+</ul>
+<h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
+<li>获取网页内容curl <a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a></li>
+<li>下载文件。curl -O www.xxx.com/download/aaa.zip</li>
+</ul>
+<h1 id="Case-Study"><a href="#Case-Study" class="headerlink" title="Case Study"></a>Case Study</h1><h2 id="2017-06-13-load过高问题"><a href="#2017-06-13-load过高问题" class="headerlink" title="2017.06.13 load过高问题"></a>2017.06.13 load过高问题</h2><ul>
+<li>热点代码定位 参考<a href="http://javaeesupportpatterns.blogspot.ca/2012/02/prstat-linux-how-to-pinpoint-high-cpu.html" target="_blank" rel="external">这里</a><ol>
+<li>使用jstack <pid> &gt; /tmp/a dump线程到文件备查</pid></li>
+<li>使用top -Hp <pid> 查看占用cpu最高的线程</pid></li>
+<li>将2中linux线程id转为16进制，在1中文件查找，找到对应线程</li>
+<li>如果是线程池pool-1-thread-1形式的线程，通常在栈信息中无法定位到具体的业务代码，你需要先把系统所有线程池自定义名称。如ExecutorService executor = Executors.newXXXExecutor(r -&gt; new Thread(r, “arbitrary-pool-thread-“))</li>
+<li>找到有问题的代码，优化相关代码</li>
+</ol>
+</li>
+<li>相关工具<ul>
+<li>jstack <pid></pid></li>
+<li>top -Hp <pid></pid></li>
+<li>greys，在线诊断，类似btrace，但是使用更轻量（无需编写代码）。可以在线查看方法执行时间、追踪方法的每一步执行时间、方法调用次数和参数返回值等，非常强大。<a href="https://github.com/oldmanpushcart/greys-anatomy" target="_blank" rel="external">https://github.com/oldmanpushcart/greys-anatomy</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="2017-07-12-load过高、内存泄漏问题"><a href="#2017-07-12-load过高、内存泄漏问题" class="headerlink" title="2017.07.12 load过高、内存泄漏问题"></a>2017.07.12 load过高、内存泄漏问题</h2><ol>
+<li>热点代码定位同上，确认是VM线程gc overhead占用cpu，判断是内存已满</li>
+<li>jstack -gcold <pid> 确认堆已满，一直fullgc且没有腾出内存</pid></li>
+<li>jmap -histo <pid> 下载内存镜像</pid></li>
+<li>使用mat查看对象最多的类型，定位问题</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjps0hy9l000as6qhxhqu3t9o" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-servermonitoring" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/15/servermonitoring/" class="article-date">
+  <time datetime="2017-07-15T04:52:58.000Z" itemprop="datePublished">2017-07-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="系统监控"><a href="#系统监控" class="headerlink" title="系统监控"></a>系统监控</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li>目标</li>
+<li>原理</li>
+<li>方案选择<ul>
+<li>商业方案：本地oneAPM(本地化服务)，国际NETWAYS（便宜，价钱一半）</li>
+</ul>
+</li>
+</ul>
+<h2 id="icinga介绍"><a href="#icinga介绍" class="headerlink" title="icinga介绍"></a>icinga介绍</h2><ul>
+<li>简介</li>
+<li>核心概念</li>
+<li>模型</li>
+</ul>
+<h2 id="icinga实践"><a href="#icinga实践" class="headerlink" title="icinga实践"></a>icinga实践</h2><h3 id="服务监控搭建"><a href="#服务监控搭建" class="headerlink" title="服务监控搭建"></a>服务监控搭建</h3><h3 id="监控集群设计方案"><a href="#监控集群设计方案" class="headerlink" title="监控集群设计方案"></a>监控集群设计方案</h3><ul>
+<li>监控报警</li>
+<li>报表接入</li>
+<li>配置方案选择：底层文件配置 or 可视化配置 Icinga Director</li>
+<li>主机监控<ul>
+<li>ping</li>
+<li>ssh -p</li>
+</ul>
+</li>
+<li>redis监控</li>
+<li>ssdb监控</li>
+<li>mysql监控</li>
+</ul>
+<h3 id="master机器迁移"><a href="#master机器迁移" class="headerlink" title="master机器迁移"></a>master机器迁移</h3><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="1000个基于perl脚本命令的service导致high-load问题"><a href="#1000个基于perl脚本命令的service导致high-load问题" class="headerlink" title="1000个基于perl脚本命令的service导致high load问题"></a>1000个基于perl脚本命令的service导致high load问题</h3><p>### </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/15/servermonitoring/" data-id="cjps0hy9h0009s6qht3f8wxf2" class="article-share-link">Delen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-操作系统" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/04/27/操作系统/" class="article-date">
@@ -478,7 +1119,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Labels</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -488,7 +1129,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 10px;">elasticsearch</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/技术内幕/" style="font-size: 20px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -497,7 +1138,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Archieven</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
   </div>
 
@@ -510,23 +1151,23 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       <ul>
         
           <li>
+            <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
           </li>
         
           <li>
+            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/17/lucene数据结构解析/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/17/git命令行常用总结/">(no title)</a>
           </li>
         
       </ul>
@@ -541,7 +1182,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2018 SeventyNine<br>
+      &copy; 2019 SeventyNine<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

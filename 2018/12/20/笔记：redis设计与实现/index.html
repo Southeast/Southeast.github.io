@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>笔记：redis设计与实现 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+简单动态字符串SDS，Simple Dynamic String
+链表
+字典
+跳表
+整数集合
+压缩列表
+对象
+
+底层数据结构
+SDS
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="笔记：redis设计与实现">
+<meta property="og:url" content="http://yoursite.com/2018/12/20/笔记：redis设计与实现/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+简单动态字符串SDS，Simple Dynamic String
+链表
+字典
+跳表
+整数集合
+压缩列表
+对象
+
+底层数据结构
+SDS
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
+<meta property="og:updated_time" content="2019-01-20T06:41:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="笔记：redis设计与实现">
+<meta name="twitter:description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+简单动态字符串SDS，Simple Dynamic String
+链表
+字典
+跳表
+整数集合
+压缩列表
+对象
+
+底层数据结构
+SDS
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-笔记：redis设计与实现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/笔记：redis设计与实现/" class="article-date">
+  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      笔记：redis设计与实现
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="笔记：redis设计与实现"><a href="#笔记：redis设计与实现" class="headerlink" title="笔记：redis设计与实现"></a>笔记：redis设计与实现</h1><h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
+<li>简单动态字符串SDS，Simple Dynamic String</li>
+<li>链表</li>
+<li>字典</li>
+<li>跳表</li>
+<li>整数集合</li>
+<li>压缩列表</li>
+<li>对象</li>
+</ul>
+<h3 id="底层数据结构"><a href="#底层数据结构" class="headerlink" title="底层数据结构"></a>底层数据结构</h3><ul>
+<li>SDS<ul>
+<li>SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不足</li>
+</ul>
+</li>
+<li>链表。linkedlist<ul>
+<li>就是一般的链表结构，C语言没有链表数据结构，所以Redis自己进行了实现</li>
+<li>Redis链表的一些特征：双向、无环、带表头表尾指针、长度计数器、多态</li>
+</ul>
+</li>
+<li>字典。又称符号表（Symbol Table），关联数组（associative array），或映射（map），用于保存键值对<ul>
+<li>类似于java中的HashMap，因为C语言没有这个结构，所以Redis自己进行了实现</li>
+<li>Redis的数据库就是通过字典来实现</li>
+<li>dict数据结构包含一个长度为2的哈希表dictht数组，一个dictType指针保存不同类型对象的哈希等处理方法，哈希表内部使用链表来处理哈希冲突</li>
+<li>当loadfactor过高时（有BGSAVE或BGREWRITEAOF运行时=5，没有时=1），会触发Redis rehash操作，渐进式rehash执行过程中的相关操作都要在dictht[1]上也执行对应的操作（如添加新的键值对时，也要rehash到dictht[1]）</li>
+<li>MurmurHash2算法：名字来源于MU（multiply）R（Rotate），很多开源项目都在使用（Redis、Lucene、Memcached等），与其它流行hash算法相比，对于规律性较强的key，MurmurHash随机分布特征表现更良好，key大于10时运行速度更快</li>
+</ul>
+</li>
+<li>跳表。skiplist是一个平均O(LogN)，最坏O(N)查找复杂度的有序数据结构，性能可以媲美平衡树，但是实现比平衡树简单，所以不少程序使用跳表来替代平衡树<ul>
+<li>跳表是有序集合的底层实现之一，包含zskiplist和zskiplistNode两个数据结构，zskiplist记录跳表的头尾、长度等基础信息</li>
+<li>节点按分值大小有序排列，当分值相同时，按对象自身的大小比较逻辑排列</li>
+</ul>
+</li>
+<li>整数集合intset。当一个集合只包含整数元素且数量不多时，Redis就会使用整数集合作为集合的底层实现<ul>
+<li>ordered、distinct方式保存数值</li>
+<li>有利于更高效的处理整数类型的小集合，如状态位、标志位、或者我们业务中常用到的代理商列表</li>
+<li>主要通过对数字类型进行保守处理（用最小的长度）来节约整数消耗的内存</li>
+<li>因为可能涉及O(N)的类型变更和内存再分配，所以不适用大集合</li>
+</ul>
+</li>
+<li>压缩列表ziplist。压缩列表是哈希和列表的底层实现之一，当一个列表只包含少量数据，且只有小整数或短字符串时，Redis就会使用压缩列表来实际存储这些数据，从而节约内存<ul>
+<li>encoding属性记录数据的类型及长度</li>
+<li>跟java的不同主要在于列表底层类型不固定，可以重新分配数据类型，重新分配内存，Redis中涉及很多类似的设计</li>
+<li>previous_entry_length更新可能会导致连锁更新（当列表元素长度变大，例如原始1字节254字节以内，变为500字节，就需要将previous_entry_length扩展），所以也不使用大集合</li>
+<li>用连续内存存储，相比hashtable减小了内存碎片；节省了指针占用的内存；</li>
+</ul>
+</li>
+<li>对象。Redis并没有直接使用上述数据结构来实现kv数据库，而是基于这些数据结构创建了一个对象系统，包括字符串对象、列表对象、哈希对象、集合对象、有序集合对象<ul>
+<li>使用对象的好处：<ul>
+<li>Redis命令执行前，可以根据对象的类型来判断一个对象是否可以执行给定的命令。</li>
+<li>针对不同的使用场景，从上述底层数据结构中选择合适的底层实现，从而优化不同场景的性能</li>
+</ul>
+</li>
+<li>Redis实现了基于引用计数的内存回收机制</li>
+<li>Redis实现了对象共享机制，通过共享数据来节约内存</li>
+<li>Redis对象的定义：type、encoding、ptr(底层数据结构)</li>
+</ul>
+</li>
+</ul>
+<h3 id="上层数据结构"><a href="#上层数据结构" class="headerlink" title="上层数据结构"></a>上层数据结构</h3><ul>
+<li>String对象的底层实现：<pre><code>- int。保存整数值
+- embstr。小于39字节的字符串、long double浮点数
+- raw。大于39字节字符串、long double浮点数
+</code></pre></li>
+<li>列表对象list底层：<ul>
+<li>ziplist。字符串长度小于64字节，元素个数小于512个。</li>
+<li>linkedlist。</li>
+</ul>
+</li>
+<li>哈希对象底层：<ul>
+<li>ziplist。key-value都小于64字节，元素数小于512个。随机访问和写入都是O(N)复杂度</li>
+<li>hashtable。内存占用大，O(1)随机访问和写入复杂度</li>
+</ul>
+</li>
+<li>集合对象set底层：<ul>
+<li>intset。当所有数据都是整数且数量不多于512时</li>
+<li>hashtable。</li>
+</ul>
+</li>
+<li>有序集合对象zset：<ul>
+<li>ziplist。元素小于64字节且数量不多于128个</li>
+<li>zset。使用一个跳表和一个dict共同实现。跳表用于有序查找，dict保存元素的score用于随机获取分值</li>
+</ul>
+</li>
+</ul>
+<h3 id="其它数据特性"><a href="#其它数据特性" class="headerlink" title="其它数据特性"></a>其它数据特性</h3><ul>
+<li>命令类型检查。检查对象是否支持当前命令，否则返回错误提示</li>
+<li>命令多态。针对不同的底层数据结构，路由到对应的底层API</li>
+<li>引用计数支持的内存回收和对象共享（只共享0-9999数字）</li>
+<li>空转时长支持内存LRU</li>
+</ul>
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><ul>
+<li>可以看到Redis实现，做了许多内存友好性的工作，例如自建的字符串结构、intset、ziplist等，有些场景甚至牺牲了部分性能来优化内存，这是Redis的取胜之道</li>
+</ul>
+<h2 id="redis设计与实现笔记（二）：单机数据库实现"><a href="#redis设计与实现笔记（二）：单机数据库实现" class="headerlink" title="redis设计与实现笔记（二）：单机数据库实现"></a>redis设计与实现笔记（二）：单机数据库实现</h2><h3 id="数据库基础"><a href="#数据库基础" class="headerlink" title="数据库基础"></a>数据库基础</h3><ul>
+<li>服务器状态类redisServer，redisServer包含一个redisDB数组表示数据库，并通过配置指定dbNum个数据库。默认redisClient访问的是db[0]，可以通过select命令指定数据库。</li>
+<li>redisDb结构主要属性是一个dict字典结构，这个dict保存了数据库中所有的键值对，这个字典称为键空间（key space）</li>
+<li>一般的增删改查操作都是在这个dict进行的，可以理解为java map中的相关的get/set等操作，并针对不同的对象进行了扩展，比如如果map的对象还是一个map，支持hset/hget等。</li>
+<li>redisDb还会维护一些常用基本信息，比如keyCount，keyspace_hits，keyspace_misses等</li>
+<li>过期时间相关操作：expire/expireAt/setex/ttl等。过期之后相应的key就无法查询到，数据库会通过一定的策略删除过期key</li>
+<li>redisDb结构包含一个expires字典，保存了数据库中所有key的过期时间，通过该字典支持上述的过期相关的操作</li>
+<li>过期键删除策略<ul>
+<li>定时删除。设置过期键的同时，创建一个定时器（Timer），让定时器在键的过期时间来临时，立即对键执行删除操作。内存最友好、CPU最不友好，难以实现。</li>
+<li>惰性删除。CPU最友好，内存最不友好，且如果大量键不再被访问或很少被访问，效果会等同于内存溢出，只能手动FLUSHDB</li>
+<li>定期删除。定时和惰性的折中方案，定期删除，并设置执行时间和频率减少对CPU影响。Redis通过一个随机策略来执行，而不是遍历</li>
+</ul>
+</li>
+</ul>
+<h3 id="RDB持久化"><a href="#RDB持久化" class="headerlink" title="RDB持久化"></a>RDB持久化</h3><ul>
+<li>RDB文件是一个压缩的二进制文件，用于对redis数据库进行持久化，防止数据丢失。RDB文件不同于AOF，它存储的是持久化时数据库的快照，而AOF类似于数据库binlog和事件流</li>
+<li>SAVE 阻塞式的持久化，BGSAVE异步非阻塞式生成RDB文件</li>
+<li>自动定期保存，可以结合更新操作的频率设置不同的条件，定期自动通过BGSAVE进行持久化保存，比如60s内执行了1000次更新，300秒内执行了100次更新，1000秒内执行了1次更新等。这个操作有ServerCron定期执行，默认100毫秒就会执行一次</li>
+<li>RDB文件结构。RDB文件持久化或从RDB加载时的文件格式，涉及一些文件checksum校验，压缩存储等基本思想，不在这里一一罗列，请参考原作了解</li>
+</ul>
+<h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><ul>
+<li>AOF（append only file）、RDB和replication对过期键的处理<ul>
+<li>生成RDB不会写入过期键</li>
+<li>载入RDB取决于启动模式，主服务器模式不载入过期键，从服务器会载入过期键</li>
+<li>AOF写入。没有影响，append DEL记录即可</li>
+<li>AOF重写。与生成RDB类似，不写入过期键</li>
+<li>replication。由主服务器进行删除管理，从服务器存在过期数据被读取到的可能，这种模式可以保证主从服务器数据一致性</li>
+</ul>
+</li>
+<li>AOF持久化可以分为命令追加（append）、文件写入、文件同步（sync）</li>
+<li>AOF处于打开时，服务器执行完一个写命令后，会按协议将被执行的命令追加写入到redisServer.aof_buf缓冲区</li>
+<li>AOF文件写入和同步，可以指定不同的策略进行写入和落盘；特别敏感的场景也可以配置Redis绕过操作系统的写文件缓存，防止数据丢失</li>
+<li>AOF载入。通过载入AOF文件完成数据还原，相当于事件流架构（Event Architecture and Event Streaming）中使用时间溯源</li>
+<li>AOF重写。防止AOF爆炸，实际上是从当前数据库快照去虚拟写入一个key-val的操作，写入到rewrite之后的AOF文件中，这样删除的key就不再有AOF记录，多次修改的key也仅有一个写入AOF记录，从而减小AOF文件大小。通过BGREWRITEAOF后台实现，后台执行时，其它命令的执行还要写入新的AOF记录，在rewrite完成之后再追加这些记录即可</li>
+</ul>
+<h3 id="数据库通知。"><a href="#数据库通知。" class="headerlink" title="数据库通知。"></a>数据库通知。</h3><ul>
+<li>Redis2.8新增的功能，可以让客户端订阅给定的频道或者模式，获知数据库中键的变化和命令的执行情况</li>
+<li>发送通知的实现：在相关操作完成后，调用通知函数</li>
+</ul>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><ul>
+<li><p>Redis服务器实际上是一个事件驱动程序，处理两类事件：</p>
+<ul>
+<li>文件事件。Redis服务器通过套接字与客户端或其它Redis服务器进行连接，文件事件是服务器对套接字操作的抽象。服务器与客户端的通信操作会产生相应的文件事件，服务器通过监听和处理这些事件来完成网络通信操作</li>
+<li>时间事件。对Redis服务器中需要定时执行的操作的抽象</li>
+</ul>
+</li>
+<li><p>文件事件。 Redis基于reactor模式实现了自己的网络事件处理器，称为文件事件处理器。</p>
+<ul>
+<li>使用I/O多路复用程序来同时监听多个套接字，并根据套接字正在执行的任务来为套接字关联不同的时间处理器</li>
+<li>当被监听的套接字准备好执行accept、read、write、close等操作时，操作相对应的文件事件就会产生，文件事件处理器随机调用套接字关联好的事件处理器来处理这些事件</li>
+<li>Redis自己封装了select，epoll，evport，kqueue等函数库</li>
+<li>事件类型：<ul>
+<li>当事件变得可读时（客户端对套接字执行write，close操作，或有新的acceptable套接字出现），套接字产生AE_READABLE事件</li>
+<li>当事件变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITABLE事件</li>
+<li>先处理读事件，再处理写事件</li>
+</ul>
+</li>
+<li>文件事件处理器<ul>
+<li>连接应答处理器。对连接服务器的客户端进行应答</li>
+<li>命令请求处理器。接收客户端传来的命令请求。</li>
+<li>命令回复处理器。向客户端返回命令执行结果。</li>
+<li>复制处理器。主从服务器进行复制操作。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>时间事件</p>
+<ul>
+<li>分类<ul>
+<li>定时事件</li>
+<li>周期性事件</li>
+</ul>
+</li>
+<li>用一个链表来存储时间事件，实际上一般只有serverCron一个时间事件    - serverCron默认1秒执行10次，它完成一些常见的服务器后台工作：<ul>
+<li>更新服务器统计信息，如时间、内存占用等</li>
+<li>删除过期key</li>
+<li>清理失效链接</li>
+<li>尝试AOF和RDB持久化</li>
+<li>主从同步</li>
+<li>集群心跳测试和同步</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>事件调度与执行</p>
+<ul>
+<li>注意所有的事件都是同步、有序、原子的执行的，不存在中断事件和事件抢断的问题。</li>
+<li>耗时的事件通过子线程后台执行</li>
+<li>某些可能耗时的操作提供了主动让出执行权的机制，从而防止饥饿</li>
+</ul>
+</li>
+</ul>
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><ul>
+<li>Redis为每个连接创建redisClient结构对象，以链表的形式保存在redisServer中，redisClient保存了当前客户端的状态信息，包括socket、名字、flag、身份验证、输入输出buffer、最后连接时间等</li>
+</ul>
+<h3 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h3><ul>
+<li><p>命令请求执行过程</p>
+<ul>
+<li>客户端发送命令请求<ul>
+<li>用户输入命令</li>
+<li>按协议格式转换命令</li>
+</ul>
+</li>
+<li>服务器接收并执行命令<ul>
+<li>套接字读取到客户端命令请求，将其保存到对应客户端对象的输入缓冲区</li>
+<li>事件分派器分发到对应的事件处理器</li>
+<li>提取命令、参数、参数个数，分别存到argv和argc参数中</li>
+<li>调用命令执行器，执行命令</li>
+<li>命令执行器（一）根据客户端传来的命令名，从命令字典查找实现命令RedisCommand对象</li>
+<li>命令执行器（二）执行预备操作</li>
+<li>命令执行器（三）调用命令的实现函数，包括映射到具体数据结构的操作命令</li>
+<li>命令执行器（四）添加AOF记录、慢日志、replication广播等</li>
+</ul>
+</li>
+<li>服务器返回执行结果<ul>
+<li>写入输出缓冲区，通过命令回复处理器发送命令回复。</li>
+<li>客户端接收并输出执行结果<ul>
+<li>从服务器获取到协议格式的回复</li>
+<li>解析回复并输出</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ServerCron</p>
+<ul>
+<li>更新服务器时间缓存。Redis保存有一个时间缓存，用于一些对时间精度要求不高的场景使用该缓存，减小获取时间系统调用，serverCron要定期更新这个缓存</li>
+<li>更新LRU时钟。lruclock是一个估算值，因此使用定时更新的方式处理，每10s处理一次</li>
+<li>更新服务器每秒执行命令数。通过1/1000抽样估算每秒执行命令数</li>
+<li>更新服务器内存峰值。</li>
+<li>处理SIGTERM信号，优雅退出</li>
+<li>管理客户端资源。释放超时链接等</li>
+<li>管理数据库资源。删除过期键等</li>
+<li>执行被延迟的BGREWRITEAOF</li>
+<li>FLUSH AOF缓冲区</li>
+</ul>
+</li>
+<li><p>初始化服务器</p>
+<ul>
+<li>初始化服务器状态结构。创建redisServer数据结构，并初始化一些默认配置</li>
+<li>载入配置。</li>
+<li>初始化服务器数据结构。server.clients链表、server.db数组、共享对象、打开AOF文件等</li>
+<li>还原数据库状态。从AOF或RDB文件恢复数据库</li>
+<li>执行事件循环。开启事件while-true循环</li>
+</ul>
+</li>
+</ul>
+<h3 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h3><ul>
+<li>redis multi databases的意义？schema用于在某些场景替代新增节点或不必要的集群化，从而简化更多节点或集群化的监控和管理成本。<a href="https://stackoverflow.com/questions/16221563/whats-the-point-of-multiple-redis-databases" target="_blank" rel="external">https://stackoverflow.com/questions/16221563/whats-the-point-of-multiple-redis-databases</a></li>
+<li>redis服务器实质上是一个事件处理循环，并且尽可能的使用单进程、单线程、顺序阻塞的模式处理文件事件和时间事件，降低了系统的复杂度，且由于redis通过IO多路复用、内存方面的高效，这种模式也没有对响应速度造成影响。</li>
+</ul>
+<h2 id="redis设计与实现笔记（三）：集群数据库实现"><a href="#redis设计与实现笔记（三）：集群数据库实现" class="headerlink" title="redis设计与实现笔记（三）：集群数据库实现"></a>redis设计与实现笔记（三）：集群数据库实现</h2><h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><ul>
+<li>Redis2.8以前不能高效的处理断线后复制的情况，2.8的部分重同步功能解决</li>
+<li>部分重同步通过复制偏移量、复制积压缓冲区、服务器运行ID三个部分实现</li>
+<li>主服务器向从服务器传播命令来更新从服务器状态，保持主从一致</li>
+<li>从服务器向主服务器发送心跳，以及检测命令丢失</li>
+</ul>
+<h3 id="Sentinel"><a href="#Sentinel" class="headerlink" title="Sentinel"></a>Sentinel</h3><ul>
+<li>Sentinel是Redis高可用性high availability的解决方案：由一个或多个Sentinel实例组成的Sentinel系统可以监视任意多个主服务器及其所有从服务器。能够在主服务器下线时，自动将下线主服务器对应的某个从服务器升级为新的主服务器，然后由新的主服务器代替已下线的主服务器继续处理命令请求。<ul>
+<li><ol>
+<li>Sentinel只是一个运行在特殊模式下的Redis服务器，它使用了和普通模式不同的命令表</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel会读入用户指定的配置文件，为每个要监视的主服务器创建相应的实例结构，并创建连接向主服务器的命令连接和订阅连接，命令连接用于向主服务器发送命令请求，订阅连接用于接收指定频道的消息</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel通过向主服务器发送INFO命令，获得主服务器下所有从服务器列表，为这些从服务器创建实例结构、命令连接和订阅连接</li>
+</ol>
+</li>
+<li><ol>
+<li>一般情况下，Sentinel以10s一次频率向被监视的服务器发送INFO命令，当主服务器处于下线状态或故障转移状态时，频率提高到1s一次</li>
+</ol>
+</li>
+<li><ol>
+<li>监视同一个服务器的多个sentinel，会以2s一次的频率向被监视服务器的<strong>sentinel</strong>:hello频道发送消息向其它Sentinel宣告自己的存在</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel与Sentinel之间只创建命令连接</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel以1s一次的频率向其它实例（主服务器、从服务器、其它Sentinel）发送PING请求，当连续PING不通时Sentinel会将这个实例判定为主观下线</li>
+</ol>
+</li>
+<li><ol>
+<li>当Sentinel判定一个主服务器下线时，它会向其它监视这个主服务器的Sentinel询问，看它们是否同意主观下线</li>
+</ol>
+</li>
+<li><ol>
+<li>当收集足够多的主观下线投票时，Sentinel会判定服务器客观下线，随后发起故障转移操作</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h3><ul>
+<li>Redis集群是Redis提供的分布式数据库方案，集群通过分片（sharding）进行数据共享，并提供复制和故障转移功能。</li>
+<li><p>集群节点</p>
+<ul>
+<li>使用MEET命令将某个目标服务器加入当前服务器所在的集群，需要在Redis启动前开启cluster-enabled选项</li>
+<li>除了集群模式下特有的数据结构clusterNode、clusterLink、clusterState，还会完整使用单机模式下的所有结构和功能</li>
+<li>MEET命令实现上，就是两个节点通信，并分别在本地为对方创建clusterNode数据结构</li>
+</ul>
+</li>
+<li><p>槽指派</p>
+<ul>
+<li>槽slot相当于数据分片，0-16383个槽必须全部分配到某个节点上，且处于服务状态，集群才可用。使用CLUSTER ADDSLOT手动指派槽</li>
+<li>槽指派信息用一个bitmap（2048个字节的位数组）来记录，且不同节点的信息会互相同步到集群所有节点的clusterNode对象保存</li>
+<li>clusterState中还要反向记录一个slot-node的映射信息（槽指派信息）</li>
+<li>CLUSTER ADDSLOTS实现：检查slots是否被占用，若没被占用就分别更新和传播clusterState.slots和slotbit信息</li>
+<li>key-&gt;槽映射。CRC16(key) &amp; 16383</li>
+<li>重新分片。Redis的集群管理工具redis-trib进行了封装。基本原理是一个一个节点处理，在目标服务器写入slots相关数据，在原服务器删除slots相关数据，并完成数据迁移</li>
+<li>重新分片的数据迁移过程中，可能出现同样的slot，有的key在原服务器上，有的key在目标服务器上，这时候通过slot-to-key数据结构可以进行错误提示或命令重定位（ASK错误）</li>
+</ul>
+</li>
+<li><p>复制与故障转移</p>
+<ul>
+<li>主从节点各有相关的标志位来标示，从节点的clusterNode结构中保存了指向主节点的指针</li>
+<li>通过PING来互相获知其它节点的服务状态，并互相同步/报告下线的服务器（创建新的clusterNodeFailReport结构），当半数以上主节点认为某个主节点疑似下线，集群就会广播其客观下线的消息，并触发故障转移</li>
+<li>故障转移步骤：选出新的主节点候选-&gt;候选设置主节点标记正式成为主节点-&gt;迁移已下线主节点的slot信息到新的主节点-&gt;新主节点向集群广播PONG消息，表明自己正式成为主节点-&gt;新的主节点开始处理自己负责的槽对应的相关命令</li>
+<li>主节点选举。由其它主节点投票，从节点向所有其它主节点发送消息，当收到确认后，对应的主节点就投了发送消息的从节点一票（结果似乎谁先发声谁占优势），获得N/2+1及以上个投票的从节点会成为新的主节点。涉及算法：Raft算法的领头选举方法leader election</li>
+</ul>
+</li>
+<li><p>消息。集群中的节点通过message来通信，一个message包括header和data两个部分，主要有5种消息：</p>
+<ul>
+<li>MEET。请求receiver加入sender所在的集群</li>
+<li>PING。随机发送PING消息到某个已知节点，若超过一定阈值没发送也会发送（防止随机产生饥饿）</li>
+<li>PONG。用于响应MEET或PING，也用于直接向集群其它节点广播当前状态，比如故障转移时选举出来的主节点准备好后，向集群确认自己成为主节点</li>
+<li>FAIL。向集群广播某主服务器下线</li>
+<li>PUBLISH。广播某个命令</li>
+</ul>
+</li>
+</ul>
+<h2 id="redis设计与实现笔记（四）：独立功能"><a href="#redis设计与实现笔记（四）：独立功能" class="headerlink" title="redis设计与实现笔记（四）：独立功能"></a>redis设计与实现笔记（四）：独立功能</h2><h3 id="发布-订阅"><a href="#发布-订阅" class="headerlink" title="发布/订阅"></a>发布/订阅</h3><ul>
+<li>支持发布/订阅、模式订阅（PUBLISH/SUBSCRIBE/PSUBSCRIBE）</li>
+<li>redisServer结构中保存有频道订阅关系的dict结构，pubsub_channels</li>
+<li>SUBSCRIBE命令就是向pubsub_channels字典的某个频道对应的链表（没有则创建）添加自己的服务器，UNSUBSCRIBE正好相反</li>
+<li>模式订阅用另一个数据结构pubsub_patterns链表来存储</li>
+<li>PSUBSCRIBE命令向pubsub_patterns链表添加新的节点，UNPSUBSCRIBE相反</li>
+<li>发送消息时，需要分别向channel和其匹配pattern的订阅者发送消息。<ul>
+<li>向channel发送消息时，遍历channel下的订阅方链表，逐个向subscriber发送消息</li>
+<li>向pattern发送消息时，遍历pattern链表，找到所有跟channel匹配的的subscriber，逐个发送消息</li>
+</ul>
+</li>
+<li>查看订阅信息PUBSUB命令，查询相关结构并打印数据</li>
+</ul>
+<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><ul>
+<li>基本流程<ul>
+<li>Redis使用MULTI、EXEC、WATCH等命令实现事务功能。</li>
+<li>MULTI命令开启事务模式，在事务模式下，不属于MULTI//EXEC/WATCH/DISCARD的命令不会被马上执行，而是加入到事务队列中</li>
+<li>redisClient.multiState用FIFO队列记录了等待被事务执行的命令列表</li>
+<li>服务器端收到EXEC命令后，会按顺序执行队列中的命令，并将每个命令的执行结果加入结果队列，最后重置事务状态，返回执行结果队列</li>
+</ul>
+</li>
+<li>WATCH<ul>
+<li>WATCH是一个乐观锁，用于监视一个或多个指定的key，当key发生变化时，服务器会拒绝执行事务</li>
+<li>被监视的key用redisDB.watched_keys字典存储</li>
+<li>监视触发。写命令（PUSH、SET、SADD等）执行后，会通过watched_keys字典检查当前key是否被监视，如果被监视，就将监视key的客户端的REDIS_DIRTY_CAS标记打开，表示该客户端的事务安全性已被破坏</li>
+</ul>
+</li>
+<li>ACID。传统数据库中，唱唱用ACID检验事务功能的可靠性和安全性<ul>
+<li>Atomicity。原子性上，Redis满足要么全执行，要么全不执行的准则，但是不支持回滚机制，如果有一个命令执行错误，剩余的命令也会被完整的执行。作者antirez在事务的文档中解释为回滚这种复杂的功能和Redis追求的简单高效的设计主旨不相符，而且他认为，Redis事务的执行时错误通常都是编码问题导致的，生产环境很少遇到这种问题。</li>
+<li>Consistency。一致性上，WATCH命令可以控制脏读脏写，入队错误、执行错误和服务器停机异常场景都进行了覆盖，不会产生非法或无效错误数据</li>
+<li>Isolation。隔离性上，Redis是单线程执行事务和命令的，也不会在事务执行期间中断事务，因此Redis事务总是以串行方式执行的，并且也总是有隔离性的</li>
+<li>Durability。Redis事务没有涉及单独的持久化逻辑，如果有必要可以在事务中手动加入SAVE命令，但是这样做效率太低，不具有实用性</li>
+</ul>
+</li>
+</ul>
+<h3 id="Lua脚本"><a href="#Lua脚本" class="headerlink" title="Lua脚本"></a>Lua脚本</h3><ul>
+<li>Lua脚本是一个小巧的脚本语言，一个完整的Lua解释器不超过200k，由C语言写成，设计目的是为了嵌入应用程序，使应用程序可以灵活的扩展和定制功能。</li>
+<li>Redis使用Lua的目的和场景<ul>
+<li>减小网络开销。一次性传输多个命令，且脚本存储到服务器端，可以重复调用</li>
+<li>原子操作。</li>
+<li>源码小巧、速度快、可移植</li>
+<li>模块化一些常用操作</li>
+<li>一些redis使用Lua的场景。限流：<a href="https://www.cnblogs.com/yanghuahui/p/3697996.html" target="_blank" rel="external">https://www.cnblogs.com/yanghuahui/p/3697996.html</a> 库存：<a href="https://www.cnblogs.com/yanghuahui/p/3697996.html" target="_blank" rel="external">https://www.cnblogs.com/yanghuahui/p/3697996.html</a></li>
+</ul>
+</li>
+<li>Redis启动时会对内嵌的Lua环境执行一系列修改操作，从而确保内嵌的Lua环境可以满足redis在功能性、安全性等方面的需求</li>
+<li>Redis服务器专门使用一个伪客户端执行Lua脚本中包含的Redis命令</li>
+</ul>
+<h3 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h3><ul>
+<li>SORT可以对列表、集合、有序集合进行排序，底层使用快速排序算法。</li>
+<li>SORT <key> 实现<ul>
+<li>创建一个redisSortObject结构数组tmp[]，并将数组tmp[]的元素指向要排序的列表的元素O(N)</li>
+<li>计算并写入每个tmp[]数组项的double评分score O(N)</li>
+<li>tmp[]按值进行排序</li>
+<li>按tmp[]顺序，获取原数组的元素组成返回结果</li>
+</ul>
+</key></li>
+<li>ALPHA选项实现。上述sort <key>的实现中，第三步值排序换成字符串排序</key></li>
+<li>ASC/DESC调整。调节排序过程中的排序比对算法即可</li>
+<li>BY实现。根据模式找出相应的值，并调整排序过程</li>
+<li>LIMIT实现。</li>
+<li>GET选项实现。（这里Foreign Key形式的松散对象的模型看着有些别扭）</li>
+<li>STORE选项。将排序结果存储到一个指定的key中，以复用结果</li>
+</ul>
+<h3 id="二进制位数组"><a href="#二进制位数组" class="headerlink" title="二进制位数组"></a>二进制位数组</h3><ul>
+<li>Redis提供了SETBIT、GETBIT、BITCOUNT、BITOP四个命令来操作位数组</li>
+<li>SETBIT、GETBIT算法比较简单，通过X/8和X%8+1找到对应的字节对应的位完成读写操作即可</li>
+<li>BITCOUNT则要复杂一些，下面罗列常见的算法：<ul>
+<li>遍历。不具体阐述，复杂度O(N)</li>
+<li>查表法。按字节或多个字节创建不同字节到BITCOUNT的表，例如，用一个字节来创建表，可以一次获知1000 0000的BITCOUNT是1，对每个字节进行操作再求和，算法复杂度直接降到O(N/8)。扩大表的范围（2个以上字节）理想情况下能更多的提升性能O(N/x*8)，但是受限于内存，CPU缓存，实际上不容易实现，效果也没有保证</li>
+<li>variable-precision SWAR算法。数学上对于BITCOUNT的过程称为计算Hamming Weight。Hamming Weight经常被用于信息论、编码理论、密码学，所以有很多算法，variable-precision SWAR是目前最好的算法。它本质上是个分治divide-conquer算法，所以能拿到O(logN)的复杂度。实际上使用时，如果循环四次，一次拿到一个4字节32位的Hamming-Weight再循环相加，最终的复杂度是O(N/32*4)</li>
+<li>Redis实现。8位表+四次variable-precision SWAR循环算法一次性计算128位的BITCOUNT</li>
+</ul>
+</li>
+<li>BITOP在进行AND/OR/XOR操作时，会创建一个新的数组保存结果。</li>
+</ul>
+<h3 id="慢日志"><a href="#慢日志" class="headerlink" title="慢日志"></a>慢日志</h3><ul>
+<li>Redis慢日志记录执行时间超过指定时长的命令</li>
+<li>慢日志并没有打印到日志文件，而是保存到redisServer结构的slowlog链表，可以用SLOWLOG GET查询</li>
+<li>新日志添加表头，当链表长度超过最大值时从表尾删除</li>
+<li>执行命令前后都会获取UNIX时间戳，并用slowlogPushEntryIfNeeded来处理<br>监视器</li>
+<li>通过执行MONITOR命令，客户端可以将自己变为一个监视器，实时的接收并打印服务器当前处理的命令相关信息</li>
+<li>redisServer维护了一个监视器列表数据结构monitors链表</li>
+<li>一个monitor实质上是一个redis-client，有一个client.flags&amp;REDIS_MONITOR = REDIS_MONITOR标志位</li>
+<li>命令执行前有一个replicationFeedMonitors函数来向监视器发布信息</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/12/20/服务集群异常监控/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Nieuwer</strong>
+      <div class="article-nav-title">
+        
+          服务监控
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/12/20/旅行基础数据搜索/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Labels</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/技术内幕/" style="font-size: 20px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

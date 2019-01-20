@@ -61,6 +61,377 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-常见设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/20/常见设计模式总结/" class="article-date">
+  <time datetime="2019-01-20T01:00:07.000Z" itemprop="datePublished">2019-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="常见设计模式总结"><a href="#常见设计模式总结" class="headerlink" title="常见设计模式总结"></a>常见设计模式总结</h1><h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><ul>
+<li>注意的点：<ul>
+<li>私有构造方法</li>
+<li>静态对象+静态方法</li>
+<li>线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）</li>
+<li>性能，减小锁的使用</li>
+</ul>
+</li>
+<li>代码：<pre><code><br>public class Singleton{<br>  private static volatile Singleton s = null;<br>  private static final ReentrantLock LOCK = new ReentrantLock();<br>  public static Singleton get(){<pre><code>if(s==null){
+    try{
+        if(LOCK.lock()){
+            if(s==null){
+                   s = new Singleton();
+               }
+        }
+    }
+}
+return s;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><ul>
+<li>注意的点：<ul>
+<li>工厂接收传入的参数，返回一个接口对应的多个实现类的其中一个实例</li>
+<li>扩展：结合单例<br>优点：</li>
+<li>按接口规范调用产品对象的所有功能方法</li>
+<li>使用方不需要关心实现细节，构造容易，逻辑简单<br>缺点：</li>
+<li>全部if-else hard code，增减类型的时候都需要修改代码，对系统的维护可扩展不利。违反“开放-关闭原则”</li>
+<li>所有类的实例创建逻辑都集中到一个工厂类中，违反“高内聚责任分配原则”</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-simple-factory.png" alt="image"></li>
+<li>代码示例：<pre><code><br>public interface IProduct{<br>  void A();<br>  void B();<br>}</code></pre></li>
+</ul>
+<p>public class Product1 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}<br>public class Product2 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}</p>
+<p>public class ProductFactory{<br>    public static IProduct create(String name){<br>        if(P1.equals(“1”)){<br>            return new Product1();<br>        }else if(P2.equals(“2”)){<br>            return new Product2();<br>        }else{<br>            return null;<br>        }<br>    }<br>}<br></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><ul>
+<li>注意的点<ul>
+<li>在简单工厂方法的基础上，将产品的创建从简单的单一工厂，拆分成多个实例工厂</li>
+<li>保留了简单工厂方法封装对象创建细节的特点的同时，解决了简单工厂扩展维护苦难的问题</li>
+</ul>
+</li>
+<li>类划分：<ul>
+<li>抽象产品/产品接口</li>
+<li>具体产品/产品实现类</li>
+<li>抽象工厂</li>
+<li>真实工厂</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>减少了单一工厂负责所有对象创建逻辑的耦合度</li>
+<li>符合“开放-关闭原则”，增减新的类型，只需要增加/删除相应的工厂类和产品类即可</li>
+<li>符合符合迪米特原则：又叫最少知识原则，即一个对象应尽可能少的了解其它对象。</li>
+<li>符合里式替换原则：任何基类可以出现的地方，一定可以用子类替换。目标是使用抽象和多台将设计中的静态结构改为动态结构</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-factory-method.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface IProduct(){<br>  void A();<br>}<br>public interface IFactory(){<br>  IProduct createProduct();<br>}<br>public class Product1() implements IProduct{<br>  public void A(){}<br>}<br>public class Product2() implements IProduct{<br>  public void A(){}<br>}<br>public class Factory1() implements IFactory1{<br>  public IProduct createProduct(){<pre><code>return new Product1();
+</code></pre>  }<br>}<br>public class Factory2() implements IFactory2{<br>  public IProduct createProduct(){<pre><code>return new Product2();
+</code></pre>  }<br>}<br>public class Client{<br>  public static void main(String[] args){<pre><code>Factory1 f1 = new Factory1();
+IProduct p1 = f1.createProduct();
+Factory2 f2 = new Factory2();
+IProduct p2 = f2.createProduct();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h2><ul>
+<li>为创建一组相关或相互依赖的对象提供一个接口，而且无需指定他们的类</li>
+<li>区别于工厂方法模式：工厂方法针对一个产品等级结构（一个产品接口/基类），而抽象工厂模式针对多个产品等级结构。举例来说，当需要通过工厂来管理男人/女人/女博士一个维度的产品分类对象时，可以使用工厂方法模式；而如果出了男人/女人/女博士一个维度，还要管理黄/黑/白三个肤色人种，或者再加一种基督/佛教/锡克教等宗教维度，就可以用到抽象工厂模式。</li>
+<li>缺点：<ul>
+<li>上层维度（产品族）扩展非常困难。底层维度扩展时，只需要直接新增产品类和产品工厂类；而上层维度扩展首先要修改IFactory，违反“开放-关闭原则”</li>
+</ul>
+</li>
+<li><img src="../images/design_pattern_abstract_factory.png" alt="image"></li>
+<li>代码示例<pre><code><br>//以下是个苹果专卖店和三星专卖店分别销售手机和平板的例子<br>//大家可以假设富士康开了两条不同的流水线，分别生产苹果产品和三星产品，自己写一个不同维度的工厂方法组织方式<br>public interface Mobile{<br>  void makeCall();<br>}<br>public interface Pad{<br>  void game();<br>}<br>public interface DigitSellerFactory{<br>  Mobile sellMobile();<br>  Pad sellPad();<br>}<br>public class IPhone implements Mobile{<br>  public void makeCall(){}<br>}<br>public class Note2 implements Mobile{<br>  public void makeCall(){}<br>}<br>public class IPad implements Pad{<br>  public void game(){}<br>}<br>public class Tab implements Pad{<br>  public void game(){}<br>}<br>public class AppleSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new IPhone();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new IPad();
+</code></pre>  }<br>}<br>public class SumsungSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new Note2();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new Tab();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="装饰器模式"><a href="#装饰器模式" class="headerlink" title="装饰器模式"></a>装饰器模式</h2><ul>
+<li>子类集成的方法对于功能多样化的扩展是极为不利的，除了功能多样难于管理，不同功能之间的组装更是有着不可计数的可能性。</li>
+<li>注意的点：<ul>
+<li>动态扩展</li>
+<li>不改变原有的类</li>
+<li>不用生成子类的继承方式</li>
+<li>Decorator的功能通常不能有关联关系</li>
+</ul>
+</li>
+<li>核心组件：<ul>
+<li>原始类接口</li>
+<li>原始类的基础实现</li>
+<li>装饰器接口（一般类或抽象类）</li>
+<li>继承装饰器接口的一系列具体装饰器</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface Phone{<br>  void func();<br>}<br>public class BasePhone implements Phone{<br>  public void func(){<pre><code>System.out.println(&quot;make call&quot;);
+</code></pre>  }<br>}<br>public abstract class PhoneDecorator implements Phone{<br>  private Phone phone;<br>  public void func(){<pre><code>phone.func();
+decoration();
+</code></pre>  }<br>  public abstract void decoration();<br>}<br>public class  GameDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;game!!!&quot;);
+</code></pre>  }<br>}<br>public class ShuangKaShuangDaiDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;shuang ka shuang dai!!!&quot;);
+</code></pre>  }<br>}<br>public class Main{<br>  public static void main(String[] args){<pre><code>Phone basePhone = new BasePhone();
+basePhone.func();
+Phone gamePhone = new GameDecorator(basePhone);
+gamePhone.func();
+Phone shuangkaPhone = new ShuangkaShuangDaiDecorator(basePhone);
+shuangkaPhone.func();
+Phone shuangkaGamePhone = new ShuangkaShuangDaiDecorator(gamePhone);
+shuangkaGamePhone.func();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="观察者模式-发布-订阅模式"><a href="#观察者模式-发布-订阅模式" class="headerlink" title="观察者模式/发布-订阅模式"></a>观察者模式/发布-订阅模式</h2><ul>
+<li>定义了一种一对多的依赖关系，让多个观察者同时监听某一个主题对象，当这个主题对象发生变化时，会通知所有观察者对象，使他们可以自动更新自己<br>注意的点：<ul>
+<li>多个观察者主动加入监听，被监听对象不关心有多少观察者，低耦合</li>
+<li>被监听对象发通知，观察者自己接收通知并完成后续处理</li>
+<li>观察者可以主动注册和撤销监听</li>
+<li>避免循环引用，观察者一般要异步去完成后续处理<br>优点：</li>
+<li>观察者和被观察者是抽象耦合的，有一套触发机制<br>缺点：</li>
+<li>观察者过多时，通知耗时</li>
+<li>观察者只知道状态变化，不知道状态变化的过程</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li><pre><code>
+public class Subject{
+  private List<observer> observers;
+  private int state;
+  public void subscribe(Observer observer){
+      observers.add(observer);
+  }
+  public void unsubscribe(Observer observer){
+      observers.remove(observer);
+  }
+  public void notifyAll(){
+      observers.foreach(x -> {
+          x.update()
+      })
+  }
+}
+public abstract class Observer{
+  protected Subject subject;
+  public abstract void update();
+}
+</observer></code></pre>
+
+</li>
+</ul>
+<h2 id="MVC模式"><a href="#MVC模式" class="headerlink" title="MVC模式"></a>MVC模式</h2><ul>
+<li>将应用程序切分为Model/View/Control三类核心组件，它们各自处理自己的任务<ul>
+<li>模型：持有数据、状态和程序逻辑</li>
+<li>视图：用来呈现模型</li>
+<li>控制器：负责接收用户输入、解析输入并返回给模型</li>
+<li>MVC通过观察者模式实现视图和模型的分离，当Model数据发生变化时，通知到其相关的所有View</li>
+<li>MVC通过策略模式将视图行为委托到Controller，并实现了视图行为的灵活切换</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>一个模型可以由不同的视图展示，模型数据发生变化时，模型将通知它对应的视图</li>
+<li>模型可复用</li>
+<li>提高开发效率</li>
+</ul>
+</li>
+</ul>
+<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><ul>
+<li>命令模式是一种数据驱动的设计模式，它属于行为模式。它将请求以命令的形式包裹在对象中，并传给调用对象。调用对象寻找可以处理该命令的合适对象，并把命令传递给相应的对象，该对象执行命令。</li>
+<li>主要组件：<ul>
+<li>被操作实体类</li>
+<li>命令接口</li>
+<li>命令实现类（含被操作的实体类的组件）</li>
+</ul>
+</li>
+<li>命令接收与处理</li>
+<li><code><pre><br>public interface ICommand{<br>  void execute();<br>}<br>public class Entity{<br>  public void op1(){}<br>  public void op2(){}<br>}<br>public class op1OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op1();
+</code></pre>  }<br>}<br>public class op2OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op2();
+</code></pre>  }<br>}<br>public class Broker{<br>  private List<icommand> toDoOperations;<br>  public void receiveCommand(ICommand c){<pre><code>toDoOperations.add(c);
+</code></pre>  }<br>  public void doCommand(){<pre><code>toDoOperations.foreach(x -&gt; x.execute());
+</code></pre>  }<br>}<br></icommand></pre></code></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/20/常见设计模式总结/" data-id="cjr4jact200003xfyazu37tmr" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-笔记——《ElasticSearch技术内幕》" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/" class="article-date">
+  <time datetime="2019-01-20T00:00:07.000Z" itemprop="datePublished">2019-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="笔记——《ElasticSearch技术内幕》"><a href="#笔记——《ElasticSearch技术内幕》" class="headerlink" title="笔记——《ElasticSearch技术内幕》"></a>笔记——《ElasticSearch技术内幕》</h1><h2 id="ElasticSearch的设计理念"><a href="#ElasticSearch的设计理念" class="headerlink" title="ElasticSearch的设计理念"></a>ElasticSearch的设计理念</h2><ul>
+<li>合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings</li>
+<li>默认分布式工作模式。每个节点总是假设自己属于某个集群</li>
+<li>集群易于伸缩</li>
+<li>对数据结构没有任何限制</li>
+<li>准实时+版本同步</li>
+</ul>
+<h2 id="ES工作流程"><a href="#ES工作流程" class="headerlink" title="ES工作流程"></a>ES工作流程</h2><ul>
+<li>启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管理及拓扑变化（集群伸缩时的分片迁移）</li>
+<li>故障检测。master节点向其它节点发送心跳检测，当发生故障时，master就会启动拓扑更新和分片数据转移，保证集群的正常工作</li>
+<li>索引数据。构建索引只会在master节点完成，再同步shard到不同的其它节点</li>
+<li>查询数据。包括分散阶段scatter phase和合并阶段gather phase两个阶段。分散阶段将query分发到不同的分片完成查询（这里也起到了负载均衡的作用），合并阶段收集各分片上的搜索结果，进行合并、排序、后续处理并返回给客户端</li>
+</ul>
+<h2 id="底层索引控制"><a href="#底层索引控制" class="headerlink" title="底层索引控制"></a>底层索引控制</h2><ul>
+<li>lucene 4.0支持了多种相似度计算模型（相似度是指查询向量同某个文档的余弦匹配度）。除了传统的TF/IDF，还有Okapi BM25、随机偏离、基于信息的模型几种。不同的field可以配置不同的相似度计算策略</li>
+<li>索引文件编解码方式。通过配置不同的编解码方式，可以控制压缩程度和高基字段的预加载，从而在查询速度和内存之间做权衡</li>
+<li>索引可见流程。<ul>
+<li>索引更新与提交过程。Lucene在接收新的Document之后，在索引变得可见之前，还要经过以下几个阶段：①document处理（类型映射等）②创建只读的Segment_N文件（commit操作）③Searcher刷新（Searcher需要重新打开才能看到新索引，默认1s刷新）。可以看到，从lucene开始处理索引，到索引可以被查询到，有1s左右的延迟，这也是lucene/ES自称为准实时系统的原因</li>
+<li>事务日志。因为不能频繁提交，所以遇到错误时有些数据可能会从内存中丢失，ES使用事务日志来记录所有的未提交事务，在发生错误时检查事务日志，执行未完成的操作。VSearch中似乎抽象了checkpoint的概念，跟写事务日志类似</li>
+<li>准实时读取。可以通过使用事务日志，将提交的事务也进行查询，从而获取未提交版本的数据</li>
+</ul>
+</li>
+<li>索引合并的3种策略。force merge操作</li>
+</ul>
+<h2 id="分布式索引架构"><a href="#分布式索引架构" class="headerlink" title="分布式索引架构"></a>分布式索引架构</h2><ul>
+<li>问题<ul>
+<li>如何为集群选择合适的shard和replication数量</li>
+<li>什么是路由</li>
+<li>分片分配器</li>
+<li>如何应对数据和查询的增长</li>
+</ul>
+</li>
+<li>实现<ul>
+<li>将一个索引切分成若干个小索引，以便在同一集群的不同节点上分配它们，实现查询的并发处理。ES默认将每个索引分成5个shards，并做1个replication。即使是只有1个节点，这样做也可以方便扩容</li>
+<li>一般来说，N个节点的集群，切分为N个分片+1个replication，总共2N个分片，可以最大化集群的分布式优势。但是这不是绝对的，因为查询过程的scatter phase和gather phase也是有代价的，有些时候（比如数据少的时候、有明确路由规则的时候）</li>
+<li>路由类似mysql的分库分表过程，使用统一的分片规则和查询规则，可以实现只在特定分片上查询，从而避免不必要的scatter&amp;gather过程。例如按用户对订单数据进行分片，查询某个用户就能映射到某一特定分片，在这一个分片上查询即可<ul>
+<li>不指定路由规则时。es会自动查询所有分片，修改或删除某一分片时也要定位到特定分片，所以只要保证一个id对应的document一直生成相同的值即可</li>
+<li>指定路由规则。在mapping中添加_mappings字段，指定任意一个未分词的字段即可。要确保对同一个document，始终能计算得出一个相同的routing值</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>分片分配机制。<ul>
+<li>当集群拓扑发生改变时，ShardAllocator负责分片的再分配。同一分片的primary shard和replication shard不能分配到同一节点（多于一个节点时）。分配机制会考虑多种因素：磁盘空间、同一分片的安全性、节点包含的同一个索引的分片数等</li>
+<li>even_shard分配。保证每个节点有相同的分片数</li>
+<li>balanced分配。提供一些可控参数交由用户控制</li>
+<li>可以自行实现ShardAllocator接口</li>
+</ul>
+</li>
+<li>ES集群跟redis集群的一点区别<ul>
+<li>ES集群所有节点都可以配置为master候选节点，当master节点故障时其它节点会选举出新的master节点，并进行分片数据迁移</li>
+<li>Redis集群是所有master节点不可或缺，系统不会因为节点故障修改master节点管理的slot，当遇到故障时，master节点对应的replication/slave节点就会选举出新的master节点加入集群</li>
+</ul>
+</li>
+</ul>
+<h2 id="管理ElasticSearch"><a href="#管理ElasticSearch" class="headerlink" title="管理ElasticSearch"></a>管理ElasticSearch</h2><ul>
+<li>目标：<ul>
+<li>选择正确的目录实现，提升底层I/O效率</li>
+<li>配置发现模块避免潜在问题</li>
+<li>配置网关模块</li>
+<li>恢复模块</li>
+<li>查看段信息</li>
+<li>ES缓存</li>
+</ul>
+</li>
+<li>存储类型：<ul>
+<li>SimpleFSDirectory。简单文件存储系统</li>
+<li>NIOFSDirecotyr。NIO文件存储。linux上默认使用nio</li>
+<li>MMapDirectory。文件映射。</li>
+<li>内存索引。小索引，有备份数据支持重建时使用。</li>
+</ul>
+</li>
+<li>发现模块：<ul>
+<li>multicast（Zen）</li>
+<li>unicast。向配置指定的服务器列表进行单播，减少不必要流量</li>
+</ul>
+</li>
+<li>最小主节点数<ul>
+<li>至少N/2+1，防止split brain</li>
+</ul>
+</li>
+<li>网关</li>
+<li>索引段统计<ul>
+<li>可以通过API查看索引/分片/段信息</li>
+</ul>
+</li>
+<li>ES缓存<ul>
+<li>过滤器缓存。缓存filter查询结果，LRU策略。</li>
+<li>字段数据缓存。主要用于aggregation</li>
+<li>使用API可以清楚特定缓存</li>
+</ul>
+</li>
+</ul>
+<h2 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h2><ul>
+<li>垃圾处理器。java8引入了G1，G1主要目标是减少暂停，使用户感受不到卡顿，但是吞吐量比较差，目前默认还是Paralllel</li>
+<li>避免内存交换。可以通过配置关闭。</li>
+<li>I/O调节。限制每秒的I/O量，防止卡顿</li>
+<li>预热器。空间换时间的操作，指定一个查询/aggregation，缓存其结果，提升查询效率。可以单独创建，也可以在indexing时实时更新</li>
+</ul>
+<h2 id="分片内部原理"><a href="#分片内部原理" class="headerlink" title="分片内部原理"></a>分片内部原理</h2><ul>
+<li>如何使文本可搜索：<ul>
+<li>段一旦生成就不能再改变</li>
+<li>ES在lucene基础上引入了“按段搜索”的概念，这样新增的数据就可以通过建立新的段从而尽快变得可搜索</li>
+<li>为了提升索引速度，ES索引的数据先写入memory buffer。ES定期commit生成新的段（行程一个commit point）</li>
+<li>commit之后，ES要refresh Searcher之后索引才能对搜索可见</li>
+<li>commit之后，新生成的段文件还处在文件缓冲区，没有真正落盘，需要使用fsync()来完成落盘操作</li>
+<li>fsync因为IO调用会很慢，fsync也是定期执行完成落盘的。</li>
+<li>因为fsync定期完成，当系统异常退出时，未落盘的文件会丢失。所以ES还有translog机制，将未落盘的事件记录文件日志，当出现系统异常时，系统会从translog完成未落盘的索引的恢复工作</li>
+<li>translog的落盘也是定期执行的，同样有丢失的可能，用户可以根据使用场景，容忍部分可能的丢失场景。根据kafka的落盘原理，顺序日志落盘其实并不慢</li>
+</ul>
+</li>
+</ul>
+<h2 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h2><ul>
+<li>coordinate节点有没有单点故障问题，客户端的角色，负责负载均衡，请求分发等。设置在同一个域名下设置多个coordinate节点做负载均衡避免单点故障问题。</li>
+<li>为什么是准实时的？除了数据落盘、filebeat轮询传送事件、logstash处理事件过程的时间消耗，ES处理完document之后，还要暂存document缓存区，commit轮询生成新的段文件，新的段要经过Refresh Searcher操作，才能对客户端可见。</li>
+<li>shard在索引创建之前就已确定，如何扩容？增加replica数量</li>
+<li>了解一下scatter-gather过程。是否带routing两种情况，不带就遍历，带了可以定位到指定索引，完成scatter搜索，再进行结果的合并</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/" data-id="cjr4jacth00033xfyxpsolvo8" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-服务集群异常监控" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/12/20/服务集群异常监控/" class="article-date">
@@ -257,6 +628,460 @@ match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:except
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-笔记：redis设计与实现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/笔记：redis设计与实现/" class="article-date">
+  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="笔记：redis设计与实现"><a href="#笔记：redis设计与实现" class="headerlink" title="笔记：redis设计与实现"></a>笔记：redis设计与实现</h1><h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
+<li>简单动态字符串SDS，Simple Dynamic String</li>
+<li>链表</li>
+<li>字典</li>
+<li>跳表</li>
+<li>整数集合</li>
+<li>压缩列表</li>
+<li>对象</li>
+</ul>
+<h3 id="底层数据结构"><a href="#底层数据结构" class="headerlink" title="底层数据结构"></a>底层数据结构</h3><ul>
+<li>SDS<ul>
+<li>SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不足</li>
+</ul>
+</li>
+<li>链表。linkedlist<ul>
+<li>就是一般的链表结构，C语言没有链表数据结构，所以Redis自己进行了实现</li>
+<li>Redis链表的一些特征：双向、无环、带表头表尾指针、长度计数器、多态</li>
+</ul>
+</li>
+<li>字典。又称符号表（Symbol Table），关联数组（associative array），或映射（map），用于保存键值对<ul>
+<li>类似于java中的HashMap，因为C语言没有这个结构，所以Redis自己进行了实现</li>
+<li>Redis的数据库就是通过字典来实现</li>
+<li>dict数据结构包含一个长度为2的哈希表dictht数组，一个dictType指针保存不同类型对象的哈希等处理方法，哈希表内部使用链表来处理哈希冲突</li>
+<li>当loadfactor过高时（有BGSAVE或BGREWRITEAOF运行时=5，没有时=1），会触发Redis rehash操作，渐进式rehash执行过程中的相关操作都要在dictht[1]上也执行对应的操作（如添加新的键值对时，也要rehash到dictht[1]）</li>
+<li>MurmurHash2算法：名字来源于MU（multiply）R（Rotate），很多开源项目都在使用（Redis、Lucene、Memcached等），与其它流行hash算法相比，对于规律性较强的key，MurmurHash随机分布特征表现更良好，key大于10时运行速度更快</li>
+</ul>
+</li>
+<li>跳表。skiplist是一个平均O(LogN)，最坏O(N)查找复杂度的有序数据结构，性能可以媲美平衡树，但是实现比平衡树简单，所以不少程序使用跳表来替代平衡树<ul>
+<li>跳表是有序集合的底层实现之一，包含zskiplist和zskiplistNode两个数据结构，zskiplist记录跳表的头尾、长度等基础信息</li>
+<li>节点按分值大小有序排列，当分值相同时，按对象自身的大小比较逻辑排列</li>
+</ul>
+</li>
+<li>整数集合intset。当一个集合只包含整数元素且数量不多时，Redis就会使用整数集合作为集合的底层实现<ul>
+<li>ordered、distinct方式保存数值</li>
+<li>有利于更高效的处理整数类型的小集合，如状态位、标志位、或者我们业务中常用到的代理商列表</li>
+<li>主要通过对数字类型进行保守处理（用最小的长度）来节约整数消耗的内存</li>
+<li>因为可能涉及O(N)的类型变更和内存再分配，所以不适用大集合</li>
+</ul>
+</li>
+<li>压缩列表ziplist。压缩列表是哈希和列表的底层实现之一，当一个列表只包含少量数据，且只有小整数或短字符串时，Redis就会使用压缩列表来实际存储这些数据，从而节约内存<ul>
+<li>encoding属性记录数据的类型及长度</li>
+<li>跟java的不同主要在于列表底层类型不固定，可以重新分配数据类型，重新分配内存，Redis中涉及很多类似的设计</li>
+<li>previous_entry_length更新可能会导致连锁更新（当列表元素长度变大，例如原始1字节254字节以内，变为500字节，就需要将previous_entry_length扩展），所以也不使用大集合</li>
+<li>用连续内存存储，相比hashtable减小了内存碎片；节省了指针占用的内存；</li>
+</ul>
+</li>
+<li>对象。Redis并没有直接使用上述数据结构来实现kv数据库，而是基于这些数据结构创建了一个对象系统，包括字符串对象、列表对象、哈希对象、集合对象、有序集合对象<ul>
+<li>使用对象的好处：<ul>
+<li>Redis命令执行前，可以根据对象的类型来判断一个对象是否可以执行给定的命令。</li>
+<li>针对不同的使用场景，从上述底层数据结构中选择合适的底层实现，从而优化不同场景的性能</li>
+</ul>
+</li>
+<li>Redis实现了基于引用计数的内存回收机制</li>
+<li>Redis实现了对象共享机制，通过共享数据来节约内存</li>
+<li>Redis对象的定义：type、encoding、ptr(底层数据结构)</li>
+</ul>
+</li>
+</ul>
+<h3 id="上层数据结构"><a href="#上层数据结构" class="headerlink" title="上层数据结构"></a>上层数据结构</h3><ul>
+<li>String对象的底层实现：<pre><code>- int。保存整数值
+- embstr。小于39字节的字符串、long double浮点数
+- raw。大于39字节字符串、long double浮点数
+</code></pre></li>
+<li>列表对象list底层：<ul>
+<li>ziplist。字符串长度小于64字节，元素个数小于512个。</li>
+<li>linkedlist。</li>
+</ul>
+</li>
+<li>哈希对象底层：<ul>
+<li>ziplist。key-value都小于64字节，元素数小于512个。随机访问和写入都是O(N)复杂度</li>
+<li>hashtable。内存占用大，O(1)随机访问和写入复杂度</li>
+</ul>
+</li>
+<li>集合对象set底层：<ul>
+<li>intset。当所有数据都是整数且数量不多于512时</li>
+<li>hashtable。</li>
+</ul>
+</li>
+<li>有序集合对象zset：<ul>
+<li>ziplist。元素小于64字节且数量不多于128个</li>
+<li>zset。使用一个跳表和一个dict共同实现。跳表用于有序查找，dict保存元素的score用于随机获取分值</li>
+</ul>
+</li>
+</ul>
+<h3 id="其它数据特性"><a href="#其它数据特性" class="headerlink" title="其它数据特性"></a>其它数据特性</h3><ul>
+<li>命令类型检查。检查对象是否支持当前命令，否则返回错误提示</li>
+<li>命令多态。针对不同的底层数据结构，路由到对应的底层API</li>
+<li>引用计数支持的内存回收和对象共享（只共享0-9999数字）</li>
+<li>空转时长支持内存LRU</li>
+</ul>
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><ul>
+<li>可以看到Redis实现，做了许多内存友好性的工作，例如自建的字符串结构、intset、ziplist等，有些场景甚至牺牲了部分性能来优化内存，这是Redis的取胜之道</li>
+</ul>
+<h2 id="redis设计与实现笔记（二）：单机数据库实现"><a href="#redis设计与实现笔记（二）：单机数据库实现" class="headerlink" title="redis设计与实现笔记（二）：单机数据库实现"></a>redis设计与实现笔记（二）：单机数据库实现</h2><h3 id="数据库基础"><a href="#数据库基础" class="headerlink" title="数据库基础"></a>数据库基础</h3><ul>
+<li>服务器状态类redisServer，redisServer包含一个redisDB数组表示数据库，并通过配置指定dbNum个数据库。默认redisClient访问的是db[0]，可以通过select命令指定数据库。</li>
+<li>redisDb结构主要属性是一个dict字典结构，这个dict保存了数据库中所有的键值对，这个字典称为键空间（key space）</li>
+<li>一般的增删改查操作都是在这个dict进行的，可以理解为java map中的相关的get/set等操作，并针对不同的对象进行了扩展，比如如果map的对象还是一个map，支持hset/hget等。</li>
+<li>redisDb还会维护一些常用基本信息，比如keyCount，keyspace_hits，keyspace_misses等</li>
+<li>过期时间相关操作：expire/expireAt/setex/ttl等。过期之后相应的key就无法查询到，数据库会通过一定的策略删除过期key</li>
+<li>redisDb结构包含一个expires字典，保存了数据库中所有key的过期时间，通过该字典支持上述的过期相关的操作</li>
+<li>过期键删除策略<ul>
+<li>定时删除。设置过期键的同时，创建一个定时器（Timer），让定时器在键的过期时间来临时，立即对键执行删除操作。内存最友好、CPU最不友好，难以实现。</li>
+<li>惰性删除。CPU最友好，内存最不友好，且如果大量键不再被访问或很少被访问，效果会等同于内存溢出，只能手动FLUSHDB</li>
+<li>定期删除。定时和惰性的折中方案，定期删除，并设置执行时间和频率减少对CPU影响。Redis通过一个随机策略来执行，而不是遍历</li>
+</ul>
+</li>
+</ul>
+<h3 id="RDB持久化"><a href="#RDB持久化" class="headerlink" title="RDB持久化"></a>RDB持久化</h3><ul>
+<li>RDB文件是一个压缩的二进制文件，用于对redis数据库进行持久化，防止数据丢失。RDB文件不同于AOF，它存储的是持久化时数据库的快照，而AOF类似于数据库binlog和事件流</li>
+<li>SAVE 阻塞式的持久化，BGSAVE异步非阻塞式生成RDB文件</li>
+<li>自动定期保存，可以结合更新操作的频率设置不同的条件，定期自动通过BGSAVE进行持久化保存，比如60s内执行了1000次更新，300秒内执行了100次更新，1000秒内执行了1次更新等。这个操作有ServerCron定期执行，默认100毫秒就会执行一次</li>
+<li>RDB文件结构。RDB文件持久化或从RDB加载时的文件格式，涉及一些文件checksum校验，压缩存储等基本思想，不在这里一一罗列，请参考原作了解</li>
+</ul>
+<h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><ul>
+<li>AOF（append only file）、RDB和replication对过期键的处理<ul>
+<li>生成RDB不会写入过期键</li>
+<li>载入RDB取决于启动模式，主服务器模式不载入过期键，从服务器会载入过期键</li>
+<li>AOF写入。没有影响，append DEL记录即可</li>
+<li>AOF重写。与生成RDB类似，不写入过期键</li>
+<li>replication。由主服务器进行删除管理，从服务器存在过期数据被读取到的可能，这种模式可以保证主从服务器数据一致性</li>
+</ul>
+</li>
+<li>AOF持久化可以分为命令追加（append）、文件写入、文件同步（sync）</li>
+<li>AOF处于打开时，服务器执行完一个写命令后，会按协议将被执行的命令追加写入到redisServer.aof_buf缓冲区</li>
+<li>AOF文件写入和同步，可以指定不同的策略进行写入和落盘；特别敏感的场景也可以配置Redis绕过操作系统的写文件缓存，防止数据丢失</li>
+<li>AOF载入。通过载入AOF文件完成数据还原，相当于事件流架构（Event Architecture and Event Streaming）中使用时间溯源</li>
+<li>AOF重写。防止AOF爆炸，实际上是从当前数据库快照去虚拟写入一个key-val的操作，写入到rewrite之后的AOF文件中，这样删除的key就不再有AOF记录，多次修改的key也仅有一个写入AOF记录，从而减小AOF文件大小。通过BGREWRITEAOF后台实现，后台执行时，其它命令的执行还要写入新的AOF记录，在rewrite完成之后再追加这些记录即可</li>
+</ul>
+<h3 id="数据库通知。"><a href="#数据库通知。" class="headerlink" title="数据库通知。"></a>数据库通知。</h3><ul>
+<li>Redis2.8新增的功能，可以让客户端订阅给定的频道或者模式，获知数据库中键的变化和命令的执行情况</li>
+<li>发送通知的实现：在相关操作完成后，调用通知函数</li>
+</ul>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><ul>
+<li><p>Redis服务器实际上是一个事件驱动程序，处理两类事件：</p>
+<ul>
+<li>文件事件。Redis服务器通过套接字与客户端或其它Redis服务器进行连接，文件事件是服务器对套接字操作的抽象。服务器与客户端的通信操作会产生相应的文件事件，服务器通过监听和处理这些事件来完成网络通信操作</li>
+<li>时间事件。对Redis服务器中需要定时执行的操作的抽象</li>
+</ul>
+</li>
+<li><p>文件事件。 Redis基于reactor模式实现了自己的网络事件处理器，称为文件事件处理器。</p>
+<ul>
+<li>使用I/O多路复用程序来同时监听多个套接字，并根据套接字正在执行的任务来为套接字关联不同的时间处理器</li>
+<li>当被监听的套接字准备好执行accept、read、write、close等操作时，操作相对应的文件事件就会产生，文件事件处理器随机调用套接字关联好的事件处理器来处理这些事件</li>
+<li>Redis自己封装了select，epoll，evport，kqueue等函数库</li>
+<li>事件类型：<ul>
+<li>当事件变得可读时（客户端对套接字执行write，close操作，或有新的acceptable套接字出现），套接字产生AE_READABLE事件</li>
+<li>当事件变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITABLE事件</li>
+<li>先处理读事件，再处理写事件</li>
+</ul>
+</li>
+<li>文件事件处理器<ul>
+<li>连接应答处理器。对连接服务器的客户端进行应答</li>
+<li>命令请求处理器。接收客户端传来的命令请求。</li>
+<li>命令回复处理器。向客户端返回命令执行结果。</li>
+<li>复制处理器。主从服务器进行复制操作。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>时间事件</p>
+<ul>
+<li>分类<ul>
+<li>定时事件</li>
+<li>周期性事件</li>
+</ul>
+</li>
+<li>用一个链表来存储时间事件，实际上一般只有serverCron一个时间事件    - serverCron默认1秒执行10次，它完成一些常见的服务器后台工作：<ul>
+<li>更新服务器统计信息，如时间、内存占用等</li>
+<li>删除过期key</li>
+<li>清理失效链接</li>
+<li>尝试AOF和RDB持久化</li>
+<li>主从同步</li>
+<li>集群心跳测试和同步</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>事件调度与执行</p>
+<ul>
+<li>注意所有的事件都是同步、有序、原子的执行的，不存在中断事件和事件抢断的问题。</li>
+<li>耗时的事件通过子线程后台执行</li>
+<li>某些可能耗时的操作提供了主动让出执行权的机制，从而防止饥饿</li>
+</ul>
+</li>
+</ul>
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><ul>
+<li>Redis为每个连接创建redisClient结构对象，以链表的形式保存在redisServer中，redisClient保存了当前客户端的状态信息，包括socket、名字、flag、身份验证、输入输出buffer、最后连接时间等</li>
+</ul>
+<h3 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h3><ul>
+<li><p>命令请求执行过程</p>
+<ul>
+<li>客户端发送命令请求<ul>
+<li>用户输入命令</li>
+<li>按协议格式转换命令</li>
+</ul>
+</li>
+<li>服务器接收并执行命令<ul>
+<li>套接字读取到客户端命令请求，将其保存到对应客户端对象的输入缓冲区</li>
+<li>事件分派器分发到对应的事件处理器</li>
+<li>提取命令、参数、参数个数，分别存到argv和argc参数中</li>
+<li>调用命令执行器，执行命令</li>
+<li>命令执行器（一）根据客户端传来的命令名，从命令字典查找实现命令RedisCommand对象</li>
+<li>命令执行器（二）执行预备操作</li>
+<li>命令执行器（三）调用命令的实现函数，包括映射到具体数据结构的操作命令</li>
+<li>命令执行器（四）添加AOF记录、慢日志、replication广播等</li>
+</ul>
+</li>
+<li>服务器返回执行结果<ul>
+<li>写入输出缓冲区，通过命令回复处理器发送命令回复。</li>
+<li>客户端接收并输出执行结果<ul>
+<li>从服务器获取到协议格式的回复</li>
+<li>解析回复并输出</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ServerCron</p>
+<ul>
+<li>更新服务器时间缓存。Redis保存有一个时间缓存，用于一些对时间精度要求不高的场景使用该缓存，减小获取时间系统调用，serverCron要定期更新这个缓存</li>
+<li>更新LRU时钟。lruclock是一个估算值，因此使用定时更新的方式处理，每10s处理一次</li>
+<li>更新服务器每秒执行命令数。通过1/1000抽样估算每秒执行命令数</li>
+<li>更新服务器内存峰值。</li>
+<li>处理SIGTERM信号，优雅退出</li>
+<li>管理客户端资源。释放超时链接等</li>
+<li>管理数据库资源。删除过期键等</li>
+<li>执行被延迟的BGREWRITEAOF</li>
+<li>FLUSH AOF缓冲区</li>
+</ul>
+</li>
+<li><p>初始化服务器</p>
+<ul>
+<li>初始化服务器状态结构。创建redisServer数据结构，并初始化一些默认配置</li>
+<li>载入配置。</li>
+<li>初始化服务器数据结构。server.clients链表、server.db数组、共享对象、打开AOF文件等</li>
+<li>还原数据库状态。从AOF或RDB文件恢复数据库</li>
+<li>执行事件循环。开启事件while-true循环</li>
+</ul>
+</li>
+</ul>
+<h3 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h3><ul>
+<li>redis multi databases的意义？schema用于在某些场景替代新增节点或不必要的集群化，从而简化更多节点或集群化的监控和管理成本。<a href="https://stackoverflow.com/questions/16221563/whats-the-point-of-multiple-redis-databases" target="_blank" rel="external">https://stackoverflow.com/questions/16221563/whats-the-point-of-multiple-redis-databases</a></li>
+<li>redis服务器实质上是一个事件处理循环，并且尽可能的使用单进程、单线程、顺序阻塞的模式处理文件事件和时间事件，降低了系统的复杂度，且由于redis通过IO多路复用、内存方面的高效，这种模式也没有对响应速度造成影响。</li>
+</ul>
+<h2 id="redis设计与实现笔记（三）：集群数据库实现"><a href="#redis设计与实现笔记（三）：集群数据库实现" class="headerlink" title="redis设计与实现笔记（三）：集群数据库实现"></a>redis设计与实现笔记（三）：集群数据库实现</h2><h3 id="Replication"><a href="#Replication" class="headerlink" title="Replication"></a>Replication</h3><ul>
+<li>Redis2.8以前不能高效的处理断线后复制的情况，2.8的部分重同步功能解决</li>
+<li>部分重同步通过复制偏移量、复制积压缓冲区、服务器运行ID三个部分实现</li>
+<li>主服务器向从服务器传播命令来更新从服务器状态，保持主从一致</li>
+<li>从服务器向主服务器发送心跳，以及检测命令丢失</li>
+</ul>
+<h3 id="Sentinel"><a href="#Sentinel" class="headerlink" title="Sentinel"></a>Sentinel</h3><ul>
+<li>Sentinel是Redis高可用性high availability的解决方案：由一个或多个Sentinel实例组成的Sentinel系统可以监视任意多个主服务器及其所有从服务器。能够在主服务器下线时，自动将下线主服务器对应的某个从服务器升级为新的主服务器，然后由新的主服务器代替已下线的主服务器继续处理命令请求。<ul>
+<li><ol>
+<li>Sentinel只是一个运行在特殊模式下的Redis服务器，它使用了和普通模式不同的命令表</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel会读入用户指定的配置文件，为每个要监视的主服务器创建相应的实例结构，并创建连接向主服务器的命令连接和订阅连接，命令连接用于向主服务器发送命令请求，订阅连接用于接收指定频道的消息</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel通过向主服务器发送INFO命令，获得主服务器下所有从服务器列表，为这些从服务器创建实例结构、命令连接和订阅连接</li>
+</ol>
+</li>
+<li><ol>
+<li>一般情况下，Sentinel以10s一次频率向被监视的服务器发送INFO命令，当主服务器处于下线状态或故障转移状态时，频率提高到1s一次</li>
+</ol>
+</li>
+<li><ol>
+<li>监视同一个服务器的多个sentinel，会以2s一次的频率向被监视服务器的<strong>sentinel</strong>:hello频道发送消息向其它Sentinel宣告自己的存在</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel与Sentinel之间只创建命令连接</li>
+</ol>
+</li>
+<li><ol>
+<li>Sentinel以1s一次的频率向其它实例（主服务器、从服务器、其它Sentinel）发送PING请求，当连续PING不通时Sentinel会将这个实例判定为主观下线</li>
+</ol>
+</li>
+<li><ol>
+<li>当Sentinel判定一个主服务器下线时，它会向其它监视这个主服务器的Sentinel询问，看它们是否同意主观下线</li>
+</ol>
+</li>
+<li><ol>
+<li>当收集足够多的主观下线投票时，Sentinel会判定服务器客观下线，随后发起故障转移操作</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h3><ul>
+<li>Redis集群是Redis提供的分布式数据库方案，集群通过分片（sharding）进行数据共享，并提供复制和故障转移功能。</li>
+<li><p>集群节点</p>
+<ul>
+<li>使用MEET命令将某个目标服务器加入当前服务器所在的集群，需要在Redis启动前开启cluster-enabled选项</li>
+<li>除了集群模式下特有的数据结构clusterNode、clusterLink、clusterState，还会完整使用单机模式下的所有结构和功能</li>
+<li>MEET命令实现上，就是两个节点通信，并分别在本地为对方创建clusterNode数据结构</li>
+</ul>
+</li>
+<li><p>槽指派</p>
+<ul>
+<li>槽slot相当于数据分片，0-16383个槽必须全部分配到某个节点上，且处于服务状态，集群才可用。使用CLUSTER ADDSLOT手动指派槽</li>
+<li>槽指派信息用一个bitmap（2048个字节的位数组）来记录，且不同节点的信息会互相同步到集群所有节点的clusterNode对象保存</li>
+<li>clusterState中还要反向记录一个slot-node的映射信息（槽指派信息）</li>
+<li>CLUSTER ADDSLOTS实现：检查slots是否被占用，若没被占用就分别更新和传播clusterState.slots和slotbit信息</li>
+<li>key-&gt;槽映射。CRC16(key) &amp; 16383</li>
+<li>重新分片。Redis的集群管理工具redis-trib进行了封装。基本原理是一个一个节点处理，在目标服务器写入slots相关数据，在原服务器删除slots相关数据，并完成数据迁移</li>
+<li>重新分片的数据迁移过程中，可能出现同样的slot，有的key在原服务器上，有的key在目标服务器上，这时候通过slot-to-key数据结构可以进行错误提示或命令重定位（ASK错误）</li>
+</ul>
+</li>
+<li><p>复制与故障转移</p>
+<ul>
+<li>主从节点各有相关的标志位来标示，从节点的clusterNode结构中保存了指向主节点的指针</li>
+<li>通过PING来互相获知其它节点的服务状态，并互相同步/报告下线的服务器（创建新的clusterNodeFailReport结构），当半数以上主节点认为某个主节点疑似下线，集群就会广播其客观下线的消息，并触发故障转移</li>
+<li>故障转移步骤：选出新的主节点候选-&gt;候选设置主节点标记正式成为主节点-&gt;迁移已下线主节点的slot信息到新的主节点-&gt;新主节点向集群广播PONG消息，表明自己正式成为主节点-&gt;新的主节点开始处理自己负责的槽对应的相关命令</li>
+<li>主节点选举。由其它主节点投票，从节点向所有其它主节点发送消息，当收到确认后，对应的主节点就投了发送消息的从节点一票（结果似乎谁先发声谁占优势），获得N/2+1及以上个投票的从节点会成为新的主节点。涉及算法：Raft算法的领头选举方法leader election</li>
+</ul>
+</li>
+<li><p>消息。集群中的节点通过message来通信，一个message包括header和data两个部分，主要有5种消息：</p>
+<ul>
+<li>MEET。请求receiver加入sender所在的集群</li>
+<li>PING。随机发送PING消息到某个已知节点，若超过一定阈值没发送也会发送（防止随机产生饥饿）</li>
+<li>PONG。用于响应MEET或PING，也用于直接向集群其它节点广播当前状态，比如故障转移时选举出来的主节点准备好后，向集群确认自己成为主节点</li>
+<li>FAIL。向集群广播某主服务器下线</li>
+<li>PUBLISH。广播某个命令</li>
+</ul>
+</li>
+</ul>
+<h2 id="redis设计与实现笔记（四）：独立功能"><a href="#redis设计与实现笔记（四）：独立功能" class="headerlink" title="redis设计与实现笔记（四）：独立功能"></a>redis设计与实现笔记（四）：独立功能</h2><h3 id="发布-订阅"><a href="#发布-订阅" class="headerlink" title="发布/订阅"></a>发布/订阅</h3><ul>
+<li>支持发布/订阅、模式订阅（PUBLISH/SUBSCRIBE/PSUBSCRIBE）</li>
+<li>redisServer结构中保存有频道订阅关系的dict结构，pubsub_channels</li>
+<li>SUBSCRIBE命令就是向pubsub_channels字典的某个频道对应的链表（没有则创建）添加自己的服务器，UNSUBSCRIBE正好相反</li>
+<li>模式订阅用另一个数据结构pubsub_patterns链表来存储</li>
+<li>PSUBSCRIBE命令向pubsub_patterns链表添加新的节点，UNPSUBSCRIBE相反</li>
+<li>发送消息时，需要分别向channel和其匹配pattern的订阅者发送消息。<ul>
+<li>向channel发送消息时，遍历channel下的订阅方链表，逐个向subscriber发送消息</li>
+<li>向pattern发送消息时，遍历pattern链表，找到所有跟channel匹配的的subscriber，逐个发送消息</li>
+</ul>
+</li>
+<li>查看订阅信息PUBSUB命令，查询相关结构并打印数据</li>
+</ul>
+<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><ul>
+<li>基本流程<ul>
+<li>Redis使用MULTI、EXEC、WATCH等命令实现事务功能。</li>
+<li>MULTI命令开启事务模式，在事务模式下，不属于MULTI//EXEC/WATCH/DISCARD的命令不会被马上执行，而是加入到事务队列中</li>
+<li>redisClient.multiState用FIFO队列记录了等待被事务执行的命令列表</li>
+<li>服务器端收到EXEC命令后，会按顺序执行队列中的命令，并将每个命令的执行结果加入结果队列，最后重置事务状态，返回执行结果队列</li>
+</ul>
+</li>
+<li>WATCH<ul>
+<li>WATCH是一个乐观锁，用于监视一个或多个指定的key，当key发生变化时，服务器会拒绝执行事务</li>
+<li>被监视的key用redisDB.watched_keys字典存储</li>
+<li>监视触发。写命令（PUSH、SET、SADD等）执行后，会通过watched_keys字典检查当前key是否被监视，如果被监视，就将监视key的客户端的REDIS_DIRTY_CAS标记打开，表示该客户端的事务安全性已被破坏</li>
+</ul>
+</li>
+<li>ACID。传统数据库中，唱唱用ACID检验事务功能的可靠性和安全性<ul>
+<li>Atomicity。原子性上，Redis满足要么全执行，要么全不执行的准则，但是不支持回滚机制，如果有一个命令执行错误，剩余的命令也会被完整的执行。作者antirez在事务的文档中解释为回滚这种复杂的功能和Redis追求的简单高效的设计主旨不相符，而且他认为，Redis事务的执行时错误通常都是编码问题导致的，生产环境很少遇到这种问题。</li>
+<li>Consistency。一致性上，WATCH命令可以控制脏读脏写，入队错误、执行错误和服务器停机异常场景都进行了覆盖，不会产生非法或无效错误数据</li>
+<li>Isolation。隔离性上，Redis是单线程执行事务和命令的，也不会在事务执行期间中断事务，因此Redis事务总是以串行方式执行的，并且也总是有隔离性的</li>
+<li>Durability。Redis事务没有涉及单独的持久化逻辑，如果有必要可以在事务中手动加入SAVE命令，但是这样做效率太低，不具有实用性</li>
+</ul>
+</li>
+</ul>
+<h3 id="Lua脚本"><a href="#Lua脚本" class="headerlink" title="Lua脚本"></a>Lua脚本</h3><ul>
+<li>Lua脚本是一个小巧的脚本语言，一个完整的Lua解释器不超过200k，由C语言写成，设计目的是为了嵌入应用程序，使应用程序可以灵活的扩展和定制功能。</li>
+<li>Redis使用Lua的目的和场景<ul>
+<li>减小网络开销。一次性传输多个命令，且脚本存储到服务器端，可以重复调用</li>
+<li>原子操作。</li>
+<li>源码小巧、速度快、可移植</li>
+<li>模块化一些常用操作</li>
+<li>一些redis使用Lua的场景。限流：<a href="https://www.cnblogs.com/yanghuahui/p/3697996.html" target="_blank" rel="external">https://www.cnblogs.com/yanghuahui/p/3697996.html</a> 库存：<a href="https://www.cnblogs.com/yanghuahui/p/3697996.html" target="_blank" rel="external">https://www.cnblogs.com/yanghuahui/p/3697996.html</a></li>
+</ul>
+</li>
+<li>Redis启动时会对内嵌的Lua环境执行一系列修改操作，从而确保内嵌的Lua环境可以满足redis在功能性、安全性等方面的需求</li>
+<li>Redis服务器专门使用一个伪客户端执行Lua脚本中包含的Redis命令</li>
+</ul>
+<h3 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h3><ul>
+<li>SORT可以对列表、集合、有序集合进行排序，底层使用快速排序算法。</li>
+<li>SORT <key> 实现<ul>
+<li>创建一个redisSortObject结构数组tmp[]，并将数组tmp[]的元素指向要排序的列表的元素O(N)</li>
+<li>计算并写入每个tmp[]数组项的double评分score O(N)</li>
+<li>tmp[]按值进行排序</li>
+<li>按tmp[]顺序，获取原数组的元素组成返回结果</li>
+</ul>
+</key></li>
+<li>ALPHA选项实现。上述sort <key>的实现中，第三步值排序换成字符串排序</key></li>
+<li>ASC/DESC调整。调节排序过程中的排序比对算法即可</li>
+<li>BY实现。根据模式找出相应的值，并调整排序过程</li>
+<li>LIMIT实现。</li>
+<li>GET选项实现。（这里Foreign Key形式的松散对象的模型看着有些别扭）</li>
+<li>STORE选项。将排序结果存储到一个指定的key中，以复用结果</li>
+</ul>
+<h3 id="二进制位数组"><a href="#二进制位数组" class="headerlink" title="二进制位数组"></a>二进制位数组</h3><ul>
+<li>Redis提供了SETBIT、GETBIT、BITCOUNT、BITOP四个命令来操作位数组</li>
+<li>SETBIT、GETBIT算法比较简单，通过X/8和X%8+1找到对应的字节对应的位完成读写操作即可</li>
+<li>BITCOUNT则要复杂一些，下面罗列常见的算法：<ul>
+<li>遍历。不具体阐述，复杂度O(N)</li>
+<li>查表法。按字节或多个字节创建不同字节到BITCOUNT的表，例如，用一个字节来创建表，可以一次获知1000 0000的BITCOUNT是1，对每个字节进行操作再求和，算法复杂度直接降到O(N/8)。扩大表的范围（2个以上字节）理想情况下能更多的提升性能O(N/x*8)，但是受限于内存，CPU缓存，实际上不容易实现，效果也没有保证</li>
+<li>variable-precision SWAR算法。数学上对于BITCOUNT的过程称为计算Hamming Weight。Hamming Weight经常被用于信息论、编码理论、密码学，所以有很多算法，variable-precision SWAR是目前最好的算法。它本质上是个分治divide-conquer算法，所以能拿到O(logN)的复杂度。实际上使用时，如果循环四次，一次拿到一个4字节32位的Hamming-Weight再循环相加，最终的复杂度是O(N/32*4)</li>
+<li>Redis实现。8位表+四次variable-precision SWAR循环算法一次性计算128位的BITCOUNT</li>
+</ul>
+</li>
+<li>BITOP在进行AND/OR/XOR操作时，会创建一个新的数组保存结果。</li>
+</ul>
+<h3 id="慢日志"><a href="#慢日志" class="headerlink" title="慢日志"></a>慢日志</h3><ul>
+<li>Redis慢日志记录执行时间超过指定时长的命令</li>
+<li>慢日志并没有打印到日志文件，而是保存到redisServer结构的slowlog链表，可以用SLOWLOG GET查询</li>
+<li>新日志添加表头，当链表长度超过最大值时从表尾删除</li>
+<li>执行命令前后都会获取UNIX时间戳，并用slowlogPushEntryIfNeeded来处理<br>监视器</li>
+<li>通过执行MONITOR命令，客户端可以将自己变为一个监视器，实时的接收并打印服务器当前处理的命令相关信息</li>
+<li>redisServer维护了一个监视器列表数据结构monitors链表</li>
+<li>一个monitor实质上是一个redis-client，有一个client.flags&amp;REDIS_MONITOR = REDIS_MONITOR标志位</li>
+<li>命令执行前有一个replicationFeedMonitors函数来向监视器发布信息</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li></ul>
 
     </footer>
   </div>
@@ -1035,644 +1860,6 @@ reboot</code></pre>
 
 
   
-    <article id="post-旅行行业基础数据本地管理" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/03/26/旅行行业基础数据本地管理/" class="article-date">
-  <time datetime="2018-03-26T08:06:52.000Z" itemprop="datePublished">2018-03-26</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/26/旅行行业基础数据本地管理/">旅行行业基础数据本地管理</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
-<li>旅行行业有许多稳定的、要查询反复使用的数据，如火车票的站点信息、航路信息，酒店的基础信息等。且这些数据往往单体数据较大，在频繁查询过程中要占用大量的网络带宽。</li>
-<li>鉴于以上特点，我们考虑把这些数据放到其所在服务之中，不用再通过网络访问，由于数据稳定，使用定期同步（外加手动同步）的方式进行更新</li>
-</ul>
-<h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><ul>
-<li>解决核心基础数据就（country,province,city,district,landmark,guide,intro等）的数据单点问题，减少其服务压力(20个系统依赖一个数据服务)</li>
-<li>使用服务器上的本地存储，维护旅行行业基础信息，减少不必要的网络带宽占用，提高访问速度</li>
-</ul>
-<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><h2 id="内存缓存"><a href="#内存缓存" class="headerlink" title="内存缓存"></a>内存缓存</h2><ul>
-<li>在服务启动时，将数据库中存储的数据加载到内存中，并根据使用需要建立map，查询数据时用相关的key从map中取数据</li>
-</ul>
-<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><pre><code>
-    private static volatile Map<integer, hotelbrand=""> _hotelBrandResult = Maps.newHashMap();
-
-    // 数据初始化，注意如果不使用ConcurrentMap，不能并发写数据
-    protected boolean handle_DataInit() {
-        boolean isSuccess = true;
-
-        try {
-            // 计算数据，填充数据
-            Map<integer, hotelbrand=""> hotelBrandMap = Maps.newHashMap();
-            List<hotelbrand> dataList = hotelBrandDao.queryListAll();
-            for (HotelBrand data : dataList) {
-                hotelBrandMap.put(data.getBrandID(), data);
-            }
-
-            _hotelBrandResult = hotelBrandMap;
-
-            // 设置数据加载成功标识
-            _isDataLoaded = true;
-
-        } catch (Throwable ex) {
-            isSuccess = false;
-            getLogger().error(String.format(LogInfoUtils.HAS_DATA_TMPL, methodName, logData), ex);
-        }
-
-        return isSuccess;
-    }
-
-    /** ==================== 读取数据部分 ==================== **/
-    /**
-     * 读取酒店品牌数据
-     * 
-     * @param brandID
-     * @return
-     */
-    public HotelBrand getHotelBrand(int brandID) {
-        //缓存加载完成前查询，需要等待缓存加载完成
-        if (checkLocalDataIsLoaded()) {
-            if (_hotelBrandResult.containsKey(brandID)) {
-                return _hotelBrandResult.get(brandID);
-            }
-        }
-
-        return null;
-    }
-</hotelbrand></integer,></integer,></code></pre>
-
-<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><ul>
-<li>优点<ul>
-<li>现成的对象存储，无需ORMapping</li>
-<li>访问速度最快</li>
-</ul>
-</li>
-<li>缺点<ul>
-<li>需要在服务启动时初始化，拖累启动速度；</li>
-<li>只能KV存储，同一份数据，如果需要多个key，就需要建立多个map</li>
-<li>如不阻塞服务，在服务上线时缓存可能仍未加载完成，导致服务长时间阻塞</li>
-<li>当数据增长到一定规模，服务启动时间会长到无法接受</li>
-</ul>
-</li>
-</ul>
-<h2 id="BerkeleyDB"><a href="#BerkeleyDB" class="headerlink" title="BerkeleyDB"></a>BerkeleyDB</h2><h3 id="bdb简介"><a href="#bdb简介" class="headerlink" title="bdb简介"></a>bdb简介</h3><ul>
-<li>设计思想：简单、小巧、可靠、高性能</li>
-<li>kv存储，支持k-List<v>存储，支持secondary key，不支持sql，不需要sql编译解析</v></li>
-<li>支持1000并发，最大256T存储</li>
-<li>嵌入式数据库，不支持网络访问，与应用程序运行在一个地址空间，不需要进程间通信</li>
-<li><a href="https://www.cnblogs.com/chenny7/p/4864547.html" target="_blank" rel="external">bdb架构设计分析</a></li>
-<li>我们使用bdb java edition，<a href="http://www.oracle.com/technetwork/database/berkeleydb/overview/index-093405.html" target="_blank" rel="external">使用文档</a></li>
-</ul>
-<h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><ul>
-<li>从基础数据源（一般是mysql或分库分表的mysql）</li>
-<li>数据存储与访问</li>
-<li>数据更新策略<ul>
-<li>增量模式，通过数据时间戳（不支持物理删除）或数据库binlog</li>
-<li>全量重新构建（时间较长，只在服务启动时检查）</li>
-</ul>
-</li>
-<li>从PrimaryIndex可以进行K-V读取</li>
-<li>从SubIndex可以进行</li>
-</ul>
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>多个服务不能同时使用同一个数据库文件</li>
-<li>注意cursor打开后需要手动关闭</li>
-</ul>
-<h3 id="代码示例-1"><a href="#代码示例-1" class="headerlink" title="代码示例"></a>代码示例</h3><ul>
-<li>bdb java edition的DPL API可以方便的使用注解实现</li>
-<li><p>数据对象,通过Persistent（在基类中使用）和Entity标示bdb的数具实体，@PrimaryKey和@SecondaryKey分别标示主键和外键。通常主键是1对1的（k-v），外键可以指定1对1，1对多，多对1，多对多等不同关系<pre><code><br>@Entity<br>@Getter@Setter<br>@ToString<br>public class HotelBasic extends HotelBase implements Serializable {</code></pre></p>
-<p>  /**</p>
-<ul>
-<li><p>酒店类型枚举<br>*/<br>private HotelTypeEnum hotelType;</p>
-<p>/**</p>
-</li>
-<li><p>酒店名称<br>*/<br>private String name = “”;</p>
-<p>/**</p>
-</li>
-<li><p>酒店英文名称<br>*/<br>private String enName = “”;</p>
-<p>/**</p>
-</li>
-<li>酒店地址<br>*/<br>private String address = “”;</li>
-</ul>
-</li>
-</ul>
-<p>}</p>
-<p>@Persistent<br>@Getter@Setter<br>@ToString<br>public class HotelBase implements Serializable {<br>    private static final long serialVersionUID = 3692698826181676533L;</p>
-<pre><code>/** =============== field =============== */
-/**
- * hotelID
- */
-@PrimaryKey
-private int hotelID;
-
-/**
- * 国家ID
- */
-private int countryID;
-
-/**
- * cityID
- */
-@SecondaryKey(relate = MANY_TO_ONE)
-private int cityID;
-
-/**
- * 酒店级别
- */
-private HotelSeriesEnum hotelSeries = HotelSeriesEnum.ECONOMY;
-</code></pre><p>}</p>
-<p></p>
-<ul>
-<li><p>数据操作</p>
-<ul>
-<li>依赖方引入包依赖，并加入服务开机启动配置（如servlet）。如果需要默认启用该缓存，也可以直接实现InitializingBean，但是因为数据量较大，且不同系统的依赖不同，因此都没有直接做默认启用。</li>
-<li>同一个数据库文件不能被多服务并发访问。如果单机部署不同服务，可以配置环境变量来建立多个DbEnvironment。如HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/$projectName/hotel/hotelbasic”)</li>
-<li><p><pre><code><br>/**</code></pre></p>
-<ul>
-<li>Created by tomxiaodong on 17/4/6.<br>*/<br>@Slf4j<br>@Component<br>public class HotelBasic_BdbProxy extends HotelBdbProxyBase {</li>
-</ul>
-<p>private static File HOTEL_BDB_DATA_DIRECTORY;<br>private static EnvironmentConfig envConfig = (EnvironmentConfig) new EnvironmentConfig().setAllowCreate(true).setCacheSize(100<em>1024</em>1024);<br>private static StoreConfig storeConfig = new StoreConfig().setAllowCreate(true);<br>private Environment env;</p>
-<p>static {<br>  HOTEL_BDB_DATA_DIRECTORY = new File(“/opt/bdb/hotel/hotelbasic”);</p>
-<p>  if(!HOTEL_BDB_DATA_DIRECTORY.exists()) {</p>
-<pre><code>HOTEL_BDB_DATA_DIRECTORY.mkdirs();
-</code></pre><p>  }<br>}</p>
-<p>private EntityStore hotelBasicStore;<br>private PrimaryIndex<integer, hotelbasic=""> pIdx;<br>private SecondaryIndex<integer, integer,="" hotelbasic=""> sIdx;</integer,></integer,></p>
-<p>private final ExecutorService _dataInitExecutorPool = Executors.newCachedThreadPool();</p>
-</li>
-</ul>
-</li>
-</ul>
-<pre><code>private Random rand = new Random();
-
-@Resource
-private BdbUpdateTime_BdbProxy bdbUpdateTime_BdbProxy;
-
-@Resource
-private SysCityDao sysCityDao;
-
-@Resource
-private HotelBasic_CacheProxy hotelBasic_CacheProxy;
-
-@Resource
-private HotelComment_CacheProxy hotelComment_CacheProxy;
-
-/**
- * 读取某城市下的 HotelBasic 列表（全部）
- *
- * @param cityID
- * @return
- */
-
-public List&lt;HotelBasic&gt; getHotelBasicList(int cityID) {
-    List&lt;HotelBasic&gt; result = Lists.newArrayList();
-    EntityCursor&lt;HotelBasic&gt; cursor = sIdx.subIndex(cityID).entities();
-    cursor.forEach(x -&gt; result.add(x));
-    cursor.close();
-    return result;
-}
-
-/**
- * 读取某城市下的 HotelBasic 列表（每个酒店的评论必须大于minCommentCount，并且评分&gt;0）
- *
- * @param cityID
- * @param minCommentCount
- * @return
- */
-public List&lt;HotelBasic&gt; getHotelBasicListHasComment(int cityID, int minCommentCount) {
-
-    long now = System.currentTimeMillis();
-    List&lt;HotelBasic&gt; result = Lists.newArrayList();
-
-    List&lt;HotelBasic&gt; hotelBasics = getHotelBasicList(cityID);
-    for (HotelBasic hotelBasic : hotelBasics) {
-        if (hotelBasic.getCommentCount() &gt; minCommentCount &amp;&amp; hotelBasic.getScore() &gt; 0) {
-            result.add(hotelBasic);
-        }
-    }
-    return result;
-}
-
-/**
- * 读取 HotelBasic 对象
- *
- * @param hotelID
- * @return
- */
-public HotelBasic getHotelBasic(int hotelID) {
-    return pIdx.get(hotelID);
-}
-
-private void putHotelBasic(HotelBasic hotelBasic){
-    pIdx.put(hotelBasic);
-}
-
-@Override
-/**
-* 从源数据同步
-*/
-public void syncData(boolean replace){
-    long startTimeMillis = System.currentTimeMillis();
-    Date lastUpdateTime = bdbUpdateTime_BdbProxy.getLastUpdateTime(getClass().getSimpleName());
-    if(lastUpdateTime!=null){
-        LocalDateTime ldt = LocalDateTime.ofEpochSecond(lastUpdateTime.getTime()/1000, 0, ZoneOffset.UTC);
-        if(ldt.plusHours(getRefreshInterval()).isAfter(LocalDateTime.now())) {
-            log.warn(&quot;sync hotelbasic bdb skipped!&quot;);
-            return;
-        }
-    }
-
-    try {
-        Map&lt;Integer, List&lt;HotelBasic&gt;&gt; hotelBasicsMap = Maps.newHashMap();
-        int total = 0;
-
-        // 计算自由行目的城市ID列表
-        //List&lt;Integer&gt; arrCityIDs = (!DebugConfigUtils.isDebug()) ? sysCityDao.querySolutionArrCityIDs() : new DebugCityConfigDaoProtoImpl().getDebugToCityIDs();
-        List&lt;Integer&gt; arrCityIDs =sysCityDao.querySolutionArrCityIDs();
-
-        // 多线程分批读取缓存数据
-        List&lt;List&lt;Integer&gt;&gt; arrCityIDsList = CustomListMathUtils.splitToListsByListItemCount(arrCityIDs, 10);
-        for (List&lt;Integer&gt; cityIDs : arrCityIDsList) {
-            List&lt;Callable&lt;List&lt;HotelBasic&gt;&gt;&gt; tasks = Lists.newArrayList();
-            for (final int cityID : cityIDs) {
-                tasks.add(() -&gt; hotelBasic_CacheProxy.getCityHotelBasicList(cityID));
-            }
-
-            // 执行 Callable 线程，取得结果
-            List&lt;Future&lt;List&lt;HotelBasic&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
-            for (Future&lt;List&lt;HotelBasic&gt;&gt; future : futures) {
-                List&lt;HotelBasic&gt; hotelBasics = future.get();
-                if(hotelBasics.size()&gt;0){
-                    hotelBasicsMap.put(hotelBasics.get(0).getCityID(), hotelBasics);
-                    total+=hotelBasics.size();
-                }
-            }
-        }
-
-        // 多线程分批读取酒店评论数
-        int hasCommentCount = 0;
-        for (Map.Entry&lt;Integer, List&lt;HotelBasic&gt;&gt; entry : hotelBasicsMap.entrySet()) {
-            Map&lt;Integer, Integer&gt; hotelListCommentCountMap = getHotelListCommentCountMap(entry.getValue());
-
-            for (HotelBasic hotelBasic : entry.getValue()) {
-                if (hotelListCommentCountMap.containsKey(hotelBasic.getHotelID())) {
-                    hasCommentCount++;
-                    hotelBasic.setCommentCount(hotelListCommentCountMap.get(hotelBasic.getHotelID()));
-                    putHotelBasic(hotelBasic);
-                }
-            }
-        }
-
-        bdbUpdateTime_BdbProxy.setLastUpdateTime(getClass().getSimpleName());
-
-        log.warn(&quot;sync hotelbasic bdb success! totalCount:{}, hasCommentCount:{}, time consumed:{}&quot;, total, hasCommentCount, System.currentTimeMillis()-startTimeMillis);
-    } catch (Throwable ex) {
-        log.error(&quot;sync hotelbasic bdb failed!&quot;, ex);
-    }
-
-}
-
-public long count(){
-    return pIdx.count();
-}
-
-@Override
-public long getRefreshInterval() {
-    return 24*150;
-}
-
-@Override
-public TimeUnit getIntervalTimeUnit() {
-    return TimeUnit.HOURS;
-}
-
-/**
- * 多线程分批读取酒店评论数
- *
- * @param hotelBasics
- * @return
- */
-private Map&lt;Integer, Integer&gt; getHotelListCommentCountMap(List&lt;HotelBasic&gt; hotelBasics) {
-    Map&lt;Integer, Integer&gt; result = Maps.newHashMap();
-
-    try {
-        List&lt;Integer&gt; allHotelIDs = hotelBasics.stream().map(x -&gt; x.getHotelID()).collect(Collectors.toList());
-        List&lt;List&lt;Integer&gt;&gt; hotelIDsList = CustomListMathUtils.splitToListsByListCount(allHotelIDs, PagingUtils.calPageCount(allHotelIDs.size(), 50));
-
-        // 分批读取酒店评论数
-        for (final List&lt;Integer&gt; hotelIDs : hotelIDsList) {
-            List&lt;Callable&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; tasks = Lists.newArrayList();
-            for (final int hotelID : hotelIDs) {
-                tasks.add(() -&gt; new KeyValuePair(hotelID, hotelComment_CacheProxy.getHotelCommentCount_All(hotelID)));
-            }
-
-            // 执行 Callable 线程，取得结果
-            List&lt;Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt;&gt; futures = _dataInitExecutorPool.invokeAll(tasks);
-            for (Future&lt;KeyValuePair&lt;Integer, Integer&gt;&gt; future : futures) {
-                KeyValuePair&lt;Integer, Integer&gt; kv = future.get();
-                result.put(kv.getKey(), kv.getValue());
-            }
-        }
-    } catch (Throwable ex) {
-        log.error(&quot;getHotelListCommentCountMap failed!&quot;, ex);
-    }
-
-    return result;
-}
-
-public PrimaryIndex&lt;Integer, HotelBasic&gt; getpIdx() {
-    return pIdx;
-}
-
-public void close(){
-    if(hotelBasicStore!=null){
-        hotelBasicStore.close();
-        hotelBasicStore = null;
-    }
-    if(env!=null) {
-        env.close();
-        env = null;
-    }
-}
-
-public void init(){
-    env = new Environment(HOTEL_BDB_DATA_DIRECTORY, envConfig);
-    hotelBasicStore = new EntityStore(env, &quot;hotelBasic&quot;, storeConfig);
-    pIdx = hotelBasicStore.getPrimaryIndex(Integer.class, HotelBasic.class);
-    sIdx = hotelBasicStore.getSecondaryIndex(pIdx, Integer.class, &quot;cityID&quot;);
-}
-</code></pre><p>}<br></p>
-<h3 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h3><ul>
-<li>百万数据量，100M bdb缓存，K-V访问平均小于1ms，K-List<v>访问在1-5ms之间，峰值qps&gt;500</v></li>
-<li>收集一组日志，通过ELK做图</li>
-</ul>
-<h1 id="深入BerkeleyDB"><a href="#深入BerkeleyDB" class="headerlink" title="深入BerkeleyDB"></a>深入BerkeleyDB</h1><ul>
-<li>并发支持</li>
-<li>cache</li>
-<li>index<ul>
-<li>secondary key</li>
-<li>secondary database</li>
-</ul>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/26/旅行行业基础数据本地管理/" data-id="cjps0hy9v000gs6qhxyzm51sr" class="article-share-link">Delen</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="shellcommands-shell-commands-case-study" class="article article-type-shellcommands" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/03/21/shell-commands-case-study/" class="article-date">
-  <time datetime="2018-03-21T03:12:35.000Z" itemprop="datePublished">2018-03-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/21/shell-commands-case-study/">shell commands case study</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="高频shell命令及使用场景总结"><a href="#高频shell命令及使用场景总结" class="headerlink" title="高频shell命令及使用场景总结"></a>高频shell命令及使用场景总结</h1><ul>
-<li><font color="blue">本文的目的是通过列举一些高频命令的常见使用场景，帮助后端开发或ops快速铺平道路，因此很多命令都只有很基础的使用方式，更多更深入的用法请使用man命令来阅读详尽的使用说明</font></li>
-<li>不必因为自己会的命令不如别人多或不如别人熟练而沮丧，使自己能够高效的围绕linux平台工作学习才是最终的目的，只要通过持续的学习和使用就一定能很快达到</li>
-</ul>
-<h2 id="磁盘与文件"><a href="#磁盘与文件" class="headerlink" title="磁盘与文件"></a>磁盘与文件</h2><h3 id="基础磁盘文件操作"><a href="#基础磁盘文件操作" class="headerlink" title="基础磁盘文件操作"></a>基础磁盘文件操作</h3><ul>
-<li>cp 使用-r选项来复制目录 cp -r a/b a1/b1</li>
-<li>mkdir 使用-p选项创建嵌套的目录 mkdir -p a/b/c/d</li>
-<li>rm -rf 强制静默删除，虽然看起来挺危险的，但是这确实是我最常使用的方式</li>
-<li>mv 用来移动或重命名 mv a b</li>
-<li>ls list directory，文件不多的时候一般我都使用ls -al以便一次性看到全部文件和必要的时间、大小等属性。可以创建一个别名alias ll = ‘ls -al’来更方便的使用</li>
-<li>chmod 给指定文件增减权限 chmod o+x给文件增加可执行权限，写shell时肯定要用到</li>
-<li>chown 改变文件owner， 有时候使用了错误的用户执行创建/复制/下载/安装等操作，会希望改变文件的owner</li>
-</ul>
-<h3 id="文件查找"><a href="#文件查找" class="headerlink" title="文件查找"></a>文件查找</h3><ul>
-<li>find    <ul>
-<li>按名称 -name，如查找当前目录以test加任意三个字符结尾的文件或文件夹find . -name “*test???” </li>
-<li>按类型 -type，如查找当前目录所有文件：find . -type f</li>
-<li>通过-exec来<font color="blue">批量操作</font><ul>
-<li>find . -maxdepth 1 -name “*test” -exec rm -rf {} \;</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="scp"><a href="#scp" class="headerlink" title="scp"></a>scp</h3><ul>
-<li>复制远程目录到本地 scp -r root@10.0.0.1:/home/admin/test/ ./</li>
-<li>复制本地文件到远程 scp ./test root@10.0.0.1:/home/admin/test/</li>
-</ul>
-<h2 id="字符处理"><a href="#字符处理" class="headerlink" title="字符处理"></a>字符处理</h2><h3 id="vi文件编辑"><a href="#vi文件编辑" class="headerlink" title="vi文件编辑"></a>vi文件编辑</h3><ul>
-<li>vi<ul>
-<li>上下左右j k l ;</li>
-<li>f下一行 b上一行 Ctrl+f下一页 Ctrl+b上一页</li>
-<li>查找 /</li>
-<li>替换 :s替换当前行，:%s替换全文，可使用正则表达式</li>
-<li>常用正则表达式（只按场景举例，基础规则可以参考<a href="http://qianjigui.iteye.com/blog/368449" target="_blank" rel="external">这里</a>）,学会用[a-zA-Z0-9]{m,n}的语法可以解决很多问题<ul>
-<li>简化的ip地址[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="字符串查找与替换"><a href="#字符串查找与替换" class="headerlink" title="字符串查找与替换"></a>字符串查找与替换</h3><ul>
-<li>grep 查找行。<font color="red">grep、awk、sed号称linux命令三剑客，如果你常年在服务端环境工作，或者你使用基于linux的开发环境（mac、ubuntu等），有必要熟练掌握这3个命令和基本的正则表达式，尽早舍弃那些低效的GUI吧！</font><ul>
-<li>一般查找 grep “content” file</li>
-<li>忽略大小写 grep -i “ConTEnt” file</li>
-<li>反选（查找不包含指定内容的行） grep “inclusiveContent” file | grep -v “exclusiveContent” </li>
-</ul>
-</li>
-<li>sed(stream editor for filtering and transforming text). 如果你经常使用vi，可以把这个命令理解为批量执行的vi命令。如果你man sed头痛的话，可以参考<a href="http://man.linuxde.net/sed" target="_blank" rel="external">这篇文章</a>其中有很多例子<ul>
-<li>替换文件中的内容，类似vi中的:s和:%s。 sed -i “bak” ‘s/originContent/newContent/g’, 注意mac中必须指定 -i选项的备份文件后缀（如上述命令中的bak，自信的人可以直接使用空字符串””）</li>
-<li>删除空白行，sed -i “bak” ‘/^$/d’ fileName</li>
-<li>在第9行插入标记，sed -i “bak” ‘9a/tag’ fileName</li>
-</ul>
-</li>
-</ul>
-<h3 id="字符串截取"><a href="#字符串截取" class="headerlink" title="字符串截取"></a>字符串截取</h3><ul>
-<li>awk类似sed，通常也是逐行接收文件内容，执行命令处理文本。不同的是，awk定义了自己的语言，叫做“样式扫描和处理语言”，通过创建剪短的程序读取文件、对数据进行排序、计算、生成报表等操作。使用方式为 awk ‘{pattern + action}’ {filenames}<ul>
-<li>杀死某个关键字对应的进程 ps aux | grep tomcat | awk ‘{print $2}’ | xargs kill -9</li>
-</ul>
-</li>
-<li>shell parameter expansion。把变量放入${}中，并指定一些特定的操作符，实现对变量的操作，通过这种方式，可以很便捷的对变量做很多常用的操作（比awk代码更简洁易上手，虽然功能没有awk多）<ul>
-<li>如${parameter:7}返回截取字符串或数组第7位以后（不包括第7位）的子串或子集</li>
-<li>${ #parameter}返回parameter的长度</li>
-<li>${parameter##<em>:}返回左数最后一个:右边的内容，类似的${parameter#</em>:}返回的是左数第一个:右边的内容、${parameter%%:<em>}返回右数最后一个:左边的内容，${parameter%:</em>}返回右数第一个:左边的内容。这在文件名处理、行数据处理（如不同分隔符分隔的数据库记录）等很有用，特别是如果你的正则表达式也跟我一样二把刀，不想每次现用现查的话</li>
-<li>IFS=’:’; arr=($line)可以把line数据按分隔符拆分并组织成数组，类似java中是String.split(“:”)。使用echo ${arr[0]}打印数组的第1个元素</li>
-</ul>
-</li>
-</ul>
-<h2 id="运维"><a href="#运维" class="headerlink" title="运维"></a>运维</h2><h3 id="ssh用于登陆远程linux服务器"><a href="#ssh用于登陆远程linux服务器" class="headerlink" title="ssh用于登陆远程linux服务器"></a>ssh用于登陆远程linux服务器</h3><ul>
-<li>使用其他的linux终端（我使用的是iterm）来登陆远程linux服务器，可以像在本地终端一样使用各种命令操作远程服务器</li>
-<li>通过将本地公钥复制到远程服务器的~/.ssh/authorized_keys文件实现免密登陆。</li>
-<li>公钥的生成使用ssh-keygen -t rsa，密码可以设置为空，生成的公钥位于~/.ssh/id_rsa.pub</li>
-<li>可以通过ssh，在脚本中批量登陆服务器执行命令。如你想一次性为多个服务器复制公钥，全部实现上述的免密登陆<pre><code><br>cat $fileName | while read line<br>do<br>  echo $line<br>  #在远程服务器创建.ssh目录<br>  ssh -n root@$line “mkdir -p /root/.ssh &amp;&amp; touch /root/.ssh/authorized_keys”<br>  #复制key到远程服务器<br>  ssh root@$line  “cat &gt;&gt; /root/.ssh/authorized_keys” &lt; ~/.ssh/id_rsa.pub<br>done<br></code></pre></li>
-<li>-n选项可以防止标准输入打断批量脚本执行</li>
-</ul>
-<h3 id="top-amp-free"><a href="#top-amp-free" class="headerlink" title="top &amp; free"></a>top &amp; free</h3><ul>
-<li>top。查看当前系统状态、各进程的资源（cpu、内存、load等）占用情况，想详细了解各行各列内容可以参考这篇<a href="https://www.cnblogs.com/dragonsuc/p/5512797.html" target="_blank" rel="external">文章</a><ul>
-<li>打开top后，输入M按内存顺序排列进程，查看占用内存最多的进程 </li>
-<li>P按cpu占用排序</li>
-<li>多核状态下，默认显示的是所有cpu平均值，输入1查看多核各cpu的状态</li>
-<li>top -Hp <pid>可以查看指定进程的所有线程的状态</pid></li>
-</ul>
-</li>
-<li>free。top中显示的内存包含了buffer/cache占用，系统一般都会尽量多的占用内存以提升响应速度，所以可以用free命令来查看实际使用中的内存情况。<ul>
-<li>free -m</li>
-<li>考虑JVM占用内存时不能只考虑堆大小，堆大小可能只占整个虚拟机的40%，以一个2G大小堆的java进程为例，通常要预留2G（2M*1000线程）的栈内存，1G的Meta和其它内容。这意味着你要在系统中为java进程预留大约5G的内存</li>
-</ul>
-</li>
-</ul>
-<h3 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h3><ul>
-<li>查看所有进程并按进程号过滤 ps -ef | grep <pid></pid></li>
-<li>同上述命令类似，不过这个命令使用的是bsd格式来展示进程信息，并按关键字过滤，关键字可以是tomcat、项目名称等 ps aux | grep <keyword></keyword></li>
-</ul>
-<h3 id="netstat"><a href="#netstat" class="headerlink" title="netstat"></a>netstat</h3><ul>
-<li>遇到端口被占用情况时可以用netstat -ap查看所有连接的端口和进程号，从而找到未正确退出或重复启动，导致新进程不能启动的进程。 netstat -ap | grep <port></port></li>
-</ul>
-<h3 id="var-logs-message"><a href="#var-logs-message" class="headerlink" title="/var/logs/message"></a>/var/logs/message</h3><ul>
-<li>记录了一些系统级别的记录，比如目前我们遇到的最常见的是oomkill记录，由于服务压力较大，有时候会遇到物理内存耗尽，系统杀死内存大户的情况。如果你遇到一些奇怪的系统问题，比如进程莫名其妙没了，也没有留下退出日志(hs<em>err</em><pid>)，可以在这里查看</pid></li>
-</ul>
-<h3 id="var-logs-security"><a href="#var-logs-security" class="headerlink" title="/var/logs/security"></a>/var/logs/security</h3><ul>
-<li>这个日志记录了一些安全方面的信息，可以查看是否有被暴力ssh登陆；有时候我们的ip被denyhosts误伤，可以在这里查到日志（当然也可以直接在denyhosts中查看）。<h3 id="keygen"><a href="#keygen" class="headerlink" title="keygen"></a>keygen</h3></li>
-<li>keygen用来为系统用户生成密钥对，在ssh免密登陆和git访问等场景经常需要<ul>
-<li>ssh-keygen -t rsa</li>
-</ul>
-</li>
-</ul>
-<h3 id="ulimit"><a href="#ulimit" class="headerlink" title="ulimit"></a>ulimit</h3><h3 id="du-amp-df"><a href="#du-amp-df" class="headerlink" title="du&amp;df"></a>du&amp;df</h3><ul>
-<li>怀疑磁盘空间不足时，使用df查看</li>
-<li>用du确定当前目录的磁盘占用情况<ul>
-<li>用du -m以MegaByte为单位显示占用量</li>
-<li>如果文件太多，可以用du –max-depth=1只显示当前目录（不递归查看子目录）</li>
-</ul>
-</li>
-</ul>
-<h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
-<li>获取网页内容curl <a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a></li>
-<li>下载文件。curl -O www.xxx.com/download/aaa.zip</li>
-</ul>
-<h1 id="Case-Study"><a href="#Case-Study" class="headerlink" title="Case Study"></a>Case Study</h1><h2 id="2017-06-13-load过高问题"><a href="#2017-06-13-load过高问题" class="headerlink" title="2017.06.13 load过高问题"></a>2017.06.13 load过高问题</h2><ul>
-<li>热点代码定位 参考<a href="http://javaeesupportpatterns.blogspot.ca/2012/02/prstat-linux-how-to-pinpoint-high-cpu.html" target="_blank" rel="external">这里</a><ol>
-<li>使用jstack <pid> &gt; /tmp/a dump线程到文件备查</pid></li>
-<li>使用top -Hp <pid> 查看占用cpu最高的线程</pid></li>
-<li>将2中linux线程id转为16进制，在1中文件查找，找到对应线程</li>
-<li>如果是线程池pool-1-thread-1形式的线程，通常在栈信息中无法定位到具体的业务代码，你需要先把系统所有线程池自定义名称。如ExecutorService executor = Executors.newXXXExecutor(r -&gt; new Thread(r, “arbitrary-pool-thread-“))</li>
-<li>找到有问题的代码，优化相关代码</li>
-</ol>
-</li>
-<li>相关工具<ul>
-<li>jstack <pid></pid></li>
-<li>top -Hp <pid></pid></li>
-<li>greys，在线诊断，类似btrace，但是使用更轻量（无需编写代码）。可以在线查看方法执行时间、追踪方法的每一步执行时间、方法调用次数和参数返回值等，非常强大。<a href="https://github.com/oldmanpushcart/greys-anatomy" target="_blank" rel="external">https://github.com/oldmanpushcart/greys-anatomy</a></li>
-</ul>
-</li>
-</ul>
-<h2 id="2017-07-12-load过高、内存泄漏问题"><a href="#2017-07-12-load过高、内存泄漏问题" class="headerlink" title="2017.07.12 load过高、内存泄漏问题"></a>2017.07.12 load过高、内存泄漏问题</h2><ol>
-<li>热点代码定位同上，确认是VM线程gc overhead占用cpu，判断是内存已满</li>
-<li>jstack -gcold <pid> 确认堆已满，一直fullgc且没有腾出内存</pid></li>
-<li>jmap -histo <pid> 下载内存镜像</pid></li>
-<li>使用mat查看对象最多的类型，定位问题</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/03/21/shell-commands-case-study/" data-id="cjps0hy9l000as6qhxhqu3t9o" class="article-share-link">Delen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-servermonitoring" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/07/15/servermonitoring/" class="article-date">
-  <time datetime="2017-07-15T04:52:58.000Z" itemprop="datePublished">2017-07-15</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="系统监控"><a href="#系统监控" class="headerlink" title="系统监控"></a>系统监控</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
-<li>目标</li>
-<li>原理</li>
-<li>方案选择<ul>
-<li>商业方案：本地oneAPM(本地化服务)，国际NETWAYS（便宜，价钱一半）</li>
-</ul>
-</li>
-</ul>
-<h2 id="icinga介绍"><a href="#icinga介绍" class="headerlink" title="icinga介绍"></a>icinga介绍</h2><ul>
-<li>简介</li>
-<li>核心概念</li>
-<li>模型</li>
-</ul>
-<h2 id="icinga实践"><a href="#icinga实践" class="headerlink" title="icinga实践"></a>icinga实践</h2><h3 id="服务监控搭建"><a href="#服务监控搭建" class="headerlink" title="服务监控搭建"></a>服务监控搭建</h3><h3 id="监控集群设计方案"><a href="#监控集群设计方案" class="headerlink" title="监控集群设计方案"></a>监控集群设计方案</h3><ul>
-<li>监控报警</li>
-<li>报表接入</li>
-<li>配置方案选择：底层文件配置 or 可视化配置 Icinga Director</li>
-<li>主机监控<ul>
-<li>ping</li>
-<li>ssh -p</li>
-</ul>
-</li>
-<li>redis监控</li>
-<li>ssdb监控</li>
-<li>mysql监控</li>
-</ul>
-<h3 id="master机器迁移"><a href="#master机器迁移" class="headerlink" title="master机器迁移"></a>master机器迁移</h3><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="1000个基于perl脚本命令的service导致high-load问题"><a href="#1000个基于perl脚本命令的service导致high-load问题" class="headerlink" title="1000个基于perl脚本命令的service导致high load问题"></a>1000个基于perl脚本命令的service导致high load问题</h3><p>### </p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/15/servermonitoring/" data-id="cjps0hy9h0009s6qht3f8wxf2" class="article-share-link">Delen</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -1689,7 +1876,7 @@ public void init(){
   <div class="widget-wrap">
     <h3 class="widget-title">Labels</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -1699,7 +1886,7 @@ public void init(){
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 10px;">elasticsearch</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/技术内幕/" style="font-size: 20px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -1708,7 +1895,7 @@ public void init(){
   <div class="widget-wrap">
     <h3 class="widget-title">Archieven</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
   </div>
 
@@ -1721,23 +1908,23 @@ public void init(){
       <ul>
         
           <li>
+            <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
           </li>
         
           <li>
+            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+          <li>
             <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/19/筋斗云ELK集群/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/17/lucene数据结构解析/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/17/git命令行常用总结/">(no title)</a>
           </li>
         
       </ul>
@@ -1752,7 +1939,7 @@ public void init(){
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2018 SeventyNine<br>
+      &copy; 2019 SeventyNine<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

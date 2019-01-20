@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>常用设计模式总结 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="常见设计模式总结单例模式
+注意的点：
+私有构造方法
+静态对象+静态方法
+线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）
+性能，减小锁的使用
+
+
+代码：public class Singleton{  private static volatile Singleton s = null;  private static final ReentrantLock LOCK = new R">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常用设计模式总结">
+<meta property="og:url" content="http://yoursite.com/2019/01/20/常见设计模式总结/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="常见设计模式总结单例模式
+注意的点：
+私有构造方法
+静态对象+静态方法
+线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）
+性能，减小锁的使用
+
+
+代码：public class Singleton{  private static volatile Singleton s = null;  private static final ReentrantLock LOCK = new R">
+<meta property="og:image" content="http://yoursite.com/../images/design-pattern-simple-factory.png">
+<meta property="og:image" content="http://yoursite.com/../images/design-pattern-factory-method.png">
+<meta property="og:image" content="http://yoursite.com/../images/design_pattern_abstract_factory.png">
+<meta property="og:image" content="http://yoursite.com/../images/design-pattern-decorator.png">
+<meta property="og:image" content="http://yoursite.com/../images/design-pattern-decorator.png">
+<meta property="og:updated_time" content="2019-01-20T06:00:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常用设计模式总结">
+<meta name="twitter:description" content="常见设计模式总结单例模式
+注意的点：
+私有构造方法
+静态对象+静态方法
+线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）
+性能，减小锁的使用
+
+
+代码：public class Singleton{  private static volatile Singleton s = null;  private static final ReentrantLock LOCK = new R">
+<meta name="twitter:image" content="http://yoursite.com/../images/design-pattern-simple-factory.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-常见设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/20/常见设计模式总结/" class="article-date">
+  <time datetime="2019-01-20T01:00:07.000Z" itemprop="datePublished">2019-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      常用设计模式总结
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="常见设计模式总结"><a href="#常见设计模式总结" class="headerlink" title="常见设计模式总结"></a>常见设计模式总结</h1><h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><ul>
+<li>注意的点：<ul>
+<li>私有构造方法</li>
+<li>静态对象+静态方法</li>
+<li>线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）</li>
+<li>性能，减小锁的使用</li>
+</ul>
+</li>
+<li>代码：<pre><code><br>public class Singleton{<br>  private static volatile Singleton s = null;<br>  private static final ReentrantLock LOCK = new ReentrantLock();<br>  public static Singleton get(){<pre><code>if(s==null){
+    try{
+        if(LOCK.lock()){
+            if(s==null){
+                   s = new Singleton();
+               }
+        }
+    }
+}
+return s;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><ul>
+<li>注意的点：<ul>
+<li>工厂接收传入的参数，返回一个接口对应的多个实现类的其中一个实例</li>
+<li>扩展：结合单例<br>优点：</li>
+<li>按接口规范调用产品对象的所有功能方法</li>
+<li>使用方不需要关心实现细节，构造容易，逻辑简单<br>缺点：</li>
+<li>全部if-else hard code，增减类型的时候都需要修改代码，对系统的维护可扩展不利。违反“开放-关闭原则”</li>
+<li>所有类的实例创建逻辑都集中到一个工厂类中，违反“高内聚责任分配原则”</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-simple-factory.png" alt="image"></li>
+<li>代码示例：<pre><code><br>public interface IProduct{<br>  void A();<br>  void B();<br>}</code></pre></li>
+</ul>
+<p>public class Product1 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}<br>public class Product2 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}</p>
+<p>public class ProductFactory{<br>    public static IProduct create(String name){<br>        if(P1.equals(“1”)){<br>            return new Product1();<br>        }else if(P2.equals(“2”)){<br>            return new Product2();<br>        }else{<br>            return null;<br>        }<br>    }<br>}<br></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><ul>
+<li>注意的点<ul>
+<li>在简单工厂方法的基础上，将产品的创建从简单的单一工厂，拆分成多个实例工厂</li>
+<li>保留了简单工厂方法封装对象创建细节的特点的同时，解决了简单工厂扩展维护苦难的问题</li>
+</ul>
+</li>
+<li>类划分：<ul>
+<li>抽象产品/产品接口</li>
+<li>具体产品/产品实现类</li>
+<li>抽象工厂</li>
+<li>真实工厂</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>减少了单一工厂负责所有对象创建逻辑的耦合度</li>
+<li>符合“开放-关闭原则”，增减新的类型，只需要增加/删除相应的工厂类和产品类即可</li>
+<li>符合符合迪米特原则：又叫最少知识原则，即一个对象应尽可能少的了解其它对象。</li>
+<li>符合里式替换原则：任何基类可以出现的地方，一定可以用子类替换。目标是使用抽象和多台将设计中的静态结构改为动态结构</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-factory-method.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface IProduct(){<br>  void A();<br>}<br>public interface IFactory(){<br>  IProduct createProduct();<br>}<br>public class Product1() implements IProduct{<br>  public void A(){}<br>}<br>public class Product2() implements IProduct{<br>  public void A(){}<br>}<br>public class Factory1() implements IFactory1{<br>  public IProduct createProduct(){<pre><code>return new Product1();
+</code></pre>  }<br>}<br>public class Factory2() implements IFactory2{<br>  public IProduct createProduct(){<pre><code>return new Product2();
+</code></pre>  }<br>}<br>public class Client{<br>  public static void main(String[] args){<pre><code>Factory1 f1 = new Factory1();
+IProduct p1 = f1.createProduct();
+Factory2 f2 = new Factory2();
+IProduct p2 = f2.createProduct();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h2><ul>
+<li>为创建一组相关或相互依赖的对象提供一个接口，而且无需指定他们的类</li>
+<li>区别于工厂方法模式：工厂方法针对一个产品等级结构（一个产品接口/基类），而抽象工厂模式针对多个产品等级结构。举例来说，当需要通过工厂来管理男人/女人/女博士一个维度的产品分类对象时，可以使用工厂方法模式；而如果出了男人/女人/女博士一个维度，还要管理黄/黑/白三个肤色人种，或者再加一种基督/佛教/锡克教等宗教维度，就可以用到抽象工厂模式。</li>
+<li>缺点：<ul>
+<li>上层维度（产品族）扩展非常困难。底层维度扩展时，只需要直接新增产品类和产品工厂类；而上层维度扩展首先要修改IFactory，违反“开放-关闭原则”</li>
+</ul>
+</li>
+<li><img src="../images/design_pattern_abstract_factory.png" alt="image"></li>
+<li>代码示例<pre><code><br>//以下是个苹果专卖店和三星专卖店分别销售手机和平板的例子<br>//大家可以假设富士康开了两条不同的流水线，分别生产苹果产品和三星产品，自己写一个不同维度的工厂方法组织方式<br>public interface Mobile{<br>  void makeCall();<br>}<br>public interface Pad{<br>  void game();<br>}<br>public interface DigitSellerFactory{<br>  Mobile sellMobile();<br>  Pad sellPad();<br>}<br>public class IPhone implements Mobile{<br>  public void makeCall(){}<br>}<br>public class Note2 implements Mobile{<br>  public void makeCall(){}<br>}<br>public class IPad implements Pad{<br>  public void game(){}<br>}<br>public class Tab implements Pad{<br>  public void game(){}<br>}<br>public class AppleSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new IPhone();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new IPad();
+</code></pre>  }<br>}<br>public class SumsungSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new Note2();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new Tab();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="装饰器模式"><a href="#装饰器模式" class="headerlink" title="装饰器模式"></a>装饰器模式</h2><ul>
+<li>子类集成的方法对于功能多样化的扩展是极为不利的，除了功能多样难于管理，不同功能之间的组装更是有着不可计数的可能性。</li>
+<li>注意的点：<ul>
+<li>动态扩展</li>
+<li>不改变原有的类</li>
+<li>不用生成子类的继承方式</li>
+<li>Decorator的功能通常不能有关联关系</li>
+</ul>
+</li>
+<li>核心组件：<ul>
+<li>原始类接口</li>
+<li>原始类的基础实现</li>
+<li>装饰器接口（一般类或抽象类）</li>
+<li>继承装饰器接口的一系列具体装饰器</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface Phone{<br>  void func();<br>}<br>public class BasePhone implements Phone{<br>  public void func(){<pre><code>System.out.println(&quot;make call&quot;);
+</code></pre>  }<br>}<br>public abstract class PhoneDecorator implements Phone{<br>  private Phone phone;<br>  public void func(){<pre><code>phone.func();
+decoration();
+</code></pre>  }<br>  public abstract void decoration();<br>}<br>public class  GameDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;game!!!&quot;);
+</code></pre>  }<br>}<br>public class ShuangKaShuangDaiDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;shuang ka shuang dai!!!&quot;);
+</code></pre>  }<br>}<br>public class Main{<br>  public static void main(String[] args){<pre><code>Phone basePhone = new BasePhone();
+basePhone.func();
+Phone gamePhone = new GameDecorator(basePhone);
+gamePhone.func();
+Phone shuangkaPhone = new ShuangkaShuangDaiDecorator(basePhone);
+shuangkaPhone.func();
+Phone shuangkaGamePhone = new ShuangkaShuangDaiDecorator(gamePhone);
+shuangkaGamePhone.func();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="观察者模式-发布-订阅模式"><a href="#观察者模式-发布-订阅模式" class="headerlink" title="观察者模式/发布-订阅模式"></a>观察者模式/发布-订阅模式</h2><ul>
+<li>定义了一种一对多的依赖关系，让多个观察者同时监听某一个主题对象，当这个主题对象发生变化时，会通知所有观察者对象，使他们可以自动更新自己<br>注意的点：<ul>
+<li>多个观察者主动加入监听，被监听对象不关心有多少观察者，低耦合</li>
+<li>被监听对象发通知，观察者自己接收通知并完成后续处理</li>
+<li>观察者可以主动注册和撤销监听</li>
+<li>避免循环引用，观察者一般要异步去完成后续处理<br>优点：</li>
+<li>观察者和被观察者是抽象耦合的，有一套触发机制<br>缺点：</li>
+<li>观察者过多时，通知耗时</li>
+<li>观察者只知道状态变化，不知道状态变化的过程</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li><pre><code>
+public class Subject{
+  private List<observer> observers;
+  private int state;
+  public void subscribe(Observer observer){
+      observers.add(observer);
+  }
+  public void unsubscribe(Observer observer){
+      observers.remove(observer);
+  }
+  public void notifyAll(){
+      observers.foreach(x -> {
+          x.update()
+      })
+  }
+}
+public abstract class Observer{
+  protected Subject subject;
+  public abstract void update();
+}
+</observer></code></pre>
+
+</li>
+</ul>
+<h2 id="MVC模式"><a href="#MVC模式" class="headerlink" title="MVC模式"></a>MVC模式</h2><ul>
+<li>将应用程序切分为Model/View/Control三类核心组件，它们各自处理自己的任务<ul>
+<li>模型：持有数据、状态和程序逻辑</li>
+<li>视图：用来呈现模型</li>
+<li>控制器：负责接收用户输入、解析输入并返回给模型</li>
+<li>MVC通过观察者模式实现视图和模型的分离，当Model数据发生变化时，通知到其相关的所有View</li>
+<li>MVC通过策略模式将视图行为委托到Controller，并实现了视图行为的灵活切换</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>一个模型可以由不同的视图展示，模型数据发生变化时，模型将通知它对应的视图</li>
+<li>模型可复用</li>
+<li>提高开发效率</li>
+</ul>
+</li>
+</ul>
+<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><ul>
+<li>命令模式是一种数据驱动的设计模式，它属于行为模式。它将请求以命令的形式包裹在对象中，并传给调用对象。调用对象寻找可以处理该命令的合适对象，并把命令传递给相应的对象，该对象执行命令。</li>
+<li>主要组件：<ul>
+<li>被操作实体类</li>
+<li>命令接口</li>
+<li>命令实现类（含被操作的实体类的组件）</li>
+</ul>
+</li>
+<li>命令接收与处理</li>
+<li><code><pre><br>public interface ICommand{<br>  void execute();<br>}<br>public class Entity{<br>  public void op1(){}<br>  public void op2(){}<br>}<br>public class op1OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op1();
+</code></pre>  }<br>}<br>public class op2OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op2();
+</code></pre>  }<br>}<br>public class Broker{<br>  private List<icommand> toDoOperations;<br>  public void receiveCommand(ICommand c){<pre><code>toDoOperations.add(c);
+</code></pre>  }<br>  public void doCommand(){<pre><code>toDoOperations.foreach(x -&gt; x.execute());
+</code></pre>  }<br>}<br></icommand></pre></code></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/20/常见设计模式总结/" data-id="cjr4jact200003xfyazu37tmr" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title">笔记——《ElasticSearch技术内幕》</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Labels</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 20px;">elasticsearch</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/技术内幕/" style="font-size: 20px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/12/20/旅行基础数据搜索/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
