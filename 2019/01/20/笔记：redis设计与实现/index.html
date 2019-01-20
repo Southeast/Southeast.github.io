@@ -5,7 +5,7 @@
   
   <title>笔记：redis设计与实现 | Life Career</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+  <meta name="description" content="redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
 简单动态字符串SDS，Simple Dynamic String
 链表
 字典
@@ -16,12 +16,15 @@
 
 底层数据结构
 SDS
-SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不足
+
+
+链表。linked">
 <meta property="og:type" content="article">
 <meta property="og:title" content="笔记：redis设计与实现">
-<meta property="og:url" content="http://yoursite.com/2018/12/20/笔记：redis设计与实现/index.html">
+<meta property="og:url" content="http://yoursite.com/2019/01/20/笔记：redis设计与实现/index.html">
 <meta property="og:site_name" content="Life Career">
-<meta property="og:description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+<meta property="og:description" content="redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
 简单动态字符串SDS，Simple Dynamic String
 链表
 字典
@@ -32,11 +35,14 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
 
 底层数据结构
 SDS
-SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
-<meta property="og:updated_time" content="2019-01-20T06:41:18.000Z">
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不足
+
+
+链表。linked">
+<meta property="og:updated_time" content="2019-01-20T10:24:37.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="笔记：redis设计与实现">
-<meta name="twitter:description" content="笔记：redis设计与实现redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
+<meta name="twitter:description" content="redis设计与实现笔记（一）：redis数据结构介绍redis用到的几种数据结构：
 简单动态字符串SDS，Simple Dynamic String
 链表
 字典
@@ -47,7 +53,10 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
 
 底层数据结构
 SDS
-SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不">
+SDS的结构。通过一个length属性表示字符串长度，free属性表示剩余可用长度，char[]属性记录字符串值，用以适应redis中使用C字符串产生的不足
+
+
+链表。linked">
   
     <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
   
@@ -87,7 +96,7 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -98,8 +107,8 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
       <div class="outer">
         <section id="main"><article id="post-笔记：redis设计与实现" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/12/20/笔记：redis设计与实现/" class="article-date">
-  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
+    <a href="/2019/01/20/笔记：redis设计与实现/" class="article-date">
+  <time datetime="2019-01-20T03:00:07.000Z" itemprop="datePublished">2019-01-20</time>
 </a>
     
   </div>
@@ -118,7 +127,7 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="笔记：redis设计与实现"><a href="#笔记：redis设计与实现" class="headerlink" title="笔记：redis设计与实现"></a>笔记：redis设计与实现</h1><h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
+        <h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
 <li>简单动态字符串SDS，Simple Dynamic String</li>
 <li>链表</li>
 <li>字典</li>
@@ -538,7 +547,7 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2019/01/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li></ul>
@@ -549,19 +558,10 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
     
 <nav id="article-nav">
   
-    <a href="/2018/12/20/服务集群异常监控/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Nieuwer</strong>
-      <div class="article-nav-title">
-        
-          服务监控
-        
-      </div>
-    </a>
   
-  
-    <a href="/2018/12/20/旅行基础数据搜索/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ouder</strong>
-      <div class="article-nav-title"></div>
+    <a href="/2019/01/20/常见设计模式总结/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">常用设计模式总结</div>
     </a>
   
 </nav>
@@ -578,7 +578,7 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Labels</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
@@ -597,7 +597,7 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
@@ -607,9 +607,13 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
         
           <li>
             <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
@@ -621,10 +625,6 @@ SDS的结构。通过一个length属性表示字符串长度，free属性表示�
         
           <li>
             <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
           </li>
         
           <li>

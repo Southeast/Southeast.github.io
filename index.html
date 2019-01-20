@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -61,585 +61,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-常见设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/01/20/常见设计模式总结/" class="article-date">
-  <time datetime="2019-01-20T01:00:07.000Z" itemprop="datePublished">2019-01-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="常见设计模式总结"><a href="#常见设计模式总结" class="headerlink" title="常见设计模式总结"></a>常见设计模式总结</h1><h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><ul>
-<li>注意的点：<ul>
-<li>私有构造方法</li>
-<li>静态对象+静态方法</li>
-<li>线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）</li>
-<li>性能，减小锁的使用</li>
-</ul>
-</li>
-<li>代码：<pre><code><br>public class Singleton{<br>  private static volatile Singleton s = null;<br>  private static final ReentrantLock LOCK = new ReentrantLock();<br>  public static Singleton get(){<pre><code>if(s==null){
-    try{
-        if(LOCK.lock()){
-            if(s==null){
-                   s = new Singleton();
-               }
-        }
-    }
-}
-return s;
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><ul>
-<li>注意的点：<ul>
-<li>工厂接收传入的参数，返回一个接口对应的多个实现类的其中一个实例</li>
-<li>扩展：结合单例<br>优点：</li>
-<li>按接口规范调用产品对象的所有功能方法</li>
-<li>使用方不需要关心实现细节，构造容易，逻辑简单<br>缺点：</li>
-<li>全部if-else hard code，增减类型的时候都需要修改代码，对系统的维护可扩展不利。违反“开放-关闭原则”</li>
-<li>所有类的实例创建逻辑都集中到一个工厂类中，违反“高内聚责任分配原则”</li>
-</ul>
-</li>
-<li><img src="../images/design-pattern-simple-factory.png" alt="image"></li>
-<li>代码示例：<pre><code><br>public interface IProduct{<br>  void A();<br>  void B();<br>}</code></pre></li>
-</ul>
-<p>public class Product1 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}<br>public class Product2 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}</p>
-<p>public class ProductFactory{<br>    public static IProduct create(String name){<br>        if(P1.equals(“1”)){<br>            return new Product1();<br>        }else if(P2.equals(“2”)){<br>            return new Product2();<br>        }else{<br>            return null;<br>        }<br>    }<br>}<br></p>
-<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><ul>
-<li>注意的点<ul>
-<li>在简单工厂方法的基础上，将产品的创建从简单的单一工厂，拆分成多个实例工厂</li>
-<li>保留了简单工厂方法封装对象创建细节的特点的同时，解决了简单工厂扩展维护苦难的问题</li>
-</ul>
-</li>
-<li>类划分：<ul>
-<li>抽象产品/产品接口</li>
-<li>具体产品/产品实现类</li>
-<li>抽象工厂</li>
-<li>真实工厂</li>
-</ul>
-</li>
-<li>优点：<ul>
-<li>减少了单一工厂负责所有对象创建逻辑的耦合度</li>
-<li>符合“开放-关闭原则”，增减新的类型，只需要增加/删除相应的工厂类和产品类即可</li>
-<li>符合符合迪米特原则：又叫最少知识原则，即一个对象应尽可能少的了解其它对象。</li>
-<li>符合里式替换原则：任何基类可以出现的地方，一定可以用子类替换。目标是使用抽象和多台将设计中的静态结构改为动态结构</li>
-</ul>
-</li>
-<li><img src="../images/design-pattern-factory-method.png" alt="image"></li>
-<li>代码示例<pre><code><br>public interface IProduct(){<br>  void A();<br>}<br>public interface IFactory(){<br>  IProduct createProduct();<br>}<br>public class Product1() implements IProduct{<br>  public void A(){}<br>}<br>public class Product2() implements IProduct{<br>  public void A(){}<br>}<br>public class Factory1() implements IFactory1{<br>  public IProduct createProduct(){<pre><code>return new Product1();
-</code></pre>  }<br>}<br>public class Factory2() implements IFactory2{<br>  public IProduct createProduct(){<pre><code>return new Product2();
-</code></pre>  }<br>}<br>public class Client{<br>  public static void main(String[] args){<pre><code>Factory1 f1 = new Factory1();
-IProduct p1 = f1.createProduct();
-Factory2 f2 = new Factory2();
-IProduct p2 = f2.createProduct();
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h2 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h2><ul>
-<li>为创建一组相关或相互依赖的对象提供一个接口，而且无需指定他们的类</li>
-<li>区别于工厂方法模式：工厂方法针对一个产品等级结构（一个产品接口/基类），而抽象工厂模式针对多个产品等级结构。举例来说，当需要通过工厂来管理男人/女人/女博士一个维度的产品分类对象时，可以使用工厂方法模式；而如果出了男人/女人/女博士一个维度，还要管理黄/黑/白三个肤色人种，或者再加一种基督/佛教/锡克教等宗教维度，就可以用到抽象工厂模式。</li>
-<li>缺点：<ul>
-<li>上层维度（产品族）扩展非常困难。底层维度扩展时，只需要直接新增产品类和产品工厂类；而上层维度扩展首先要修改IFactory，违反“开放-关闭原则”</li>
-</ul>
-</li>
-<li><img src="../images/design_pattern_abstract_factory.png" alt="image"></li>
-<li>代码示例<pre><code><br>//以下是个苹果专卖店和三星专卖店分别销售手机和平板的例子<br>//大家可以假设富士康开了两条不同的流水线，分别生产苹果产品和三星产品，自己写一个不同维度的工厂方法组织方式<br>public interface Mobile{<br>  void makeCall();<br>}<br>public interface Pad{<br>  void game();<br>}<br>public interface DigitSellerFactory{<br>  Mobile sellMobile();<br>  Pad sellPad();<br>}<br>public class IPhone implements Mobile{<br>  public void makeCall(){}<br>}<br>public class Note2 implements Mobile{<br>  public void makeCall(){}<br>}<br>public class IPad implements Pad{<br>  public void game(){}<br>}<br>public class Tab implements Pad{<br>  public void game(){}<br>}<br>public class AppleSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new IPhone();
-</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new IPad();
-</code></pre>  }<br>}<br>public class SumsungSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new Note2();
-</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new Tab();
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h2 id="装饰器模式"><a href="#装饰器模式" class="headerlink" title="装饰器模式"></a>装饰器模式</h2><ul>
-<li>子类集成的方法对于功能多样化的扩展是极为不利的，除了功能多样难于管理，不同功能之间的组装更是有着不可计数的可能性。</li>
-<li>注意的点：<ul>
-<li>动态扩展</li>
-<li>不改变原有的类</li>
-<li>不用生成子类的继承方式</li>
-<li>Decorator的功能通常不能有关联关系</li>
-</ul>
-</li>
-<li>核心组件：<ul>
-<li>原始类接口</li>
-<li>原始类的基础实现</li>
-<li>装饰器接口（一般类或抽象类）</li>
-<li>继承装饰器接口的一系列具体装饰器</li>
-</ul>
-</li>
-<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
-<li>代码示例<pre><code><br>public interface Phone{<br>  void func();<br>}<br>public class BasePhone implements Phone{<br>  public void func(){<pre><code>System.out.println(&quot;make call&quot;);
-</code></pre>  }<br>}<br>public abstract class PhoneDecorator implements Phone{<br>  private Phone phone;<br>  public void func(){<pre><code>phone.func();
-decoration();
-</code></pre>  }<br>  public abstract void decoration();<br>}<br>public class  GameDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;game!!!&quot;);
-</code></pre>  }<br>}<br>public class ShuangKaShuangDaiDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;shuang ka shuang dai!!!&quot;);
-</code></pre>  }<br>}<br>public class Main{<br>  public static void main(String[] args){<pre><code>Phone basePhone = new BasePhone();
-basePhone.func();
-Phone gamePhone = new GameDecorator(basePhone);
-gamePhone.func();
-Phone shuangkaPhone = new ShuangkaShuangDaiDecorator(basePhone);
-shuangkaPhone.func();
-Phone shuangkaGamePhone = new ShuangkaShuangDaiDecorator(gamePhone);
-shuangkaGamePhone.func();
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h2 id="观察者模式-发布-订阅模式"><a href="#观察者模式-发布-订阅模式" class="headerlink" title="观察者模式/发布-订阅模式"></a>观察者模式/发布-订阅模式</h2><ul>
-<li>定义了一种一对多的依赖关系，让多个观察者同时监听某一个主题对象，当这个主题对象发生变化时，会通知所有观察者对象，使他们可以自动更新自己<br>注意的点：<ul>
-<li>多个观察者主动加入监听，被监听对象不关心有多少观察者，低耦合</li>
-<li>被监听对象发通知，观察者自己接收通知并完成后续处理</li>
-<li>观察者可以主动注册和撤销监听</li>
-<li>避免循环引用，观察者一般要异步去完成后续处理<br>优点：</li>
-<li>观察者和被观察者是抽象耦合的，有一套触发机制<br>缺点：</li>
-<li>观察者过多时，通知耗时</li>
-<li>观察者只知道状态变化，不知道状态变化的过程</li>
-</ul>
-</li>
-<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
-<li><pre><code>
-public class Subject{
-  private List<observer> observers;
-  private int state;
-  public void subscribe(Observer observer){
-      observers.add(observer);
-  }
-  public void unsubscribe(Observer observer){
-      observers.remove(observer);
-  }
-  public void notifyAll(){
-      observers.foreach(x -> {
-          x.update()
-      })
-  }
-}
-public abstract class Observer{
-  protected Subject subject;
-  public abstract void update();
-}
-</observer></code></pre>
-
-</li>
-</ul>
-<h2 id="MVC模式"><a href="#MVC模式" class="headerlink" title="MVC模式"></a>MVC模式</h2><ul>
-<li>将应用程序切分为Model/View/Control三类核心组件，它们各自处理自己的任务<ul>
-<li>模型：持有数据、状态和程序逻辑</li>
-<li>视图：用来呈现模型</li>
-<li>控制器：负责接收用户输入、解析输入并返回给模型</li>
-<li>MVC通过观察者模式实现视图和模型的分离，当Model数据发生变化时，通知到其相关的所有View</li>
-<li>MVC通过策略模式将视图行为委托到Controller，并实现了视图行为的灵活切换</li>
-</ul>
-</li>
-<li>优点：<ul>
-<li>一个模型可以由不同的视图展示，模型数据发生变化时，模型将通知它对应的视图</li>
-<li>模型可复用</li>
-<li>提高开发效率</li>
-</ul>
-</li>
-</ul>
-<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><ul>
-<li>命令模式是一种数据驱动的设计模式，它属于行为模式。它将请求以命令的形式包裹在对象中，并传给调用对象。调用对象寻找可以处理该命令的合适对象，并把命令传递给相应的对象，该对象执行命令。</li>
-<li>主要组件：<ul>
-<li>被操作实体类</li>
-<li>命令接口</li>
-<li>命令实现类（含被操作的实体类的组件）</li>
-</ul>
-</li>
-<li>命令接收与处理</li>
-<li><code><pre><br>public interface ICommand{<br>  void execute();<br>}<br>public class Entity{<br>  public void op1(){}<br>  public void op2(){}<br>}<br>public class op1OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op1();
-</code></pre>  }<br>}<br>public class op2OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op2();
-</code></pre>  }<br>}<br>public class Broker{<br>  private List<icommand> toDoOperations;<br>  public void receiveCommand(ICommand c){<pre><code>toDoOperations.add(c);
-</code></pre>  }<br>  public void doCommand(){<pre><code>toDoOperations.foreach(x -&gt; x.execute());
-</code></pre>  }<br>}<br></icommand></pre></code></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/20/常见设计模式总结/" data-id="cjr4jact200003xfyazu37tmr" class="article-share-link">Delen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-笔记——《ElasticSearch技术内幕》" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/" class="article-date">
-  <time datetime="2019-01-20T00:00:07.000Z" itemprop="datePublished">2019-01-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="笔记——《ElasticSearch技术内幕》"><a href="#笔记——《ElasticSearch技术内幕》" class="headerlink" title="笔记——《ElasticSearch技术内幕》"></a>笔记——《ElasticSearch技术内幕》</h1><h2 id="ElasticSearch的设计理念"><a href="#ElasticSearch的设计理念" class="headerlink" title="ElasticSearch的设计理念"></a>ElasticSearch的设计理念</h2><ul>
-<li>合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings</li>
-<li>默认分布式工作模式。每个节点总是假设自己属于某个集群</li>
-<li>集群易于伸缩</li>
-<li>对数据结构没有任何限制</li>
-<li>准实时+版本同步</li>
-</ul>
-<h2 id="ES工作流程"><a href="#ES工作流程" class="headerlink" title="ES工作流程"></a>ES工作流程</h2><ul>
-<li>启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管理及拓扑变化（集群伸缩时的分片迁移）</li>
-<li>故障检测。master节点向其它节点发送心跳检测，当发生故障时，master就会启动拓扑更新和分片数据转移，保证集群的正常工作</li>
-<li>索引数据。构建索引只会在master节点完成，再同步shard到不同的其它节点</li>
-<li>查询数据。包括分散阶段scatter phase和合并阶段gather phase两个阶段。分散阶段将query分发到不同的分片完成查询（这里也起到了负载均衡的作用），合并阶段收集各分片上的搜索结果，进行合并、排序、后续处理并返回给客户端</li>
-</ul>
-<h2 id="底层索引控制"><a href="#底层索引控制" class="headerlink" title="底层索引控制"></a>底层索引控制</h2><ul>
-<li>lucene 4.0支持了多种相似度计算模型（相似度是指查询向量同某个文档的余弦匹配度）。除了传统的TF/IDF，还有Okapi BM25、随机偏离、基于信息的模型几种。不同的field可以配置不同的相似度计算策略</li>
-<li>索引文件编解码方式。通过配置不同的编解码方式，可以控制压缩程度和高基字段的预加载，从而在查询速度和内存之间做权衡</li>
-<li>索引可见流程。<ul>
-<li>索引更新与提交过程。Lucene在接收新的Document之后，在索引变得可见之前，还要经过以下几个阶段：①document处理（类型映射等）②创建只读的Segment_N文件（commit操作）③Searcher刷新（Searcher需要重新打开才能看到新索引，默认1s刷新）。可以看到，从lucene开始处理索引，到索引可以被查询到，有1s左右的延迟，这也是lucene/ES自称为准实时系统的原因</li>
-<li>事务日志。因为不能频繁提交，所以遇到错误时有些数据可能会从内存中丢失，ES使用事务日志来记录所有的未提交事务，在发生错误时检查事务日志，执行未完成的操作。VSearch中似乎抽象了checkpoint的概念，跟写事务日志类似</li>
-<li>准实时读取。可以通过使用事务日志，将提交的事务也进行查询，从而获取未提交版本的数据</li>
-</ul>
-</li>
-<li>索引合并的3种策略。force merge操作</li>
-</ul>
-<h2 id="分布式索引架构"><a href="#分布式索引架构" class="headerlink" title="分布式索引架构"></a>分布式索引架构</h2><ul>
-<li>问题<ul>
-<li>如何为集群选择合适的shard和replication数量</li>
-<li>什么是路由</li>
-<li>分片分配器</li>
-<li>如何应对数据和查询的增长</li>
-</ul>
-</li>
-<li>实现<ul>
-<li>将一个索引切分成若干个小索引，以便在同一集群的不同节点上分配它们，实现查询的并发处理。ES默认将每个索引分成5个shards，并做1个replication。即使是只有1个节点，这样做也可以方便扩容</li>
-<li>一般来说，N个节点的集群，切分为N个分片+1个replication，总共2N个分片，可以最大化集群的分布式优势。但是这不是绝对的，因为查询过程的scatter phase和gather phase也是有代价的，有些时候（比如数据少的时候、有明确路由规则的时候）</li>
-<li>路由类似mysql的分库分表过程，使用统一的分片规则和查询规则，可以实现只在特定分片上查询，从而避免不必要的scatter&amp;gather过程。例如按用户对订单数据进行分片，查询某个用户就能映射到某一特定分片，在这一个分片上查询即可<ul>
-<li>不指定路由规则时。es会自动查询所有分片，修改或删除某一分片时也要定位到特定分片，所以只要保证一个id对应的document一直生成相同的值即可</li>
-<li>指定路由规则。在mapping中添加_mappings字段，指定任意一个未分词的字段即可。要确保对同一个document，始终能计算得出一个相同的routing值</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>分片分配机制。<ul>
-<li>当集群拓扑发生改变时，ShardAllocator负责分片的再分配。同一分片的primary shard和replication shard不能分配到同一节点（多于一个节点时）。分配机制会考虑多种因素：磁盘空间、同一分片的安全性、节点包含的同一个索引的分片数等</li>
-<li>even_shard分配。保证每个节点有相同的分片数</li>
-<li>balanced分配。提供一些可控参数交由用户控制</li>
-<li>可以自行实现ShardAllocator接口</li>
-</ul>
-</li>
-<li>ES集群跟redis集群的一点区别<ul>
-<li>ES集群所有节点都可以配置为master候选节点，当master节点故障时其它节点会选举出新的master节点，并进行分片数据迁移</li>
-<li>Redis集群是所有master节点不可或缺，系统不会因为节点故障修改master节点管理的slot，当遇到故障时，master节点对应的replication/slave节点就会选举出新的master节点加入集群</li>
-</ul>
-</li>
-</ul>
-<h2 id="管理ElasticSearch"><a href="#管理ElasticSearch" class="headerlink" title="管理ElasticSearch"></a>管理ElasticSearch</h2><ul>
-<li>目标：<ul>
-<li>选择正确的目录实现，提升底层I/O效率</li>
-<li>配置发现模块避免潜在问题</li>
-<li>配置网关模块</li>
-<li>恢复模块</li>
-<li>查看段信息</li>
-<li>ES缓存</li>
-</ul>
-</li>
-<li>存储类型：<ul>
-<li>SimpleFSDirectory。简单文件存储系统</li>
-<li>NIOFSDirecotyr。NIO文件存储。linux上默认使用nio</li>
-<li>MMapDirectory。文件映射。</li>
-<li>内存索引。小索引，有备份数据支持重建时使用。</li>
-</ul>
-</li>
-<li>发现模块：<ul>
-<li>multicast（Zen）</li>
-<li>unicast。向配置指定的服务器列表进行单播，减少不必要流量</li>
-</ul>
-</li>
-<li>最小主节点数<ul>
-<li>至少N/2+1，防止split brain</li>
-</ul>
-</li>
-<li>网关</li>
-<li>索引段统计<ul>
-<li>可以通过API查看索引/分片/段信息</li>
-</ul>
-</li>
-<li>ES缓存<ul>
-<li>过滤器缓存。缓存filter查询结果，LRU策略。</li>
-<li>字段数据缓存。主要用于aggregation</li>
-<li>使用API可以清楚特定缓存</li>
-</ul>
-</li>
-</ul>
-<h2 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h2><ul>
-<li>垃圾处理器。java8引入了G1，G1主要目标是减少暂停，使用户感受不到卡顿，但是吞吐量比较差，目前默认还是Paralllel</li>
-<li>避免内存交换。可以通过配置关闭。</li>
-<li>I/O调节。限制每秒的I/O量，防止卡顿</li>
-<li>预热器。空间换时间的操作，指定一个查询/aggregation，缓存其结果，提升查询效率。可以单独创建，也可以在indexing时实时更新</li>
-</ul>
-<h2 id="分片内部原理"><a href="#分片内部原理" class="headerlink" title="分片内部原理"></a>分片内部原理</h2><ul>
-<li>如何使文本可搜索：<ul>
-<li>段一旦生成就不能再改变</li>
-<li>ES在lucene基础上引入了“按段搜索”的概念，这样新增的数据就可以通过建立新的段从而尽快变得可搜索</li>
-<li>为了提升索引速度，ES索引的数据先写入memory buffer。ES定期commit生成新的段（行程一个commit point）</li>
-<li>commit之后，ES要refresh Searcher之后索引才能对搜索可见</li>
-<li>commit之后，新生成的段文件还处在文件缓冲区，没有真正落盘，需要使用fsync()来完成落盘操作</li>
-<li>fsync因为IO调用会很慢，fsync也是定期执行完成落盘的。</li>
-<li>因为fsync定期完成，当系统异常退出时，未落盘的文件会丢失。所以ES还有translog机制，将未落盘的事件记录文件日志，当出现系统异常时，系统会从translog完成未落盘的索引的恢复工作</li>
-<li>translog的落盘也是定期执行的，同样有丢失的可能，用户可以根据使用场景，容忍部分可能的丢失场景。根据kafka的落盘原理，顺序日志落盘其实并不慢</li>
-</ul>
-</li>
-</ul>
-<h2 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h2><ul>
-<li>coordinate节点有没有单点故障问题，客户端的角色，负责负载均衡，请求分发等。设置在同一个域名下设置多个coordinate节点做负载均衡避免单点故障问题。</li>
-<li>为什么是准实时的？除了数据落盘、filebeat轮询传送事件、logstash处理事件过程的时间消耗，ES处理完document之后，还要暂存document缓存区，commit轮询生成新的段文件，新的段要经过Refresh Searcher操作，才能对客户端可见。</li>
-<li>shard在索引创建之前就已确定，如何扩容？增加replica数量</li>
-<li>了解一下scatter-gather过程。是否带routing两种情况，不带就遍历，带了可以定位到指定索引，完成scatter搜索，再进行结果的合并</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/" data-id="cjr4jacth00033xfyxpsolvo8" class="article-share-link">Delen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-服务集群异常监控" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/12/20/服务集群异常监控/" class="article-date">
-  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/20/服务集群异常监控/">服务监控</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="服务监控"><a href="#服务监控" class="headerlink" title="服务监控"></a>服务监控</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><ul>
-<li>业务trace<ul>
-<li>按时间顺序追踪业务流程的关键节点，主要包括以下两个部分：</li>
-<li>搜索部分：用户产品选择、验价结果记录等</li>
-<li>订单部分：下单、付款、关单、出单、退改签等</li>
-<li>日志跟踪效果：</li>
-<li><img src="../images/query-trace-log.png" alt="image"></li>
-</ul>
-</li>
-<li>商家接口监控报警<ul>
-<li>每天机票、酒店、火车票商家的接口状态追踪，对异常情况进行通知报警（邮件/短信）</li>
-<li>邮件报警效果：</li>
-<li><img src="../images/task-item-notification.png" alt="image"></li>
-<li>报表效果：</li>
-<li><img src="../images/taskitem-report.png" alt="image"></li>
-</ul>
-</li>
-<li>异常监控<ul>
-<li>服务器异常及错误日志监控报警，超过阈值时进行通知(短信)</li>
-<li><img src="../images/exception-report.png" alt="image"></li>
-</ul>
-</li>
-</ul>
-<h2 id="业务流程trace"><a href="#业务流程trace" class="headerlink" title="业务流程trace"></a>业务流程trace</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
-<li>需求：我们的产品有很长的系统流转过程，从用户选择产品，下单，商品的预定与售后等，有些关键数据需要记录下来防止用户纠纷，而系统运维、问题排查等要依赖各个节点的数据（用户/商品快照/价格快照/用户操作记录等）。当给定一个订单或产品时，我们通过订单id或产品标示就可以查到其业务流转过程中的所有关键节点数据日志，从而可以快速定位问题，解决纠纷</li>
-<li>方案：通过ELK，Filebeat收集日志数据，Logstash对日志数据进行处理，ElasticSearch存储处理后的数据。在ElasticSearch数据基础上，通过Kibana进行可视化报表展示，也可以通过watcher插件进行报警通知</li>
-</ul>
-<h3 id="日志生成策略"><a href="#日志生成策略" class="headerlink" title="日志生成策略"></a>日志生成策略</h3><ul>
-<li>统一的key追踪<ul>
-<li>产品搜索key。用户搜索产品时的唯一产品标识，通过URL参数生成UUID，用这个UUID作为产品的唯一标识和日志追踪key</li>
-<li>订单key。用户产品下单后，需要用订单id来追踪日志</li>
-<li>key关联。将产品key和订单key进行关联，从而通过一个key可以看到完整的日志数据</li>
-</ul>
-</li>
-<li>日志结构<pre><code><br>  public static void trace(String key, String secondaryKey, StepEnum step, String msg) {<pre><code>JSONObject traceLog = new JSONObject();
-traceLog.put(&quot;key&quot;, key);
-traceLog.put(&quot;secondaryKey&quot;, secondaryKey);
-traceLog.put(&quot;step&quot;, step.getStepName());
-traceLog.put(&quot;subStep&quot;, step.getSubStepName());
-traceLog.put(&quot;message&quot;, msg);
-traceLog.put(&quot;@timestamp&quot;, LocalDateTime.now());
-log.info(traceLog.toJSONString());
-</code></pre>  }<br></code></pre></li>
-<li>在产品下单时，通过key和secondarykey将产品和订单进行关联</li>
-<li>logstash数据处理。日志是json格式文本，通过json插件来完成数据提取(date插件提取时间戳)<pre><code><br>  json {<pre><code>source =&gt; &quot;message&quot;
-remove_field =&gt; [&quot;message&quot;]
-</code></pre>  }<br>  date {<pre><code>locale=&gt;&quot;en&quot;
-match =&gt; [ &quot;startTime&quot;, &quot;ISO8601&quot; ]
-target =&gt; &quot;startTime&quot;
-</code></pre>  }<br></code></pre></li>
-<li>ElasticSearch存储。按时间rotate数据，每天一个索引，最多保存7天</li>
-<li>搜索<ul>
-<li>排序，只按时间进行排序</li>
-<li>关于分页，日志数量不大，暂时不做分页，后期考虑先在前端分页。最终可以通过doc_id或时间戳进行分页查询</li>
-<li>通过产品链接或订单号查询所有日志</li>
-</ul>
-</li>
-<li>watcher<ul>
-<li>watcher现在是付费账户专享插件，费用比较高</li>
-<li>我们自己通过spring-quartz定制定时任务来完成报警通知</li>
-<li>通常定时任务都是单机完成的，通过指定运行ip来限制一下</li>
-</ul>
-</li>
-</ul>
-<h2 id="商家接口监控报警"><a href="#商家接口监控报警" class="headerlink" title="商家接口监控报警"></a>商家接口监控报警</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><ul>
-<li>需求：每天多达数千万的接口调用，需要及时获知各接口的状态<ul>
-<li>接口实时异常通知</li>
-<li>报表展示</li>
-</ul>
-</li>
-<li>方案<ul>
-<li>接口调用通过任务队列调度异步完成，完成之后任务有统一的日志，通过与上文所述同样的ELK方案来处理</li>
-</ul>
-</li>
-</ul>
-<h3 id="日志收集"><a href="#日志收集" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
-<li>filebeat。单行日志，配置一般的harvester即可<pre><code><br>filebeat:<h1 id="List-of-prospectors-to-fetch-data"><a href="#List-of-prospectors-to-fetch-data" class="headerlink" title="List of prospectors to fetch data."></a>List of prospectors to fetch data.</h1>prospectors:<br>  -<pre><code>paths:
-  - &quot;/opt/jdy-applog/*/taskitem.log&quot;
-input_type: log
-</code></pre>output:<br>logstash:<br>  hosts: [“logstash1.jdydev.cn:5043”, “logstash2.jdydev.cn:5043”, “logstash3.jdydev.cn:5043”]<br></code></pre></li>
-<li>logstash grok。<pre><code><br>ruby {<br>code =&gt; “<br>  require ‘date’<br>  event.set(‘[@metadata][localdate]’, event.get(‘logdate’)[0,10].gsub(/[-]/,’.’))<br>“<br>}<br>ruby {<pre><code>code =&gt; &quot;
-    require &apos;date&apos;
-    event.set(&apos;execEnd&apos;, event.get(&apos;execEnd&apos;)+&apos;+0800&apos;)
-    event.set(&apos;execStart&apos;, event.get(&apos;execStart&apos;)+&apos;+0800&apos;)
-    event.set(&apos;assignStart&apos;, event.get(&apos;assignStart&apos;)+&apos;+0800&apos;)
-    event.set(&apos;assignEnd&apos;, event.get(&apos;assignEnd&apos;)+&apos;+0800&apos;)
-    # event.set(&apos;@timestamp&apos;, event.get(&apos;@timestamp&apos;)+&apos;+0800&apos;)
-&quot;
-</code></pre>  }<br>grok {<pre><code>break_on_match =&gt; false
-match =&gt; { &quot;message&quot; =&gt; [ &quot;\&quot;webSiteID\&quot;:%{NUMBER:webSiteId:int}&quot;, &quot;\&quot;fromCityCode\&quot;:\&quot;%{DATA:flightFromCity}\&quot;&quot;, &quot;\&quot;toCityCode\&quot;:\&quot;%{DATA:flightToCit
-</code></pre>y}\””, “\”depDate\”:\”%{DATA:flightDepDate}\””, “\”retDate\”:\”%{DATA:flightRetDate}\””, “\”verifyFlightProductIden\”:\”%{DATA:verifyFlightProductIden}\”” ] }<pre><code>}
-</code></pre>mutate { add_field =&gt; { “businessLine” =&gt; “flight” } }<br></code></pre></li>
-<li>ElasticSearch按业务线分集群flight/train/hotel，每个业务一个索引，索引每天rotate，每天一个索引</li>
-</ul>
-<h3 id="可视化"><a href="#可视化" class="headerlink" title="可视化"></a>可视化</h3><ul>
-<li>使用kibana配置，<ul>
-<li>注意粒度，一般使用最小一分钟作为最细粒度就可以了</li>
-<li>多维统计可以拆图（split chart）或拆线（split line），也可以组合使用来实现更详尽的图表表达</li>
-<li>酒店status报表，代理商拆图，status拆表。用于监控接口状态</li>
-<li><img src="../images/hotel-taskitem-split.png" alt="image"></li>
-<li>酒店执行时间报表。用于监控接口执行时间</li>
-<li><img src="../images/hotel-taskitem-exectime.png" alt="image"></li>
-</ul>
-</li>
-<li>可以将多个报表iframe嵌入其它系统统一查看（如运营后台）</li>
-</ul>
-<h3 id="报警通知"><a href="#报警通知" class="headerlink" title="报警通知"></a>报警通知</h3><ul>
-<li>通过定时任务，并为每一指标配置阈值，达到报警阈值时短信+邮件报警</li>
-</ul>
-<h2 id="异常监控"><a href="#异常监控" class="headerlink" title="异常监控"></a>异常监控</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><ul>
-<li>需求：对系统运行过程中产生异常和错误日志进行监控和实时通知</li>
-<li>方案：同样通过ELK收集、处理并存储</li>
-</ul>
-<h3 id="日志收集-1"><a href="#日志收集-1" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
-<li>filebeat 多行处理。filebeat默认每行日志作为一个事件来处理，而异常日志多是多行的，需要进行额外的配置<pre><code><br>filebeat:<h1 id="List-of-prospectors-to-fetch-data-1"><a href="#List-of-prospectors-to-fetch-data-1" class="headerlink" title="List of prospectors to fetch data."></a>List of prospectors to fetch data.</h1>prospectors:<br>  -<pre><code>paths:
-  - &quot;/opt/jdy-applog/*/error.log&quot;
-input_type: log
-multiline.pattern: &apos;^[0-9]{4}-[0-9]{2}-[0-9]{2}&apos;
-multiline.negate: true
-multiline.match: after
-</code></pre>output:<br>logstash:<br>  hosts: [“logstash1.jdydev.cn:5043”, “logstash2.jdydev.cn:5043”, “logstash3.jdydev.cn:5043”]<br></code></pre></li>
-<li>Exception/Error 名称。grok有对应的exceptionName正则式，可以在logstash grok filter中使用下列语句进行截取<pre><code><br>filter{<br>  mutate { add_field =&gt; { “businessLine” =&gt; “errorlog” } }<br>  grok {<pre><code>patterns_dir =&gt; [&quot;/home/jdy/jdy-elk/logstash-5.3.0/config/patterns&quot;]
-match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:exceptionName}&quot;]}
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h3 id="可视化-1"><a href="#可视化-1" class="headerlink" title="可视化"></a>可视化</h3><ul>
-<li>用kibana配置报表</li>
-<li>重点异常重点跟踪，例如我们将redis异常的跟踪到每台机器，这样可以从报表中获得更多信息：</li>
-<li><img src="../images/redis-exception-report.png" alt="image"></li>
-</ul>
-<h3 id="报警"><a href="#报警" class="headerlink" title="报警"></a>报警</h3><ul>
-<li>定时程序汇总，例如查询过去5分钟内的异常数量，当超过一定值时进行报警，可以针对某一异常单独配置阈值，也可以自动累积历史数值，创建基线作为阈值。threshold = a * threshold + val(0&lt;a&lt;1, val是当前异常数量)</li>
-<li>短信告警（云片）。异常的通知通常属于紧急事件，需要保证通知触达率及打开率，因此使用短信通知，可以使用邮件额外</li>
-</ul>
-<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><h3 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h3><ul>
-<li>理论上可以实现at least once机制，保证数据不丢失，但是可能会有重复</li>
-<li>logstash需要persistent queue来保证100%的不丢失</li>
-<li>如果进程异常退出或被异常关闭（kill -9），会导致inflight数据丢失，请注意ELK各进程的规范退出</li>
-</ul>
-<h3 id="实时性"><a href="#实时性" class="headerlink" title="实时性"></a>实时性</h3><ul>
-<li>在统一的内网环境部署，忽略网络传输时间</li>
-<li>日志落地。Logback日志本地缓存到异步落盘的时间在毫秒级别</li>
-<li>filebeat生成事件。扫描间隔1s，强制上传时间（事件本地缓存的时间）是5s。</li>
-<li>logstash处理时间。一般是毫秒级，可以通过x-pack查看延迟，可以按需求配置workers数量增加并发，提升排队延迟</li>
-<li>索引延迟及索引可见的时间约1s</li>
-<li>总计有1-10s的延迟，能够满足准实时需求</li>
-<li>@timestamp使用默认的logstash处理时间，日志时间单独存储，可以比较出延迟时间（日志生成event -&gt; grok之间）</li>
-</ul>
-<h3 id="查询速度"><a href="#查询速度" class="headerlink" title="查询速度"></a>查询速度</h3><ul>
-<li>global ordinals<ul>
-<li>global_ordinals 是用于减少string类型的fielddata占用内存的技术。以我们的系统为例一个doc至少有10个keyword类型的field需要用于查询、聚合操作，假设每个keyword类型的平均长度是20个byte，1G（10亿）个doc的所有keyword field所占用的内存是10<em>20</em>1G=200G。global_ordinals对这些keyword的值进行编号，使用整数值来替代原始的字符串，查询计算完成之后，再用对应的字符串值替换序号，从而减小内存占用。由于一个整数值只占一个byte，因此这些field全都加载到内存占用的内存大小是10*1G=20G。只有原来的1/20</li>
-<li>好处：1. 降低内存占用2. 极大提高汇总排序查询的速度</li>
-<li>global ordinals默认在搜索时加载，text和keyword field默认在搜索时构建global ordinals，这样在第一次搜索时，在数据量很大的情况下，用户会感受到明显的延迟。</li>
-<li>可以通过配置eager_global_ordinals将global_ordinals的构建从搜索转移到索引的构建刷新。</li>
-</ul>
-</li>
-<li>缓存。<ul>
-<li>不使用类似now的时间戳</li>
-<li>使用恒定的范围查询和聚类，例如[10-20),[20-30),…，而不要使用[9-22),[23-57)之类，或者使用不恒定的变量</li>
-<li>对某些经常聚类的字段进行缓存冗余，如val=17，冗余存储一个范围10-20</li>
-</ul>
-</li>
-</ul>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
-<li>日志记录要在侵入性和灵活性之间做权衡，我们处在业务初始阶段，变化较多，因此目前记录的日志都是侵入性日志</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/20/服务集群异常监控/" data-id="cjpwfntqk00006nqhdrlfmsvb" class="article-share-link">Delen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-笔记：redis设计与实现" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/12/20/笔记：redis设计与实现/" class="article-date">
-  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
+    <a href="/2019/01/20/笔记：redis设计与实现/" class="article-date">
+  <time datetime="2019-01-20T03:00:07.000Z" itemprop="datePublished">2019-01-20</time>
 </a>
     
   </div>
@@ -650,7 +75,7 @@ match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:except
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+      <a class="article-title" href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
     </h1>
   
 
@@ -658,7 +83,7 @@ match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:except
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="笔记：redis设计与实现"><a href="#笔记：redis设计与实现" class="headerlink" title="笔记：redis设计与实现"></a>笔记：redis设计与实现</h1><h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
+        <h2 id="redis设计与实现笔记（一）：redis数据结构介绍"><a href="#redis设计与实现笔记（一）：redis数据结构介绍" class="headerlink" title="redis设计与实现笔记（一）：redis数据结构介绍"></a>redis设计与实现笔记（一）：redis数据结构介绍</h2><h3 id="redis用到的几种数据结构："><a href="#redis用到的几种数据结构：" class="headerlink" title="redis用到的几种数据结构："></a>redis用到的几种数据结构：</h3><ul>
 <li>简单动态字符串SDS，Simple Dynamic String</li>
 <li>链表</li>
 <li>字典</li>
@@ -1078,10 +503,585 @@ match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:except
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2019/01/20/笔记：redis设计与实现/" data-id="cjr4jact600013xfy7k6hw7b5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-常见设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/20/常见设计模式总结/" class="article-date">
+  <time datetime="2019-01-20T01:00:07.000Z" itemprop="datePublished">2019-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><ul>
+<li>注意的点：<ul>
+<li>私有构造方法</li>
+<li>静态对象+静态方法</li>
+<li>线程安全性，不能重复创建（类初始化时就加载没有线程安全性问题）</li>
+<li>性能，减小锁的使用</li>
+</ul>
+</li>
+<li>代码：<pre><code><br>public class Singleton{<br>  private static volatile Singleton s = null;<br>  private static final ReentrantLock LOCK = new ReentrantLock();<br>  public static Singleton get(){<pre><code>if(s==null){
+    try{
+        if(LOCK.lock()){
+            if(s==null){
+                   s = new Singleton();
+               }
+        }
+    }
+}
+return s;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><ul>
+<li>注意的点：<ul>
+<li>工厂接收传入的参数，返回一个接口对应的多个实现类的其中一个实例</li>
+<li>扩展：结合单例<br>优点：</li>
+<li>按接口规范调用产品对象的所有功能方法</li>
+<li>使用方不需要关心实现细节，构造容易，逻辑简单<br>缺点：</li>
+<li>全部if-else hard code，增减类型的时候都需要修改代码，对系统的维护可扩展不利。违反“开放-关闭原则”</li>
+<li>所有类的实例创建逻辑都集中到一个工厂类中，违反“高内聚责任分配原则”</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-simple-factory.png" alt="image"></li>
+<li>代码示例：<pre><code><br>public interface IProduct{<br>  void A();<br>  void B();<br>}</code></pre></li>
+</ul>
+<p>public class Product1 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}<br>public class Product2 implements IProduct{<br>    public void A(){}<br>    public void B(){}<br>}</p>
+<p>public class ProductFactory{<br>    public static IProduct create(String name){<br>        if(P1.equals(“1”)){<br>            return new Product1();<br>        }else if(P2.equals(“2”)){<br>            return new Product2();<br>        }else{<br>            return null;<br>        }<br>    }<br>}<br></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><ul>
+<li>注意的点<ul>
+<li>在简单工厂方法的基础上，将产品的创建从简单的单一工厂，拆分成多个实例工厂</li>
+<li>保留了简单工厂方法封装对象创建细节的特点的同时，解决了简单工厂扩展维护苦难的问题</li>
+</ul>
+</li>
+<li>类划分：<ul>
+<li>抽象产品/产品接口</li>
+<li>具体产品/产品实现类</li>
+<li>抽象工厂</li>
+<li>真实工厂</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>减少了单一工厂负责所有对象创建逻辑的耦合度</li>
+<li>符合“开放-关闭原则”，增减新的类型，只需要增加/删除相应的工厂类和产品类即可</li>
+<li>符合符合迪米特原则：又叫最少知识原则，即一个对象应尽可能少的了解其它对象。</li>
+<li>符合里式替换原则：任何基类可以出现的地方，一定可以用子类替换。目标是使用抽象和多台将设计中的静态结构改为动态结构</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-factory-method.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface IProduct(){<br>  void A();<br>}<br>public interface IFactory(){<br>  IProduct createProduct();<br>}<br>public class Product1() implements IProduct{<br>  public void A(){}<br>}<br>public class Product2() implements IProduct{<br>  public void A(){}<br>}<br>public class Factory1() implements IFactory1{<br>  public IProduct createProduct(){<pre><code>return new Product1();
+</code></pre>  }<br>}<br>public class Factory2() implements IFactory2{<br>  public IProduct createProduct(){<pre><code>return new Product2();
+</code></pre>  }<br>}<br>public class Client{<br>  public static void main(String[] args){<pre><code>Factory1 f1 = new Factory1();
+IProduct p1 = f1.createProduct();
+Factory2 f2 = new Factory2();
+IProduct p2 = f2.createProduct();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h2><ul>
+<li>为创建一组相关或相互依赖的对象提供一个接口，而且无需指定他们的类</li>
+<li>区别于工厂方法模式：工厂方法针对一个产品等级结构（一个产品接口/基类），而抽象工厂模式针对多个产品等级结构。举例来说，当需要通过工厂来管理男人/女人/女博士一个维度的产品分类对象时，可以使用工厂方法模式；而如果出了男人/女人/女博士一个维度，还要管理黄/黑/白三个肤色人种，或者再加一种基督/佛教/锡克教等宗教维度，就可以用到抽象工厂模式。</li>
+<li>缺点：<ul>
+<li>上层维度（产品族）扩展非常困难。底层维度扩展时，只需要直接新增产品类和产品工厂类；而上层维度扩展首先要修改IFactory，违反“开放-关闭原则”</li>
+</ul>
+</li>
+<li><img src="../images/design_pattern_abstract_factory.png" alt="image"></li>
+<li>代码示例<pre><code><br>//以下是个苹果专卖店和三星专卖店分别销售手机和平板的例子<br>//大家可以假设富士康开了两条不同的流水线，分别生产苹果产品和三星产品，自己写一个不同维度的工厂方法组织方式<br>public interface Mobile{<br>  void makeCall();<br>}<br>public interface Pad{<br>  void game();<br>}<br>public interface DigitSellerFactory{<br>  Mobile sellMobile();<br>  Pad sellPad();<br>}<br>public class IPhone implements Mobile{<br>  public void makeCall(){}<br>}<br>public class Note2 implements Mobile{<br>  public void makeCall(){}<br>}<br>public class IPad implements Pad{<br>  public void game(){}<br>}<br>public class Tab implements Pad{<br>  public void game(){}<br>}<br>public class AppleSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new IPhone();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new IPad();
+</code></pre>  }<br>}<br>public class SumsungSeller implements DigitSellerFactory{<br>  public Mobile sellMobile(){<pre><code>return new Note2();
+</code></pre>  }<br>  public Pad sellPad(){<pre><code>return new Tab();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="装饰器模式"><a href="#装饰器模式" class="headerlink" title="装饰器模式"></a>装饰器模式</h2><ul>
+<li>子类集成的方法对于功能多样化的扩展是极为不利的，除了功能多样难于管理，不同功能之间的组装更是有着不可计数的可能性。</li>
+<li>注意的点：<ul>
+<li>动态扩展</li>
+<li>不改变原有的类</li>
+<li>不用生成子类的继承方式</li>
+<li>Decorator的功能通常不能有关联关系</li>
+</ul>
+</li>
+<li>核心组件：<ul>
+<li>原始类接口</li>
+<li>原始类的基础实现</li>
+<li>装饰器接口（一般类或抽象类）</li>
+<li>继承装饰器接口的一系列具体装饰器</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li>代码示例<pre><code><br>public interface Phone{<br>  void func();<br>}<br>public class BasePhone implements Phone{<br>  public void func(){<pre><code>System.out.println(&quot;make call&quot;);
+</code></pre>  }<br>}<br>public abstract class PhoneDecorator implements Phone{<br>  private Phone phone;<br>  public void func(){<pre><code>phone.func();
+decoration();
+</code></pre>  }<br>  public abstract void decoration();<br>}<br>public class  GameDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;game!!!&quot;);
+</code></pre>  }<br>}<br>public class ShuangKaShuangDaiDecorator extends PhoneDecorator{<br>  public void decoration(){<pre><code>System.out.println(&quot;shuang ka shuang dai!!!&quot;);
+</code></pre>  }<br>}<br>public class Main{<br>  public static void main(String[] args){<pre><code>Phone basePhone = new BasePhone();
+basePhone.func();
+Phone gamePhone = new GameDecorator(basePhone);
+gamePhone.func();
+Phone shuangkaPhone = new ShuangkaShuangDaiDecorator(basePhone);
+shuangkaPhone.func();
+Phone shuangkaGamePhone = new ShuangkaShuangDaiDecorator(gamePhone);
+shuangkaGamePhone.func();
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="观察者模式-发布-订阅模式"><a href="#观察者模式-发布-订阅模式" class="headerlink" title="观察者模式/发布-订阅模式"></a>观察者模式/发布-订阅模式</h2><ul>
+<li>定义了一种一对多的依赖关系，让多个观察者同时监听某一个主题对象，当这个主题对象发生变化时，会通知所有观察者对象，使他们可以自动更新自己<br>注意的点：<ul>
+<li>多个观察者主动加入监听，被监听对象不关心有多少观察者，低耦合</li>
+<li>被监听对象发通知，观察者自己接收通知并完成后续处理</li>
+<li>观察者可以主动注册和撤销监听</li>
+<li>避免循环引用，观察者一般要异步去完成后续处理<br>优点：</li>
+<li>观察者和被观察者是抽象耦合的，有一套触发机制<br>缺点：</li>
+<li>观察者过多时，通知耗时</li>
+<li>观察者只知道状态变化，不知道状态变化的过程</li>
+</ul>
+</li>
+<li><img src="../images/design-pattern-decorator.png" alt="image"></li>
+<li><pre><code>
+public class Subject{
+  private List<observer> observers;
+  private int state;
+  public void subscribe(Observer observer){
+      observers.add(observer);
+  }
+  public void unsubscribe(Observer observer){
+      observers.remove(observer);
+  }
+  public void notifyAll(){
+      observers.foreach(x -> {
+          x.update()
+      })
+  }
+}
+public abstract class Observer{
+  protected Subject subject;
+  public abstract void update();
+}
+</observer></code></pre>
+
+</li>
+</ul>
+<h2 id="MVC模式"><a href="#MVC模式" class="headerlink" title="MVC模式"></a>MVC模式</h2><ul>
+<li>将应用程序切分为Model/View/Control三类核心组件，它们各自处理自己的任务<ul>
+<li>模型：持有数据、状态和程序逻辑</li>
+<li>视图：用来呈现模型</li>
+<li>控制器：负责接收用户输入、解析输入并返回给模型</li>
+<li>MVC通过观察者模式实现视图和模型的分离，当Model数据发生变化时，通知到其相关的所有View</li>
+<li>MVC通过策略模式将视图行为委托到Controller，并实现了视图行为的灵活切换</li>
+</ul>
+</li>
+<li>优点：<ul>
+<li>一个模型可以由不同的视图展示，模型数据发生变化时，模型将通知它对应的视图</li>
+<li>模型可复用</li>
+<li>提高开发效率</li>
+</ul>
+</li>
+</ul>
+<h2 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h2><ul>
+<li>命令模式是一种数据驱动的设计模式，它属于行为模式。它将请求以命令的形式包裹在对象中，并传给调用对象。调用对象寻找可以处理该命令的合适对象，并把命令传递给相应的对象，该对象执行命令。</li>
+<li>主要组件：<ul>
+<li>被操作实体类</li>
+<li>命令接口</li>
+<li>命令实现类（含被操作的实体类的组件）</li>
+</ul>
+</li>
+<li>命令接收与处理</li>
+<li><code><pre><br>public interface ICommand{<br>  void execute();<br>}<br>public class Entity{<br>  public void op1(){}<br>  public void op2(){}<br>}<br>public class op1OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op1();
+</code></pre>  }<br>}<br>public class op2OnEntity implements ICommand{<br>  private Entity entity;<br>  public void execute(){<pre><code>entity.op2();
+</code></pre>  }<br>}<br>public class Broker{<br>  private List<icommand> toDoOperations;<br>  public void receiveCommand(ICommand c){<pre><code>toDoOperations.add(c);
+</code></pre>  }<br>  public void doCommand(){<pre><code>toDoOperations.foreach(x -&gt; x.execute());
+</code></pre>  }<br>}<br></icommand></pre></code></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/20/常见设计模式总结/" data-id="cjr4jact200003xfyazu37tmr" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-笔记——《ElasticSearch技术内幕》" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/" class="article-date">
+  <time datetime="2019-01-20T00:00:07.000Z" itemprop="datePublished">2019-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="ElasticSearch的设计理念"><a href="#ElasticSearch的设计理念" class="headerlink" title="ElasticSearch的设计理念"></a>ElasticSearch的设计理念</h2><ul>
+<li>合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings</li>
+<li>默认分布式工作模式。每个节点总是假设自己属于某个集群</li>
+<li>集群易于伸缩</li>
+<li>对数据结构没有任何限制</li>
+<li>准实时+版本同步</li>
+</ul>
+<h2 id="ES工作流程"><a href="#ES工作流程" class="headerlink" title="ES工作流程"></a>ES工作流程</h2><ul>
+<li>启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管理及拓扑变化（集群伸缩时的分片迁移）</li>
+<li>故障检测。master节点向其它节点发送心跳检测，当发生故障时，master就会启动拓扑更新和分片数据转移，保证集群的正常工作</li>
+<li>索引数据。构建索引只会在master节点完成，再同步shard到不同的其它节点</li>
+<li>查询数据。包括分散阶段scatter phase和合并阶段gather phase两个阶段。分散阶段将query分发到不同的分片完成查询（这里也起到了负载均衡的作用），合并阶段收集各分片上的搜索结果，进行合并、排序、后续处理并返回给客户端</li>
+</ul>
+<h2 id="底层索引控制"><a href="#底层索引控制" class="headerlink" title="底层索引控制"></a>底层索引控制</h2><ul>
+<li>lucene 4.0支持了多种相似度计算模型（相似度是指查询向量同某个文档的余弦匹配度）。除了传统的TF/IDF，还有Okapi BM25、随机偏离、基于信息的模型几种。不同的field可以配置不同的相似度计算策略</li>
+<li>索引文件编解码方式。通过配置不同的编解码方式，可以控制压缩程度和高基字段的预加载，从而在查询速度和内存之间做权衡</li>
+<li>索引可见流程。<ul>
+<li>索引更新与提交过程。Lucene在接收新的Document之后，在索引变得可见之前，还要经过以下几个阶段：①document处理（类型映射等）②创建只读的Segment_N文件（commit操作）③Searcher刷新（Searcher需要重新打开才能看到新索引，默认1s刷新）。可以看到，从lucene开始处理索引，到索引可以被查询到，有1s左右的延迟，这也是lucene/ES自称为准实时系统的原因</li>
+<li>事务日志。因为不能频繁提交，所以遇到错误时有些数据可能会从内存中丢失，ES使用事务日志来记录所有的未提交事务，在发生错误时检查事务日志，执行未完成的操作。VSearch中似乎抽象了checkpoint的概念，跟写事务日志类似</li>
+<li>准实时读取。可以通过使用事务日志，将提交的事务也进行查询，从而获取未提交版本的数据</li>
+</ul>
+</li>
+<li>索引合并的3种策略。force merge操作</li>
+</ul>
+<h2 id="分布式索引架构"><a href="#分布式索引架构" class="headerlink" title="分布式索引架构"></a>分布式索引架构</h2><ul>
+<li>问题<ul>
+<li>如何为集群选择合适的shard和replication数量</li>
+<li>什么是路由</li>
+<li>分片分配器</li>
+<li>如何应对数据和查询的增长</li>
+</ul>
+</li>
+<li>实现<ul>
+<li>将一个索引切分成若干个小索引，以便在同一集群的不同节点上分配它们，实现查询的并发处理。ES默认将每个索引分成5个shards，并做1个replication。即使是只有1个节点，这样做也可以方便扩容</li>
+<li>一般来说，N个节点的集群，切分为N个分片+1个replication，总共2N个分片，可以最大化集群的分布式优势。但是这不是绝对的，因为查询过程的scatter phase和gather phase也是有代价的，有些时候（比如数据少的时候、有明确路由规则的时候）</li>
+<li>路由类似mysql的分库分表过程，使用统一的分片规则和查询规则，可以实现只在特定分片上查询，从而避免不必要的scatter&amp;gather过程。例如按用户对订单数据进行分片，查询某个用户就能映射到某一特定分片，在这一个分片上查询即可<ul>
+<li>不指定路由规则时。es会自动查询所有分片，修改或删除某一分片时也要定位到特定分片，所以只要保证一个id对应的document一直生成相同的值即可</li>
+<li>指定路由规则。在mapping中添加_mappings字段，指定任意一个未分词的字段即可。要确保对同一个document，始终能计算得出一个相同的routing值</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>分片分配机制。<ul>
+<li>当集群拓扑发生改变时，ShardAllocator负责分片的再分配。同一分片的primary shard和replication shard不能分配到同一节点（多于一个节点时）。分配机制会考虑多种因素：磁盘空间、同一分片的安全性、节点包含的同一个索引的分片数等</li>
+<li>even_shard分配。保证每个节点有相同的分片数</li>
+<li>balanced分配。提供一些可控参数交由用户控制</li>
+<li>可以自行实现ShardAllocator接口</li>
+</ul>
+</li>
+<li>ES集群跟redis集群的一点区别<ul>
+<li>ES集群所有节点都可以配置为master候选节点，当master节点故障时其它节点会选举出新的master节点，并进行分片数据迁移</li>
+<li>Redis集群是所有master节点不可或缺，系统不会因为节点故障修改master节点管理的slot，当遇到故障时，master节点对应的replication/slave节点就会选举出新的master节点加入集群</li>
+</ul>
+</li>
+</ul>
+<h2 id="管理ElasticSearch"><a href="#管理ElasticSearch" class="headerlink" title="管理ElasticSearch"></a>管理ElasticSearch</h2><ul>
+<li>目标：<ul>
+<li>选择正确的目录实现，提升底层I/O效率</li>
+<li>配置发现模块避免潜在问题</li>
+<li>配置网关模块</li>
+<li>恢复模块</li>
+<li>查看段信息</li>
+<li>ES缓存</li>
+</ul>
+</li>
+<li>存储类型：<ul>
+<li>SimpleFSDirectory。简单文件存储系统</li>
+<li>NIOFSDirecotyr。NIO文件存储。linux上默认使用nio</li>
+<li>MMapDirectory。文件映射。</li>
+<li>内存索引。小索引，有备份数据支持重建时使用。</li>
+</ul>
+</li>
+<li>发现模块：<ul>
+<li>multicast（Zen）</li>
+<li>unicast。向配置指定的服务器列表进行单播，减少不必要流量</li>
+</ul>
+</li>
+<li>最小主节点数<ul>
+<li>至少N/2+1，防止split brain</li>
+</ul>
+</li>
+<li>网关</li>
+<li>索引段统计<ul>
+<li>可以通过API查看索引/分片/段信息</li>
+</ul>
+</li>
+<li>ES缓存<ul>
+<li>过滤器缓存。缓存filter查询结果，LRU策略。</li>
+<li>字段数据缓存。主要用于aggregation</li>
+<li>使用API可以清楚特定缓存</li>
+</ul>
+</li>
+</ul>
+<h2 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h2><ul>
+<li>垃圾处理器。java8引入了G1，G1主要目标是减少暂停，使用户感受不到卡顿，但是吞吐量比较差，目前默认还是Paralllel</li>
+<li>避免内存交换。可以通过配置关闭。</li>
+<li>I/O调节。限制每秒的I/O量，防止卡顿</li>
+<li>预热器。空间换时间的操作，指定一个查询/aggregation，缓存其结果，提升查询效率。可以单独创建，也可以在indexing时实时更新</li>
+</ul>
+<h2 id="分片内部原理"><a href="#分片内部原理" class="headerlink" title="分片内部原理"></a>分片内部原理</h2><ul>
+<li>如何使文本可搜索：<ul>
+<li>段一旦生成就不能再改变</li>
+<li>ES在lucene基础上引入了“按段搜索”的概念，这样新增的数据就可以通过建立新的段从而尽快变得可搜索</li>
+<li>为了提升索引速度，ES索引的数据先写入memory buffer。ES定期commit生成新的段（行程一个commit point）</li>
+<li>commit之后，ES要refresh Searcher之后索引才能对搜索可见</li>
+<li>commit之后，新生成的段文件还处在文件缓冲区，没有真正落盘，需要使用fsync()来完成落盘操作</li>
+<li>fsync因为IO调用会很慢，fsync也是定期执行完成落盘的。</li>
+<li>因为fsync定期完成，当系统异常退出时，未落盘的文件会丢失。所以ES还有translog机制，将未落盘的事件记录文件日志，当出现系统异常时，系统会从translog完成未落盘的索引的恢复工作</li>
+<li>translog的落盘也是定期执行的，同样有丢失的可能，用户可以根据使用场景，容忍部分可能的丢失场景。根据kafka的落盘原理，顺序日志落盘其实并不慢</li>
+</ul>
+</li>
+</ul>
+<h2 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h2><ul>
+<li>coordinate节点有没有单点故障问题，客户端的角色，负责负载均衡，请求分发等。设置在同一个域名下设置多个coordinate节点做负载均衡避免单点故障问题。</li>
+<li>为什么是准实时的？除了数据落盘、filebeat轮询传送事件、logstash处理事件过程的时间消耗，ES处理完document之后，还要暂存document缓存区，commit轮询生成新的段文件，新的段要经过Refresh Searcher操作，才能对客户端可见。</li>
+<li>shard在索引创建之前就已确定，如何扩容？增加replica数量</li>
+<li>了解一下scatter-gather过程。是否带routing两种情况，不带就遍历，带了可以定位到指定索引，完成scatter搜索，再进行结果的合并</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/" data-id="cjr4jacth00033xfyxpsolvo8" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-服务集群异常监控" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/服务集群异常监控/" class="article-date">
+  <time datetime="2018-12-20T10:00:07.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/20/服务集群异常监控/">服务监控</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="服务监控"><a href="#服务监控" class="headerlink" title="服务监控"></a>服务监控</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><ul>
+<li>业务trace<ul>
+<li>按时间顺序追踪业务流程的关键节点，主要包括以下两个部分：</li>
+<li>搜索部分：用户产品选择、验价结果记录等</li>
+<li>订单部分：下单、付款、关单、出单、退改签等</li>
+<li>日志跟踪效果：</li>
+<li><img src="../images/query-trace-log.png" alt="image"></li>
+</ul>
+</li>
+<li>商家接口监控报警<ul>
+<li>每天机票、酒店、火车票商家的接口状态追踪，对异常情况进行通知报警（邮件/短信）</li>
+<li>邮件报警效果：</li>
+<li><img src="../images/task-item-notification.png" alt="image"></li>
+<li>报表效果：</li>
+<li><img src="../images/taskitem-report.png" alt="image"></li>
+</ul>
+</li>
+<li>异常监控<ul>
+<li>服务器异常及错误日志监控报警，超过阈值时进行通知(短信)</li>
+<li><img src="../images/exception-report.png" alt="image"></li>
+</ul>
+</li>
+</ul>
+<h2 id="业务流程trace"><a href="#业务流程trace" class="headerlink" title="业务流程trace"></a>业务流程trace</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>需求：我们的产品有很长的系统流转过程，从用户选择产品，下单，商品的预定与售后等，有些关键数据需要记录下来防止用户纠纷，而系统运维、问题排查等要依赖各个节点的数据（用户/商品快照/价格快照/用户操作记录等）。当给定一个订单或产品时，我们通过订单id或产品标示就可以查到其业务流转过程中的所有关键节点数据日志，从而可以快速定位问题，解决纠纷</li>
+<li>方案：通过ELK，Filebeat收集日志数据，Logstash对日志数据进行处理，ElasticSearch存储处理后的数据。在ElasticSearch数据基础上，通过Kibana进行可视化报表展示，也可以通过watcher插件进行报警通知</li>
+</ul>
+<h3 id="日志生成策略"><a href="#日志生成策略" class="headerlink" title="日志生成策略"></a>日志生成策略</h3><ul>
+<li>统一的key追踪<ul>
+<li>产品搜索key。用户搜索产品时的唯一产品标识，通过URL参数生成UUID，用这个UUID作为产品的唯一标识和日志追踪key</li>
+<li>订单key。用户产品下单后，需要用订单id来追踪日志</li>
+<li>key关联。将产品key和订单key进行关联，从而通过一个key可以看到完整的日志数据</li>
+</ul>
+</li>
+<li>日志结构<pre><code><br>  public static void trace(String key, String secondaryKey, StepEnum step, String msg) {<pre><code>JSONObject traceLog = new JSONObject();
+traceLog.put(&quot;key&quot;, key);
+traceLog.put(&quot;secondaryKey&quot;, secondaryKey);
+traceLog.put(&quot;step&quot;, step.getStepName());
+traceLog.put(&quot;subStep&quot;, step.getSubStepName());
+traceLog.put(&quot;message&quot;, msg);
+traceLog.put(&quot;@timestamp&quot;, LocalDateTime.now());
+log.info(traceLog.toJSONString());
+</code></pre>  }<br></code></pre></li>
+<li>在产品下单时，通过key和secondarykey将产品和订单进行关联</li>
+<li>logstash数据处理。日志是json格式文本，通过json插件来完成数据提取(date插件提取时间戳)<pre><code><br>  json {<pre><code>source =&gt; &quot;message&quot;
+remove_field =&gt; [&quot;message&quot;]
+</code></pre>  }<br>  date {<pre><code>locale=&gt;&quot;en&quot;
+match =&gt; [ &quot;startTime&quot;, &quot;ISO8601&quot; ]
+target =&gt; &quot;startTime&quot;
+</code></pre>  }<br></code></pre></li>
+<li>ElasticSearch存储。按时间rotate数据，每天一个索引，最多保存7天</li>
+<li>搜索<ul>
+<li>排序，只按时间进行排序</li>
+<li>关于分页，日志数量不大，暂时不做分页，后期考虑先在前端分页。最终可以通过doc_id或时间戳进行分页查询</li>
+<li>通过产品链接或订单号查询所有日志</li>
+</ul>
+</li>
+<li>watcher<ul>
+<li>watcher现在是付费账户专享插件，费用比较高</li>
+<li>我们自己通过spring-quartz定制定时任务来完成报警通知</li>
+<li>通常定时任务都是单机完成的，通过指定运行ip来限制一下</li>
+</ul>
+</li>
+</ul>
+<h2 id="商家接口监控报警"><a href="#商家接口监控报警" class="headerlink" title="商家接口监控报警"></a>商家接口监控报警</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>需求：每天多达数千万的接口调用，需要及时获知各接口的状态<ul>
+<li>接口实时异常通知</li>
+<li>报表展示</li>
+</ul>
+</li>
+<li>方案<ul>
+<li>接口调用通过任务队列调度异步完成，完成之后任务有统一的日志，通过与上文所述同样的ELK方案来处理</li>
+</ul>
+</li>
+</ul>
+<h3 id="日志收集"><a href="#日志收集" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
+<li>filebeat。单行日志，配置一般的harvester即可<pre><code><br>filebeat:<h1 id="List-of-prospectors-to-fetch-data"><a href="#List-of-prospectors-to-fetch-data" class="headerlink" title="List of prospectors to fetch data."></a>List of prospectors to fetch data.</h1>prospectors:<br>  -<pre><code>paths:
+  - &quot;/opt/jdy-applog/*/taskitem.log&quot;
+input_type: log
+</code></pre>output:<br>logstash:<br>  hosts: [“logstash1.jdydev.cn:5043”, “logstash2.jdydev.cn:5043”, “logstash3.jdydev.cn:5043”]<br></code></pre></li>
+<li>logstash grok。<pre><code><br>ruby {<br>code =&gt; “<br>  require ‘date’<br>  event.set(‘[@metadata][localdate]’, event.get(‘logdate’)[0,10].gsub(/[-]/,’.’))<br>“<br>}<br>ruby {<pre><code>code =&gt; &quot;
+    require &apos;date&apos;
+    event.set(&apos;execEnd&apos;, event.get(&apos;execEnd&apos;)+&apos;+0800&apos;)
+    event.set(&apos;execStart&apos;, event.get(&apos;execStart&apos;)+&apos;+0800&apos;)
+    event.set(&apos;assignStart&apos;, event.get(&apos;assignStart&apos;)+&apos;+0800&apos;)
+    event.set(&apos;assignEnd&apos;, event.get(&apos;assignEnd&apos;)+&apos;+0800&apos;)
+    # event.set(&apos;@timestamp&apos;, event.get(&apos;@timestamp&apos;)+&apos;+0800&apos;)
+&quot;
+</code></pre>  }<br>grok {<pre><code>break_on_match =&gt; false
+match =&gt; { &quot;message&quot; =&gt; [ &quot;\&quot;webSiteID\&quot;:%{NUMBER:webSiteId:int}&quot;, &quot;\&quot;fromCityCode\&quot;:\&quot;%{DATA:flightFromCity}\&quot;&quot;, &quot;\&quot;toCityCode\&quot;:\&quot;%{DATA:flightToCit
+</code></pre>y}\””, “\”depDate\”:\”%{DATA:flightDepDate}\””, “\”retDate\”:\”%{DATA:flightRetDate}\””, “\”verifyFlightProductIden\”:\”%{DATA:verifyFlightProductIden}\”” ] }<pre><code>}
+</code></pre>mutate { add_field =&gt; { “businessLine” =&gt; “flight” } }<br></code></pre></li>
+<li>ElasticSearch按业务线分集群flight/train/hotel，每个业务一个索引，索引每天rotate，每天一个索引</li>
+</ul>
+<h3 id="可视化"><a href="#可视化" class="headerlink" title="可视化"></a>可视化</h3><ul>
+<li>使用kibana配置，<ul>
+<li>注意粒度，一般使用最小一分钟作为最细粒度就可以了</li>
+<li>多维统计可以拆图（split chart）或拆线（split line），也可以组合使用来实现更详尽的图表表达</li>
+<li>酒店status报表，代理商拆图，status拆表。用于监控接口状态</li>
+<li><img src="../images/hotel-taskitem-split.png" alt="image"></li>
+<li>酒店执行时间报表。用于监控接口执行时间</li>
+<li><img src="../images/hotel-taskitem-exectime.png" alt="image"></li>
+</ul>
+</li>
+<li>可以将多个报表iframe嵌入其它系统统一查看（如运营后台）</li>
+</ul>
+<h3 id="报警通知"><a href="#报警通知" class="headerlink" title="报警通知"></a>报警通知</h3><ul>
+<li>通过定时任务，并为每一指标配置阈值，达到报警阈值时短信+邮件报警</li>
+</ul>
+<h2 id="异常监控"><a href="#异常监控" class="headerlink" title="异常监控"></a>异常监控</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>需求：对系统运行过程中产生异常和错误日志进行监控和实时通知</li>
+<li>方案：同样通过ELK收集、处理并存储</li>
+</ul>
+<h3 id="日志收集-1"><a href="#日志收集-1" class="headerlink" title="日志收集"></a>日志收集</h3><ul>
+<li>filebeat 多行处理。filebeat默认每行日志作为一个事件来处理，而异常日志多是多行的，需要进行额外的配置<pre><code><br>filebeat:<h1 id="List-of-prospectors-to-fetch-data-1"><a href="#List-of-prospectors-to-fetch-data-1" class="headerlink" title="List of prospectors to fetch data."></a>List of prospectors to fetch data.</h1>prospectors:<br>  -<pre><code>paths:
+  - &quot;/opt/jdy-applog/*/error.log&quot;
+input_type: log
+multiline.pattern: &apos;^[0-9]{4}-[0-9]{2}-[0-9]{2}&apos;
+multiline.negate: true
+multiline.match: after
+</code></pre>output:<br>logstash:<br>  hosts: [“logstash1.jdydev.cn:5043”, “logstash2.jdydev.cn:5043”, “logstash3.jdydev.cn:5043”]<br></code></pre></li>
+<li>Exception/Error 名称。grok有对应的exceptionName正则式，可以在logstash grok filter中使用下列语句进行截取<pre><code><br>filter{<br>  mutate { add_field =&gt; { “businessLine” =&gt; “errorlog” } }<br>  grok {<pre><code>patterns_dir =&gt; [&quot;/home/jdy/jdy-elk/logstash-5.3.0/config/patterns&quot;]
+match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:exceptionName}&quot;]}
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h3 id="可视化-1"><a href="#可视化-1" class="headerlink" title="可视化"></a>可视化</h3><ul>
+<li>用kibana配置报表</li>
+<li>重点异常重点跟踪，例如我们将redis异常的跟踪到每台机器，这样可以从报表中获得更多信息：</li>
+<li><img src="../images/redis-exception-report.png" alt="image"></li>
+</ul>
+<h3 id="报警"><a href="#报警" class="headerlink" title="报警"></a>报警</h3><ul>
+<li>定时程序汇总，例如查询过去5分钟内的异常数量，当超过一定值时进行报警，可以针对某一异常单独配置阈值，也可以自动累积历史数值，创建基线作为阈值。threshold = a * threshold + val(0&lt;a&lt;1, val是当前异常数量)</li>
+<li>短信告警（云片）。异常的通知通常属于紧急事件，需要保证通知触达率及打开率，因此使用短信通知，可以使用邮件额外</li>
+</ul>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><h3 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h3><ul>
+<li>理论上可以实现at least once机制，保证数据不丢失，但是可能会有重复</li>
+<li>logstash需要persistent queue来保证100%的不丢失</li>
+<li>如果进程异常退出或被异常关闭（kill -9），会导致inflight数据丢失，请注意ELK各进程的规范退出</li>
+</ul>
+<h3 id="实时性"><a href="#实时性" class="headerlink" title="实时性"></a>实时性</h3><ul>
+<li>在统一的内网环境部署，忽略网络传输时间</li>
+<li>日志落地。Logback日志本地缓存到异步落盘的时间在毫秒级别</li>
+<li>filebeat生成事件。扫描间隔1s，强制上传时间（事件本地缓存的时间）是5s。</li>
+<li>logstash处理时间。一般是毫秒级，可以通过x-pack查看延迟，可以按需求配置workers数量增加并发，提升排队延迟</li>
+<li>索引延迟及索引可见的时间约1s</li>
+<li>总计有1-10s的延迟，能够满足准实时需求</li>
+<li>@timestamp使用默认的logstash处理时间，日志时间单独存储，可以比较出延迟时间（日志生成event -&gt; grok之间）</li>
+</ul>
+<h3 id="查询速度"><a href="#查询速度" class="headerlink" title="查询速度"></a>查询速度</h3><ul>
+<li>global ordinals<ul>
+<li>global_ordinals 是用于减少string类型的fielddata占用内存的技术。以我们的系统为例一个doc至少有10个keyword类型的field需要用于查询、聚合操作，假设每个keyword类型的平均长度是20个byte，1G（10亿）个doc的所有keyword field所占用的内存是10<em>20</em>1G=200G。global_ordinals对这些keyword的值进行编号，使用整数值来替代原始的字符串，查询计算完成之后，再用对应的字符串值替换序号，从而减小内存占用。由于一个整数值只占一个byte，因此这些field全都加载到内存占用的内存大小是10*1G=20G。只有原来的1/20</li>
+<li>好处：1. 降低内存占用2. 极大提高汇总排序查询的速度</li>
+<li>global ordinals默认在搜索时加载，text和keyword field默认在搜索时构建global ordinals，这样在第一次搜索时，在数据量很大的情况下，用户会感受到明显的延迟。</li>
+<li>可以通过配置eager_global_ordinals将global_ordinals的构建从搜索转移到索引的构建刷新。</li>
+</ul>
+</li>
+<li>缓存。<ul>
+<li>不使用类似now的时间戳</li>
+<li>使用恒定的范围查询和聚类，例如[10-20),[20-30),…，而不要使用[9-22),[23-57)之类，或者使用不恒定的变量</li>
+<li>对某些经常聚类的字段进行缓存冗余，如val=17，冗余存储一个范围10-20</li>
+</ul>
+</li>
+</ul>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
+<li>日志记录要在侵入性和灵活性之间做权衡，我们处在业务初始阶段，变化较多，因此目前记录的日志都是侵入性日志</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/服务集群异常监控/" data-id="cjpwfntqk00006nqhdrlfmsvb" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li></ul>
 
     </footer>
   </div>
@@ -1176,7 +1176,7 @@ index =&gt; &quot;logstash-jdbc-basic&quot;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1437,7 +1437,7 @@ reboot</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/19/筋斗云ELK集群/" data-id="cjpuzqwvv0000e7qhfzzm8vz0" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/12/19/筋斗云ELK集群/" data-id="cjpuzqwvv0000e7qhfzzm8vz0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1539,7 +1539,7 @@ reboot</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/17/lucene数据结构解析/" data-id="cjptnh2ar0000i9qh7c3ic83s" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/12/17/lucene数据结构解析/" data-id="cjptnh2ar0000i9qh7c3ic83s" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1604,7 +1604,7 @@ reboot</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/17/git命令行常用总结/" data-id="cjps0hy8r0004s6qhtpd6iu6j" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/12/17/git命令行常用总结/" data-id="cjps0hy8r0004s6qhtpd6iu6j" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1748,7 +1748,7 @@ reboot</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/27/Time-Series-Data-Introduction/" data-id="cjps0hy8o0003s6qhn19m5t6v" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/11/27/Time-Series-Data-Introduction/" data-id="cjps0hy8o0003s6qhn19m5t6v" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1850,7 +1850,7 @@ reboot</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/01/java团队code style规范/" data-id="cjps0hy9d0008s6qhu0x57zn8" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2018/04/01/java团队code style规范/" data-id="cjps0hy9d0008s6qhu0x57zn8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1874,7 +1874,7 @@ reboot</code></pre>
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Labels</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
@@ -1893,7 +1893,7 @@ reboot</code></pre>
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
@@ -1903,9 +1903,13 @@ reboot</code></pre>
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
         
           <li>
             <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
@@ -1917,10 +1921,6 @@ reboot</code></pre>
         
           <li>
             <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
           </li>
         
           <li>

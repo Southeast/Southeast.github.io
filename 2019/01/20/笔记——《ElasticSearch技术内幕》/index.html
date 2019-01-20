@@ -5,7 +5,7 @@
   
   <title>笔记——《ElasticSearch技术内幕》 | Life Career</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="笔记——《ElasticSearch技术内幕》ElasticSearch的设计理念
+  <meta name="description" content="ElasticSearch的设计理念
 合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings
 默认分布式工作模式。每个节点总是假设自己属于某个集群
 集群易于伸缩
@@ -13,12 +13,12 @@
 准实时+版本同步
 
 ES工作流程
-启动过程。所有节点通过广播/单播组件结成集群，并选举产生ma">
+启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管">
 <meta property="og:type" content="article">
 <meta property="og:title" content="笔记——《ElasticSearch技术内幕》">
 <meta property="og:url" content="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/index.html">
 <meta property="og:site_name" content="Life Career">
-<meta property="og:description" content="笔记——《ElasticSearch技术内幕》ElasticSearch的设计理念
+<meta property="og:description" content="ElasticSearch的设计理念
 合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings
 默认分布式工作模式。每个节点总是假设自己属于某个集群
 集群易于伸缩
@@ -26,11 +26,11 @@ ES工作流程
 准实时+版本同步
 
 ES工作流程
-启动过程。所有节点通过广播/单播组件结成集群，并选举产生ma">
-<meta property="og:updated_time" content="2019-01-20T06:00:36.000Z">
+启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管">
+<meta property="og:updated_time" content="2019-01-20T10:24:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="笔记——《ElasticSearch技术内幕》">
-<meta name="twitter:description" content="笔记——《ElasticSearch技术内幕》ElasticSearch的设计理念
+<meta name="twitter:description" content="ElasticSearch的设计理念
 合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings
 默认分布式工作模式。每个节点总是假设自己属于某个集群
 集群易于伸缩
@@ -38,7 +38,7 @@ ES工作流程
 准实时+版本同步
 
 ES工作流程
-启动过程。所有节点通过广播/单播组件结成集群，并选举产生ma">
+启动过程。所有节点通过广播/单播组件结成集群，并选举产生master节点。master节点负责集群的状态管">
   
     <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
   
@@ -78,7 +78,7 @@ ES工作流程
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -109,7 +109,7 @@ ES工作流程
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="笔记——《ElasticSearch技术内幕》"><a href="#笔记——《ElasticSearch技术内幕》" class="headerlink" title="笔记——《ElasticSearch技术内幕》"></a>笔记——《ElasticSearch技术内幕》</h1><h2 id="ElasticSearch的设计理念"><a href="#ElasticSearch的设计理念" class="headerlink" title="ElasticSearch的设计理念"></a>ElasticSearch的设计理念</h2><ul>
+        <h2 id="ElasticSearch的设计理念"><a href="#ElasticSearch的设计理念" class="headerlink" title="ElasticSearch的设计理念"></a>ElasticSearch的设计理念</h2><ul>
 <li>合理的默认配置，使用户简单安装之后就可以直接使用，例如有了dynamic mapping，基本上就不需要再单独写mappings</li>
 <li>默认分布式工作模式。每个节点总是假设自己属于某个集群</li>
 <li>集群易于伸缩</li>
@@ -231,7 +231,7 @@ ES工作流程
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/" data-id="cjr4jacth00033xfyxpsolvo8" class="article-share-link">Delen</a>
+      <a data-url="http://yoursite.com/2019/01/20/笔记——《ElasticSearch技术内幕》/" data-id="cjr4jacth00033xfyxpsolvo8" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
@@ -243,7 +243,7 @@ ES工作流程
 <nav id="article-nav">
   
     <a href="/2019/01/20/常见设计模式总结/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Nieuwer</strong>
+      <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
           常用设计模式总结
@@ -253,7 +253,7 @@ ES工作流程
   
   
     <a href="/2018/12/20/服务集群异常监控/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ouder</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">服务监控</div>
     </a>
   
@@ -271,7 +271,7 @@ ES工作流程
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Labels</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
@@ -290,7 +290,7 @@ ES工作流程
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
@@ -300,9 +300,13 @@ ES工作流程
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
         
           <li>
             <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
@@ -314,10 +318,6 @@ ES工作流程
         
           <li>
             <a href="/2018/12/20/服务集群异常监控/">服务监控</a>
-          </li>
-        
-          <li>
-            <a href="/2018/12/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
           </li>
         
           <li>
