@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>笔记——《java并发编程的艺术》 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="（一）并发编程的挑战上下文
+由于CPU的时间分片逻辑，以及当前线程在某些条件（执行完成/等待资源/主动让出）下让出CPU权时，就是所谓的任务切换
+上下文切换：CPU切换任务时，需要保存当前任务的状态，加载下一个任务的状态的过程
+要尽可能减少上下文切换：
+无锁并发编程
+CAS算法
+避免不必要的多线程
+协程
+
+
+
+死锁
+必要条件：
+互斥
+占有且等待
+不可抢占
+循环等待
+
+
+避免死锁的常见办法（破坏上述">
+<meta property="og:type" content="article">
+<meta property="og:title" content="笔记——《java并发编程的艺术》">
+<meta property="og:url" content="http://yoursite.com/2019/01/26/笔记——《java并发编程的艺术》/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="（一）并发编程的挑战上下文
+由于CPU的时间分片逻辑，以及当前线程在某些条件（执行完成/等待资源/主动让出）下让出CPU权时，就是所谓的任务切换
+上下文切换：CPU切换任务时，需要保存当前任务的状态，加载下一个任务的状态的过程
+要尽可能减少上下文切换：
+无锁并发编程
+CAS算法
+避免不必要的多线程
+协程
+
+
+
+死锁
+必要条件：
+互斥
+占有且等待
+不可抢占
+循环等待
+
+
+避免死锁的常见办法（破坏上述">
+<meta property="og:image" content="http://yoursite.com/../images/java-thread-state.jpg">
+<meta property="og:updated_time" content="2019-01-26T15:42:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="笔记——《java并发编程的艺术》">
+<meta name="twitter:description" content="（一）并发编程的挑战上下文
+由于CPU的时间分片逻辑，以及当前线程在某些条件（执行完成/等待资源/主动让出）下让出CPU权时，就是所谓的任务切换
+上下文切换：CPU切换任务时，需要保存当前任务的状态，加载下一个任务的状态的过程
+要尽可能减少上下文切换：
+无锁并发编程
+CAS算法
+避免不必要的多线程
+协程
+
+
+
+死锁
+必要条件：
+互斥
+占有且等待
+不可抢占
+循环等待
+
+
+避免死锁的常见办法（破坏上述">
+<meta name="twitter:image" content="http://yoursite.com/../images/java-thread-state.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-笔记——《java并发编程的艺术》" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/26/笔记——《java并发编程的艺术》/" class="article-date">
+  <time datetime="2019-01-26T14:50:00.000Z" itemprop="datePublished">2019-01-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      笔记——《java并发编程的艺术》
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="（一）并发编程的挑战"><a href="#（一）并发编程的挑战" class="headerlink" title="（一）并发编程的挑战"></a>（一）并发编程的挑战</h2><h3 id="上下文"><a href="#上下文" class="headerlink" title="上下文"></a>上下文</h3><ul>
+<li>由于CPU的时间分片逻辑，以及当前线程在某些条件（执行完成/等待资源/主动让出）下让出CPU权时，就是所谓的任务切换</li>
+<li>上下文切换：CPU切换任务时，需要保存当前任务的状态，加载下一个任务的状态的过程</li>
+<li>要尽可能减少上下文切换：<ul>
+<li>无锁并发编程</li>
+<li>CAS算法</li>
+<li>避免不必要的多线程</li>
+<li>协程</li>
+</ul>
+</li>
+</ul>
+<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><ul>
+<li>必要条件：<ul>
+<li>互斥</li>
+<li>占有且等待</li>
+<li>不可抢占</li>
+<li>循环等待</li>
+</ul>
+</li>
+<li>避免死锁的常见办法（破坏上述必要条件中的一个）：<ul>
+<li>避免一个线程内同时获取多个锁，避免一个锁占有多个资源</li>
+<li>使用定时锁</li>
+<li>顺序加锁</li>
+</ul>
+</li>
+<li>资源限制<ul>
+<li>要根据资源数量调整并发度，例如网速上线20M，每个线程可以占用10M时，就不必使用多于2个线程</li>
+</ul>
+</li>
+</ul>
+<h2 id="（二）并发机制的底层实现原理"><a href="#（二）并发机制的底层实现原理" class="headerlink" title="（二）并发机制的底层实现原理"></a>（二）并发机制的底层实现原理</h2><h3 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h3><ul>
+<li>定义：Volatile修饰的成员变量在每次被线程访问时，都强迫从共享内存中重读该成员变量的值。而且，当成员变量发生变化时，强迫线程将变化值回写到共享内存。这样在任何时刻，两个不同的线程总是看到某个成员变量的值是相同的，更简单一点理解就是volatile修饰的变量值发生变化时对于另外的线程是可见的</li>
+<li>优势：volatile不会引起线程上下文切换和调度，所以比synchronized使用和执行成本更低</li>
+<li>volatile的实现原理是，在执行完成后，触发2件事情：<ul>
+<li>将当前处理器缓存行的数据写回到内存系统</li>
+<li>通过缓存一致性协议，使其它处理器里缓存行对应的内存失效（被修改）</li>
+</ul>
+</li>
+<li>什么情况下使用volatile：<ul>
+<li>主要原则：写入变量不依赖变量值</li>
+<li>场景1：状态标记（指示发生了一个重要的一次性事件）</li>
+<li>独立观察（获取最后一个访问者）</li>
+</ul>
+</li>
+<li>一些底层问题（硬件级别）：<ul>
+<li>为了提高处理速度，处理器不直接和内存进行通信，而是先将内存数据读到处理器内部缓存，但是操作完成后缓存同步到内存的时间是不确定的。</li>
+<li>缓存一致性协议要锁定整个行，因此有些时候，这个协议会导致不必要的内存锁。例如JDK7中的LinkedTransferQueue，就将队头队尾进行了扩充（64字节），防止队头队尾被加载到同一个处理器缓存行中导致的队头队尾同时被锁的问题（出队时不能入队或入队时不能出队，实际上它们是完全可以安全的并发运行的）</li>
+</ul>
+</li>
+</ul>
+<h3 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h3><ul>
+<li>synchronized锁的三种表现形式：<ul>
+<li>非static方法：锁是当前实例对象</li>
+<li>static方法：锁是当前类的Class对象</li>
+<li>方法块：锁是synchronized声明括号中的对象</li>
+</ul>
+</li>
+<li>java对象头里的Mark Word默认存储了对象的锁信息</li>
+<li>java中几种锁类型。为了减少获得锁和释放锁带来的性能消耗，1.6以后引入了3个级别的锁状态，偏向锁、轻量锁、重量锁，锁的成功率也由低到高，锁的使用成本由低到高，锁可以升级，但是不能降级。<font color="red">不同级别的锁本质上是JVM在对锁的竞争程度有一定判断的基础上，力图通过乐观锁、自旋锁来提升锁的同步性能的策略。</font><ul>
+<li>偏向锁。当某一线程获取锁并执行完成后，在锁对象中保留线程ID，下次再获取锁时检查当前线程ID是否等于锁对象中的线程ID，若是则不用再重新加锁/解锁，直接进入同步块；否则，撤销原有的线程ID，重新获取偏向锁，执行完成后记录新的线程ID</li>
+<li>轻量级锁。在当前栈帧中创建锁记录，将锁对象头中的MarkWord复制到这个锁记录中，再用CAS将对象头中MarkWord的轻量锁指针指导当前线程的锁记录，如果失败，会适用自旋来获取锁；执行完成后，重置线程锁记录和锁对象MarkWord的数据，完成解锁</li>
+<li>重量级锁。其它线程在遇到无法获取锁的时候会直接BLOCK。</li>
+</ul>
+</li>
+</ul>
+<h3 id="原子操作的实现"><a href="#原子操作的实现" class="headerlink" title="原子操作的实现"></a>原子操作的实现</h3><ul>
+<li>总线锁，锁总线，所有的处理器都会被阻塞，不能操作其它内存地址</li>
+<li>缓存锁（锁某一行缓存），只会锁当前缓存行</li>
+<li>java原子操作的另一种方式：循环CAS<ul>
+<li>AtomicInteger、AtomicLong、AtomicReference</li>
+<li>问题：ABA、竞争激烈时循环时间长开销大</li>
+</ul>
+</li>
+</ul>
+<h2 id="（三）Java内存模型"><a href="#（三）Java内存模型" class="headerlink" title="（三）Java内存模型"></a>（三）Java内存模型</h2><h3 id="Java内存模型基础："><a href="#Java内存模型基础：" class="headerlink" title="Java内存模型基础："></a>Java内存模型基础：</h3><ul>
+<li>并发编程的关键问题：线程通信。Java通过共享内存实现线程通信</li>
+<li>内存模型抽象结构：每个线程在其线程对象内保存共享变量的副本，当某个线程修改共享变量时，其它线程如何获取这个修改，就是Java线程通信的关键</li>
+<li>指令重排序：<ul>
+<li>编译器优化排序</li>
+<li>CPU优化：指令级并行技术（Instruction-Level Parallelism）将多条指令重叠执行</li>
+<li>CPU优化：使用缓存和读写缓冲区，加载和存储操作看上去可能是乱序执行</li>
+<li>java内存模块JMM通过在生成指令序列时，插入内存屏障指令，禁止某些CPU重排序</li>
+</ul>
+</li>
+<li>happens-before。如果一个操作执行结果要对另一个操作可见，那么两个操作之间就是happens-before关系</li>
+<li>指令重排序：<ul>
+<li>as-if-serial：不管怎么重排序，程序的执行结果不能被改变</li>
+<li>在不改变程序执行结果的前提下，尽可能提高并行度</li>
+</ul>
+</li>
+</ul>
+<h2 id="（四）Java并发编程基础"><a href="#（四）Java并发编程基础" class="headerlink" title="（四）Java并发编程基础"></a>（四）Java并发编程基础</h2><h3 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h3><ul>
+<li>什么是线程：操作系统调度的最小单元，也叫轻量级进程，一个进程可以创建多个线程，这些线程都拥有各自的计数器、堆栈、局部变量等属性，能够访问共享的变量内存</li>
+<li>为什么要多线程：<ul>
+<li>多处理器</li>
+<li>业务异步解耦</li>
+<li>异步I/O，某个线程等待IO时，可以把CPU使用权交给其他线程</li>
+</ul>
+</li>
+<li>线程优先级：处理器会参考优先级对线程进行调度，但是不保证优先级高的比优先级低的先执行。</li>
+<li>线程状态：<img src="../images/java-thread-state.jpg" alt="image"></li>
+</ul>
+<h3 id="启动和终止线程"><a href="#启动和终止线程" class="headerlink" title="启动和终止线程"></a>启动和终止线程</h3><ul>
+<li>thread.start()</li>
+<li>thread.interrupt()。线程中断可以理解为线程的一个标志位属性，表示一个运行中的线程是否被其它线程进行了中断操作</li>
+<li>thread.cancel()。终止线程</li>
+</ul>
+<h3 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h3><ul>
+<li>volatile&amp;synchronized，不同级别的同步</li>
+<li>wait/notify机制，解决轮询太多占CPU和轮询太少线程执行不及时的问题。wait/notify依赖同步机制</li>
+<li>wait/notify经典范式<ul>
+<li>wait方：获取锁 -&gt; 条件不满足，调用wait -&gt; 条件满足执行对应逻辑</li>
+<li>notify方：获取锁-&gt; 改变条件 -&gt; notify/notifyAll</li>
+</ul>
+</li>
+<li>join()。用于处理线程顺序依赖关系，前文我们说过优先级不能用来保证顺序，join可以</li>
+</ul>
+<h2 id="（五）Java中的锁"><a href="#（五）Java中的锁" class="headerlink" title="（五）Java中的锁"></a>（五）Java中的锁</h2><h3 id="Lock接口"><a href="#Lock接口" class="headerlink" title="Lock接口"></a>Lock接口</h3><ul>
+<li>使用Lock接口比使用synchronized<ul>
+<li>需要显式声明和释放锁</li>
+<li>锁的可操作性（声明/释放）、可中断锁、超时锁、读写锁等synchronized所没有的功能</li>
+<li>非阻塞的获取锁（不阻塞，而是直接返回获取成功还是失败）</li>
+</ul>
+</li>
+<li>组件<ul>
+<li>lock()</li>
+<li>lockInterruptibly()</li>
+<li>tryLock()</li>
+<li>unlock()</li>
+<li>Condition</li>
+</ul>
+</li>
+</ul>
+<h3 id="队列同步器AQS"><a href="#队列同步器AQS" class="headerlink" title="队列同步器AQS"></a>队列同步器AQS</h3><ul>
+<li>队列同步器是实现锁的关键，在锁的实现中聚合同步器，实现锁的语义</li>
+<li>锁是面向使用者的，定义了使用者与锁交互的接口，隐藏了实现细节</li>
+<li>同步器面向的是锁的实现，简化了锁的实现方式，屏蔽了同步状态管理，线程排队，等待与唤醒等底层操作</li>
+<li>管理同步状态方法：<ul>
+<li>getState()</li>
+<li>setState(int newState)</li>
+<li>compareAndSetState(int expect, int update)</li>
+</ul>
+</li>
+<li>用于子类进行扩展的方法<ul>
+<li>isHeldExclusively()</li>
+<li>tryAcquire()</li>
+<li>tryRelease(int releases)</li>
+</ul>
+</li>
+<li>实现。<ul>
+<li>阻塞队列：阻塞线程创建Node加入队列，原理参考阻塞队列一章，各个节点自旋的获取同步队列（也有升级进入到park状态的逻辑）</li>
+<li>独占式：state==0时设置state完成占用</li>
+<li>共享式：state&gt;0是设置state完成占用（要根据state的更新定义调整，比如原始值是2，占用时-1，就可以限定在state&gt;0时完成占用）</li>
+</ul>
+</li>
+</ul>
+<h3 id="重入锁ReentrantLock"><a href="#重入锁ReentrantLock" class="headerlink" title="重入锁ReentrantLock"></a>重入锁ReentrantLock</h3><ul>
+<li>线程不会被自己阻塞。当前线程可以重复修改state（条件与其它线程不一致）<br>读写锁ReadWriteLock</li>
+<li>readLock()、writeLock()</li>
+<li>一个变量维护多种状态，使用按位切割使用的方法</li>
+</ul>
+<h3 id="LockSupport工具"><a href="#LockSupport工具" class="headerlink" title="LockSupport工具"></a>LockSupport工具</h3><h3 id="Condition接口"><a href="#Condition接口" class="headerlink" title="Condition接口"></a>Condition接口</h3><ul>
+<li>await()、signal()</li>
+<li>condition用一个同步队列来公平的调度正在等待信号的线程</li>
+</ul>
+<h2 id="（六）Java并发容器和框架"><a href="#（六）Java并发容器和框架" class="headerlink" title="（六）Java并发容器和框架"></a>（六）Java并发容器和框架</h2><h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><ul>
+<li>HashMap线程不安全，并发写会引起死锁；HashTable用synchronized来保证线程安全，效率很低</li>
+<li>get方法通过定义成volatile，来保证可见性</li>
+<li>put方法通过锁分段（Segment）来实现写并发（不同segment上的数据可以并发写）</li>
+</ul>
+<h3 id="ConcurrentLinkedQueue"><a href="#ConcurrentLinkedQueue" class="headerlink" title="ConcurrentLinkedQueue"></a>ConcurrentLinkedQueue</h3><ul>
+<li>通过CAS实现无锁并发队列</li>
+</ul>
+<h3 id="阻塞队列"><a href="#阻塞队列" class="headerlink" title="阻塞队列"></a>阻塞队列</h3><ul>
+<li>阻塞队列是指队列在队列满时阻塞写队列线程；队列为空时阻塞读队列线程的队列，常用于producer/consumer问题</li>
+<li>阻塞队列的几个要求：①满队列/空队列时的producer/consumer线程阻塞②公平性（按照阻塞先后顺序访问队列）</li>
+<li>ArrayBlockingQueue。用数组实现的阻塞队列，出队时需要进行数组元素复制迁移</li>
+<li>LinkedBlockingQueue。用链表实现的阻塞队列</li>
+<li>PriorityBlockingQueue。支持优先级的队列，高优先级的先出队，相同优先级没有顺序保证</li>
+<li>DelayQueue。支持延时获取元素的阻塞队列</li>
+<li>SynchronousQueue。不存储元素，每一个put操作必须等待一个take操作，否则不能继续添加元素</li>
+<li>LinkedTransferQueue。在consumer阻塞时，将生产者的输出直接transfer给consumer</li>
+<li>LinkedBlockingDeque。双向阻塞队列</li>
+<li>实现原理：一个Lock（ReentrantLock）&amp;两个Condition。UNsafe.park()是线程进入阻塞状态</li>
+</ul>
+<h3 id="Fork-Join"><a href="#Fork-Join" class="headerlink" title="Fork/Join"></a>Fork/Join</h3><ul>
+<li>Fork/Join是把一个大问题分解为若干个小问题，并最终汇总小问题的执行结果得到最终结果</li>
+<li>工作窃取算法。切分任务并发时，某个线程完成了自己的任务，去其它线程的队列中窃取任务来执行</li>
+<li>设计。实现ForkJoinTask接口，使用ForkJoinPool来执行</li>
+</ul>
+<h2 id="（七）Java中的12个原子操作类"><a href="#（七）Java中的12个原子操作类" class="headerlink" title="（七）Java中的12个原子操作类"></a>（七）Java中的12个原子操作类</h2><h3 id="原子基本类型（原子更新某个值）"><a href="#原子基本类型（原子更新某个值）" class="headerlink" title="原子基本类型（原子更新某个值）"></a>原子基本类型（原子更新某个值）</h3><ul>
+<li>AtmoicInteger</li>
+<li>AtomicLong</li>
+<li>AtomicBoolean<h3 id="原子数组（原子更新数组中的某个值）"><a href="#原子数组（原子更新数组中的某个值）" class="headerlink" title="原子数组（原子更新数组中的某个值）"></a>原子数组（原子更新数组中的某个值）</h3></li>
+<li>AtomicIntegerArray</li>
+<li>AtomicLongArray</li>
+<li>AtomicReferenceArray<h3 id="原子引用"><a href="#原子引用" class="headerlink" title="原子引用"></a>原子引用</h3></li>
+<li>AtomicReference</li>
+<li>AtomicReferenceFieldUpdater</li>
+<li>AtomicMarkableReference<br>原子更新字段类</li>
+<li>AtomicIntegerFieldUpdater</li>
+<li>AtomicLongFieldUpdater</li>
+<li>AtomicStampedReference</li>
+</ul>
+<h2 id="（八）Java中的并发工具类"><a href="#（八）Java中的并发工具类" class="headerlink" title="（八）Java中的并发工具类"></a>（八）Java中的并发工具类</h2><h3 id="CountDownLatch"><a href="#CountDownLatch" class="headerlink" title="CountDownLatch"></a>CountDownLatch</h3><ul>
+<li>场景：当某个线程需要等待N个子线程完成之后再执行后续逻辑时。</li>
+<li>可以用join()来实现，join用于让当前线程等待join线程执行结束，原理是不停检查join线程是否存活。join线程终止后，线程的notifyAll会被调用</li>
+<li>CountDownLatch的N可以在任意场景减一，因此可以实现等待N个线程，也可以等待1个线程里的N个执行步骤，或者二者的组合。CountDownLatch的N只能通过countDown()方法减1，不能回退</li>
+</ul>
+<h3 id="CyclicBarrier"><a href="#CyclicBarrier" class="headerlink" title="CyclicBarrier"></a>CyclicBarrier</h3><ul>
+<li>场景与CountDownLatch类似，但是CyclicBarrier在遇到错误时可以重置计数器，重新计算</li>
+</ul>
+<h3 id="Semaphore"><a href="#Semaphore" class="headerlink" title="Semaphore"></a>Semaphore</h3><ul>
+<li>Semaphore用来控制同时访问特定资源的线程数量。</li>
+<li>用acquire()获取资源，用release()释放资源。当无法获取到资源时，线程处在wait()状态，当释放资源时，线程会调用notifyAll()</li>
+</ul>
+<h3 id="Exchanger"><a href="#Exchanger" class="headerlink" title="Exchanger"></a>Exchanger</h3><ul>
+<li>用于两个线程交换数据</li>
+</ul>
+<h2 id="（九）Java中的线程池"><a href="#（九）Java中的线程池" class="headerlink" title="（九）Java中的线程池"></a>（九）Java中的线程池</h2><h3 id="为什么要使用线程池："><a href="#为什么要使用线程池：" class="headerlink" title="为什么要使用线程池："></a>为什么要使用线程池：</h3><ul>
+<li>降低资源消耗。重复利用已创建的线程，避免创建-销毁过程造成的消耗</li>
+<li>提高响应速度。因为不需要创建线程，加快了执行速度</li>
+<li>提高线程的可管理性。使用线程池统一分配、调优、监控，合理使用系统资源</li>
+</ul>
+<h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><ul>
+<li>组件：核心池+非核心池+工作队列</li>
+<li>Worker线程循环执行任务，保留线程状态</li>
+</ul>
+<h3 id="线程池使用"><a href="#线程池使用" class="headerlink" title="线程池使用"></a>线程池使用</h3><ul>
+<li>初始化new ThreadPoolExecutor(corePoolSize, maimumPoolSize, keepAliveTime, timeUnit, queue, threadFactory, handler)</li>
+<li>执行：threadPool.execute(Runnable), threadPool.submit(Runnable)</li>
+<li>关闭：shutdown()或shutdownNow()</li>
+<li>优化：CPU密集型线程不能太多，IO密集型可以增加并发度1</li>
+</ul>
+<h3 id="线程池类型："><a href="#线程池类型：" class="headerlink" title="线程池类型："></a>线程池类型：</h3><ul>
+<li>FixedThreadPool</li>
+<li>SingleThreadPool</li>
+<li>CacheThreadPool</li>
+</ul>
+<h2 id="（十）Executor框架"><a href="#（十）Executor框架" class="headerlink" title="（十）Executor框架"></a>（十）Executor框架</h2><h3 id="成员："><a href="#成员：" class="headerlink" title="成员："></a>成员：</h3><ul>
+<li>ThreadPoolExecutor</li>
+<li>ScheduledThreadPoolExecutor</li>
+<li>Future。实现Future接口可以返回一个执行结果</li>
+<li>Runnable/Callable Runnable不能返回执行结果，Callable可以返回执行结果</li>
+</ul>
+<h3 id="ScheduledThreadPoolExecutor详解"><a href="#ScheduledThreadPoolExecutor详解" class="headerlink" title="ScheduledThreadPoolExecutor详解"></a>ScheduledThreadPoolExecutor详解</h3><ul>
+<li>通过DelayQueue(通过时间实现的PriorityQueue)来对任务排序，并按顺序取到时的任务执行</li>
+</ul>
+<h3 id="AbstractQueueSynchronizer"><a href="#AbstractQueueSynchronizer" class="headerlink" title="AbstractQueueSynchronizer"></a>AbstractQueueSynchronizer</h3><ul>
+<li>AQS提供通用机制来管理同步状态、阻塞和唤醒线程，以及维护被阻塞的线程队列</li>
+<li>AQS应用广泛，基于AQS实现的同步器包括：ReentrantLock、Semaphore、ReentrantReadWriteLock、CountDownLatch、FutureTask</li>
+<li>acquire()用于阻塞线程，知道AQS状态允许线程继续执行</li>
+<li>release()用于改变AQS状态，改变后的状态能够允许一个或多个阻塞线程被解除阻塞</li>
+</ul>
+<h3 id="FutureTask"><a href="#FutureTask" class="headerlink" title="FutureTask"></a>FutureTask</h3><ul>
+<li>使用一个volatile的state来管理run()和get()之间的同步关系</li>
+<li>FutureTask run()执行之后，在设置执行结果set(V)时，设置state为完成</li>
+<li>FutureTask get()执行时检查state是否为完成，若不是就阻塞</li>
+</ul>
+<h2 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h2><ul>
+<li>必须先获取锁，才能通过wait/notify，如果锁是排他的，这会不会没有意义？wait操作会释放其对应的锁！！</li>
+<li>producer/consumer中的生产和消费者怎样实现公平策略（先被阻塞的线程在notify之后先执行）？增加同步队列，从队列中完成调度，而不依赖CPU的调度。例如AQS中当前线程执行后，通过队列链表唤醒后续节点unparkSuccessor(h)</li>
+<li>Java为什么效率比其它语言高？垃圾回收、简单易用的并发组件（thanks to Doug Lea）</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/26/笔记——《java并发编程的艺术》/" data-id="cjrdn99z40000k8fyw69hmmcx" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发/">并发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/01/26/DevOps核心目标与方法体系/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">DevOps核心目标与方法体系</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/DevOps核心目标与方法体系/">DevOps核心目标与方法体系</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/常见设计模式总结/">常用设计模式总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记——《ElasticSearch技术内幕》/">笔记——《ElasticSearch技术内幕》</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
