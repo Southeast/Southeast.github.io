@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>SOA架构总结 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="SOA方法论
+SOA原则：自治和管制
+服务间调用使用消息替代RPC调用，实现依赖剥离
+服务都是无连接的
+SOA目标和优势：
+松耦合。服务自治，各系统之间划定服务边界，服务调用通过接口发布。调用方无需关心服务实现细节，利于团队工作划分和业务发展
+位置透明。消费者无需关心服务位置
+可在异构平台之间使用
+便于测试和并行开发
+
+
+
+RPC核心组件服务暴露
+provider需要以某种形式提供服务调用的相关信">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SOA架构总结">
+<meta property="og:url" content="http://yoursite.com/2019/01/27/SOA方法论/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="SOA方法论
+SOA原则：自治和管制
+服务间调用使用消息替代RPC调用，实现依赖剥离
+服务都是无连接的
+SOA目标和优势：
+松耦合。服务自治，各系统之间划定服务边界，服务调用通过接口发布。调用方无需关心服务实现细节，利于团队工作划分和业务发展
+位置透明。消费者无需关心服务位置
+可在异构平台之间使用
+便于测试和并行开发
+
+
+
+RPC核心组件服务暴露
+provider需要以某种形式提供服务调用的相关信">
+<meta property="og:updated_time" content="2019-02-05T16:24:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SOA架构总结">
+<meta name="twitter:description" content="SOA方法论
+SOA原则：自治和管制
+服务间调用使用消息替代RPC调用，实现依赖剥离
+服务都是无连接的
+SOA目标和优势：
+松耦合。服务自治，各系统之间划定服务边界，服务调用通过接口发布。调用方无需关心服务实现细节，利于团队工作划分和业务发展
+位置透明。消费者无需关心服务位置
+可在异构平台之间使用
+便于测试和并行开发
+
+
+
+RPC核心组件服务暴露
+provider需要以某种形式提供服务调用的相关信">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-SOA方法论" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/27/SOA方法论/" class="article-date">
+  <time datetime="2019-01-27T14:00:00.000Z" itemprop="datePublished">2019-01-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SOA架构总结
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="SOA方法论"><a href="#SOA方法论" class="headerlink" title="SOA方法论"></a>SOA方法论</h2><ul>
+<li>SOA原则：自治和管制</li>
+<li>服务间调用使用消息替代RPC调用，实现依赖剥离</li>
+<li>服务都是无连接的</li>
+<li>SOA目标和优势：<ul>
+<li>松耦合。服务自治，各系统之间划定服务边界，服务调用通过接口发布。调用方无需关心服务实现细节，利于团队工作划分和业务发展</li>
+<li>位置透明。消费者无需关心服务位置</li>
+<li>可在异构平台之间使用</li>
+<li>便于测试和并行开发</li>
+</ul>
+</li>
+</ul>
+<h2 id="RPC核心组件"><a href="#RPC核心组件" class="headerlink" title="RPC核心组件"></a>RPC核心组件</h2><h3 id="服务暴露"><a href="#服务暴露" class="headerlink" title="服务暴露"></a>服务暴露</h3><ul>
+<li>provider需要以某种形式提供服务调用的相关信息，一般用IDL文件来暴露其服务信息。dubbo使用xml文件注册其提供的服务内容，并通过zookeeper来实现服务的负载均衡和容灾</li>
+<li>同一语言平台的RPC通过共享接口定义来实现</li>
+</ul>
+<h3 id="远程代理对象"><a href="#远程代理对象" class="headerlink" title="远程代理对象"></a>远程代理对象</h3><ul>
+<li>jdk动态代理，突出可读性。实现代理对象一样的接口，并实现代理功能。如统一封装发送远程调用请求</li>
+<li>java动态代理简介<pre><code><br>public interface InvocationHandler{<br>  public Object invoke(Object proxy, Method method, Object[] args);<br>}<br>public class DynamicProxy implements InvocationHandler{<br>  private Object proxy;<br>  public Object invoke(Object proxy, Method method, Object[] args){<pre><code>preProcess();
+Object rs = method.invoke(proxy, args);
+proProcess();
+return rs;
+</code></pre>  }<br>}<br></code></pre></li>
+<li>字节码生成，突出性能</li>
+</ul>
+<h3 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h3><ul>
+<li>协议：TCP、HTTP<ul>
+<li>传输层协议TCP性能更好</li>
+<li>WebService 就是基于HTTP的RPC，具有良好的跨平台性，性能不如TCP</li>
+</ul>
+</li>
+<li>IO方式，使用NIO</li>
+</ul>
+<h3 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h3><ul>
+<li>java<ul>
+<li>Java序列化是对对象的结构和内容的完全描述，所以数据会比较大，但是安全可靠。</li>
+<li>性能差，必须要手动管理serializationUID</li>
+</ul>
+</li>
+<li>protobuf<ul>
+<li>只针对数据进行序列化，数据小，性能高</li>
+<li>通过额外的protobuf配置文件，在序列化和反序列化两方约定数据的格式</li>
+<li>protobuf在数据表示方面也进行了一些技巧来减小数据的大小<ul>
+<li>varint 越小的数字占用的存储越小</li>
+<li>sint 由于有符号负数在计算机中需要用一个很大的数值来表示，这样用上述varint来表示就一定需要5个byte（比使用正常的32bit整型还大）        - optional字段不序列化</li>
+<li>数据类型也用一个WiredType来映射</li>
+</ul>
+</li>
+<li>封包/解包速度<ul>
+<li>XML需要进行复杂的文法词法分析，而protobuf只要简单的将二进制序列按照指定的格式读取到C++对应的结构类型中    </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Hessian<ul>
+<li>hessian相当于一个java和protobuf平衡的方案，省去protobuf的配置文件，在程序逻辑中进行一些数据大小的优化</li>
+<li>着重数据的序列化，简单类型信息会直接附带；复杂类型序列化成Map，包含基本类型描述和数据内容。</li>
+<li>在序列化过程中，如果一个对象之前出现过，hessian会直接插入一个R index这样的块来表示一个引用位置，从而省去再次序列化和反序列化的时间。</li>
+</ul>
+</li>
+<li>一些最佳实践原则<ul>
+<li>子类的field不应该跟父类冲突（相同）</li>
+<li>不论是父类/子类，java序列化必须显示声明serializationUID否则可能会随着代码和环境的变化，产生版本冲到导致的反序列化错误</li>
+<li>引用其它对象时，也要遵从响应的原则</li>
+</ul>
+</li>
+</ul>
+<h3 id="负载均衡（dubbo）"><a href="#负载均衡（dubbo）" class="headerlink" title="负载均衡（dubbo）"></a>负载均衡（dubbo）</h3><ul>
+<li>服务列表。使用zk进行管理，通过zk保证分布式数据的一致性，当服务地址发生变更时，zk要主动通知各client，保证列表的实时性和有效性</li>
+<li>支持手动下线</li>
+<li>选择算法。部分算法支持手动权重调节<ul>
+<li>random</li>
+<li>round robin</li>
+<li>consistent hash，相同参数的请求总是被发送到同一个provider</li>
+<li>least active loadbalance，为provider维护一个未完成的调用数量统计，这样可以使慢的服务得到少的请求</li>
+</ul>
+</li>
+<li>注意路由/负载均衡/failover的区别<ul>
+<li>路由，是根据路由配置选出调用子集（如指定调用最近的机房的provider列表）</li>
+<li>负载均衡，在路由选出来的provider列表中按上述的算法选出一台服务器进行调用</li>
+<li>failover，负载均衡到某台机器，但是这台机器失败时，需要换一个机器</li>
+</ul>
+</li>
+<li>dubbo支持客户使用SPI机制对负载均衡进行定制扩展。</li>
+</ul>
+<h2 id="常见RPC组件"><a href="#常见RPC组件" class="headerlink" title="常见RPC组件"></a>常见RPC组件</h2><h3 id="google-GRPC"><a href="#google-GRPC" class="headerlink" title="google GRPC"></a>google GRPC</h3><h3 id="阿里-dubbo-核心代码"><a href="#阿里-dubbo-核心代码" class="headerlink" title="阿里 dubbo 核心代码"></a>阿里 dubbo 核心代码</h3><ul>
+<li>BeanDefinition。从xml配置文件加载bean定义，用BeanDefinition对象表示，spring先转化得到BeanDefinition列表，再用BeanDefinition对象初始化所有的Bean</li>
+<li>DubboBeanDefinitionParser/BeanDefinitionParser(spring)。DubboBeanDefinitionParser将dubbo配置文件转化为Dubbo相关的BeanDefinition定义</li>
+<li>ReferenceBean/ReferenceConfig。DubboBeanDefinitionParser将bean定义用ReferenceBean和ReferenceConfig来表示，包含了服务接口名、服务器地址url、方法、客户端类型、Invoker等远程调用信息。</li>
+<li>Invoker。封装了远程调用的逻辑，管理具体的Client来向远程服务器发送请求。Invoker 是实体域，它是 Dubbo 的核心模型，其它模型都向它靠扰，或转换成它，它代表一个可执行体，可向它发起 invoke 调用，它有可能是一个本地的实现，也可能是一个远程的实现，也可能一个集群实现。</li>
+<li>Invocation。Invocation 是会话域，它持有调用过程中的变量，比如方法名，参数，同步异步，isoneway等。</li>
+<li>ProxyFactory/JdkProxyFactory/JavaassistProxyFactory。代理对象生成逻辑，JdkProxyFactory使用java动态代理，JavaassistProxyFactory使用字节码生成技术。</li>
+<li>ExchangeClient/Client/EndPoint。执行具体的transport层功能。</li>
+<li>LoadBalance。实现上述具体的负载均衡策略。</li>
+</ul>
+<h3 id="苹果thrift"><a href="#苹果thrift" class="headerlink" title="苹果thrift"></a>苹果thrift</h3><h2 id="其它服务组织"><a href="#其它服务组织" class="headerlink" title="其它服务组织"></a>其它服务组织</h2><h3 id="RESTful"><a href="#RESTful" class="headerlink" title="RESTful"></a>RESTful</h3><ul>
+<li>REST 指的是一组架构约束条件和原则。满足这些约束条件和原则的应用程序或设计就是 RESTful。<ul>
+<li>客户端和服务器间的请求无状态</li>
+<li>分层系统，这表示组件无法了解它与之交互的中间层以外的组件。通过将系统知识限制在单个层，可以限制整个系统的复杂性，促进了底层的独立性。</li>
+<li>资源都使用 URI (Universal Resource Identifier) 得到一个唯一的地址。所有资源都共享统一的接口，以便在客户端和服务器之间传输状态。使用的是标准的 HTTP 方法，比如 GET、PUT、POST 和 DELETE。</li>
+</ul>
+</li>
+</ul>
+<h3 id="REST架构和RPC架构比较"><a href="#REST架构和RPC架构比较" class="headerlink" title="REST架构和RPC架构比较"></a>REST架构和RPC架构比较</h3><ul>
+<li>在 RPC 样式的架构中，关注点在于方法，而在 REST 样式的架构中，关注点在于资源 —— 将使用标准方法检索并操作信息片段（使用表示的形式）</li>
+<li>RESTful的关键是定义可表示流程元素/资源的对象。在REST中，每一个对象都是通过URL来表示的，对象用户负责将状态信息打包进每一条消息内，以便对象的处理总是无状态的。</li>
+<li>RESTful的第二大问题是组合管理及流程绑定。企业对正规的（基于SOAP）SOA最大的反对声之一便是，这种等级的发现和绑定灵活性不足以适应复杂性。    </li>
+</ul>
+<h3 id="microservice"><a href="#microservice" class="headerlink" title="microservice"></a>microservice</h3><h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><ul>
+<li><a href="https://www.ibm.com/developerworks/cn/linux/l-cn-gpb/index.html" target="_blank" rel="external">google protocol buffer使用和原理</a></li>
+<li><a href="https://www.ibm.com/developerworks/community/blogs/3302cc3b-074e-44da-90b1-5055f1dc0d9c/entry/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1_%E7%B3%BB%E5%88%97%E8%AF%BE%E7%A8%8B%E6%9D%A5%E4%BA%86?lang=zh" target="_blank" rel="external">IBM “容器技术和微服务”系列课程 </a> </li>
+<li><a href="http://dubbo.apache.org/zh-cn/blog/dubbo-loadbalance.html" target="_blank" rel="external">dubbo官方负载均衡文档</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/27/SOA方法论/" data-id="cjrrz76p4000171fyyd4xaor5" class="article-share-link">Delen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SOA/">SOA</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/01/27/笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title">笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Labels</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/01/27/SOA方法论/">SOA架构总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/27/笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》/">笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/DevOps核心目标与方法体系/">DevOps核心目标与方法体系</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/20/笔记：redis设计与实现/">笔记：redis设计与实现</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
