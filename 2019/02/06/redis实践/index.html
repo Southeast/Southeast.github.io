@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>redis实践 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="redis实践case阻塞式队列
+命令
+lpop/rpop
+弹出列表key(可以指定多个)的头元素
+lpop [key…]
+
+
+blpop/brpop
+
+弹出列表key(可以指定多个)的头元素，若队列为空则阻塞一定时间或到队列有元素位置。多个阻塞的请求使用FIFO的方式响应。timeout=0则一直阻塞
+blpop [key…] timeout
+实现原理：redis服务器是文件事件和时间事件的双重">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis实践">
+<meta property="og:url" content="http://yoursite.com/2019/02/06/redis实践/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="redis实践case阻塞式队列
+命令
+lpop/rpop
+弹出列表key(可以指定多个)的头元素
+lpop [key…]
+
+
+blpop/brpop
+
+弹出列表key(可以指定多个)的头元素，若队列为空则阻塞一定时间或到队列有元素位置。多个阻塞的请求使用FIFO的方式响应。timeout=0则一直阻塞
+blpop [key…] timeout
+实现原理：redis服务器是文件事件和时间事件的双重">
+<meta property="og:updated_time" content="2019-02-05T16:43:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis实践">
+<meta name="twitter:description" content="redis实践case阻塞式队列
+命令
+lpop/rpop
+弹出列表key(可以指定多个)的头元素
+lpop [key…]
+
+
+blpop/brpop
+
+弹出列表key(可以指定多个)的头元素，若队列为空则阻塞一定时间或到队列有元素位置。多个阻塞的请求使用FIFO的方式响应。timeout=0则一直阻塞
+blpop [key…] timeout
+实现原理：redis服务器是文件事件和时间事件的双重">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-redis实践" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/06/redis实践/" class="article-date">
+  <time datetime="2019-02-05T16:28:00.000Z" itemprop="datePublished">2019-02-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      redis实践
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="redis实践case"><a href="#redis实践case" class="headerlink" title="redis实践case"></a>redis实践case</h2><h3 id="阻塞式队列"><a href="#阻塞式队列" class="headerlink" title="阻塞式队列"></a>阻塞式队列</h3><ul>
+<li>命令<ul>
+<li>lpop/rpop</li>
+<li>弹出列表key(可以指定多个)的头元素</li>
+<li>lpop [key…]</li>
+</ul>
+</li>
+<li><p>blpop/brpop</p>
+<ul>
+<li>弹出列表key(可以指定多个)的头元素，若队列为空则阻塞一定时间或到队列有元素位置。多个阻塞的请求使用FIFO的方式响应。timeout=0则一直阻塞</li>
+<li>blpop [key…] timeout</li>
+<li>实现原理：redis服务器是文件事件和时间事件的双重事件处理器，所以虽然单线程处理文件事件，但是队列为空需要阻塞时，key会被push到名为blocking_keys的dict结构中，当有push操作时，会查找blocking_keys有无对应的key，若有则返回到第一个被阻塞的client</li>
+</ul>
+</li>
+<li><p>rpush/lpush</p>
+<ul>
+<li>将一个或多个值插入队列尾端</li>
+</ul>
+</li>
+<li><p>rpoplpush </p>
+<ul>
+<li>将队列任务直接转移到processing队列，等到process完成再移除processing队列，从而实现at least once保证</li>
+<li>rpoplpush taskqueue processingTaskqueue</li>
+</ul>
+</li>
+<li><p>目标：</p>
+<ul>
+<li>可靠性，是否需要支持分布式事务</li>
+<li>支持什么样的一致性保证（at least once/at most once）</li>
+<li>吞吐量保证</li>
+<li>参考<a href="http://blog.bronto.com/engineering/reliable-queueing-in-redis-part-1/" target="_blank" rel="external">http://blog.bronto.com/engineering/reliable-queueing-in-redis-part-1/</a></li>
+</ul>
+</li>
+<li>我们实际实现时，没有用redis的bpop命令，而是在客户端进行status缓存，每隔一段时间去刷新status，减小阻塞在redis端的线程。使用bpop应该问题也不大</li>
+</ul>
+<h3 id="分布式锁，实现不同时间单位的流量控制"><a href="#分布式锁，实现不同时间单位的流量控制" class="headerlink" title="分布式锁，实现不同时间单位的流量控制"></a>分布式锁，实现不同时间单位的流量控制</h3><ul>
+<li>命令<ul>
+<li>incr/incrby</li>
+<li>decr/decrby</li>
+<li>原子的对一个key进行加减操作</li>
+<li>incr/decr key</li>
+<li>incrby/decrby key amount</li>
+</ul>
+</li>
+</ul>
+<h2 id="redis实践问题"><a href="#redis实践问题" class="headerlink" title="redis实践问题"></a>redis实践问题</h2><h3 id="缓存倾斜"><a href="#缓存倾斜" class="headerlink" title="缓存倾斜"></a>缓存倾斜</h3><ul>
+<li>hot key造成的集群访问量倾斜<ul>
+<li>hot key是指一段时间内，某些访问量远远高于其它redis key的key，导致大部分的访问流量都落在hot key所在的slot/redis节点，常见的hot key场景有：</li>
+<li><ol>
+<li>库存系统/秒杀系统中，最热门的商品信息或库存</li>
+</ol>
+</li>
+<li><ol>
+<li>新闻应用之中的热点新闻</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>方案：</p>
+<ul>
+<li>一、本地缓存，考虑两个问题：<ul>
+<li>hot key过多时，本地缓存是否会过大</li>
+<li>本地缓存同redis数据的一致性</li>
+</ul>
+</li>
+<li>二、利用分片算法特性，将key进行打散处理<ul>
+<li>在hot key上增加后缀/前缀，一般数量是集群节点数量N <em> 指定倍数M个tmp key，这N</em> M个tmp key分摊到不同的实例上，将访问量均摊到所有实例。一份数据变成了N*M+1份，多分数据之间的一致性保证就是一件高成本的事情，因此写多读少的场景可能不适合</li>
+<li>N*M个tmp key备份数据要随机使用不同的缓存时间（随机），防止tmp key同时失效造成缓存雪崩，这是一种通过坡度过期的方式避免雪崩的思路</li>
+<li>tmp key的前缀后缀策略，注意twemproxy的计算分片时，越靠前的字符权重越大，越靠后的字符权重越小，因此当key特别长时，加后缀有可能起不到分散到不同节点的作用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>big key造成集群的数据量倾斜</p>
+<ul>
+<li>big key是指数据大小远大于其它key，导致分片之后，big key所在（量大）的节点内存使用量远大于其它实例，造成内存不足，拖累集群。常见的big key场景由：</li>
+<li><ol>
+<li>论坛中大型持久盖楼活动</li>
+</ol>
+</li>
+<li><ol>
+<li>聊天系统中热门聊天室的消息列表</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>方案：对数据进行拆分（数据必须是可拆分的列表、set等）</p>
+<ul>
+<li>一、hset，将key的内容打散到不同的实例中</li>
+<li>二、list，将list拆分成子list</li>
+</ul>
+</li>
+<li><p>既是big key也是hot key</p>
+<ul>
+<li><ol>
+<li>考虑是否适合redis存储</li>
+</ol>
+</li>
+<li><ol>
+<li>可否迁出集群，采用master+replication/读写分离的方式来存储</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>如何发现hot key和big key</p>
+<ul>
+<li>一、基于业务预判</li>
+<li>二、监控<ul>
+<li><ol>
+<li>在应用程序端进行收集</li>
+</ol>
+</li>
+<li><ol>
+<li>在proxy层进行redis请求的收集（推荐）</li>
+</ol>
+</li>
+<li><ol>
+<li>在redis实例上使用monitor统计热点key（高并发时产生的overhead过高）</li>
+</ol>
+</li>
+<li><ol>
+<li>对redis端口进行数据抓包</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>自动处理</p>
+<ul>
+<li><ol>
+<li>发现big key和hot key，进行报警</li>
+</ol>
+</li>
+<li><ol>
+<li>自动处理big key和hot key，例如建立一套中间层，升级为big key或hot key的key访问，转为hot key/big key方式的访问</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="缓存雪崩问题"><a href="#缓存雪崩问题" class="headerlink" title="缓存雪崩问题"></a>缓存雪崩问题</h3><ul>
+<li>第一种：大量缓存几种在某一个时间段失效</li>
+<li>解决方案：<ul>
+<li><ol>
+<li>缓存访问流控(只允许一个线程穿透到数据库，通过JVM同步或者分布式同步实现)，</li>
+</ol>
+</li>
+<li><ol>
+<li>缓存坡度过期策略（不同的key使用不同的缓存过期时间，例如在基础有效时长上加一个随机数，这个随机数越大，以为着坡度越大，缓冲器越长，压力就会越小）</li>
+</ol>
+</li>
+<li><ol>
+<li>在缓存更新时间与缓存过期时间之间增加容忍期，相当于缓存永远不会失效，那当然不会有雪崩问题</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>第二种：或者缓存服务器宕机/hot key失效，导致并发访问在短时间内几种到数据库后端系统<ul>
+<li><ol>
+<li>通过HA架构提高缓存服务的可靠性</li>
+</ol>
+</li>
+<li><ol>
+<li>数据库保护性访问流控（保护了数据库和依赖数据库的其它业务，但是当前业务的可用性收到影响），</li>
+</ol>
+</li>
+<li><ol>
+<li>当遇到缓存服务器宕机/hot key失效这些场景，只能进行保护性降级，熔断-&gt;限流-&gt;隔离</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="缓存穿透问题"><a href="#缓存穿透问题" class="headerlink" title="缓存穿透问题"></a>缓存穿透问题</h3><ul>
+<li>并发很高的场景下，某个key没有在缓存中，短时间内对该key的大量并发访问就会全部穿透到数据库中，或者大量非法/无效的key被同时访问，对后端造成很大的压力，被称为缓存穿透</li>
+<li><p>解决方案</p>
+<ul>
+<li><ol>
+<li>布隆过滤器，空key缓存/key existing判断（bitmap存储），或者直接怼查询过的空key加入到缓存</li>
+</ol>
+</li>
+<li><ol>
+<li>对key做按规则的过滤</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>缓存与db数据的一致性保证</p>
+<ul>
+<li><ol>
+<li>数据库更新时同步更新，监听binlog异步更新</li>
+</ol>
+</li>
+<li><ol>
+<li>以库存为例，直接使用缓存做更新，redis可以通过incr和decr操作判断库存是否足够，并直接完成库存扣减。无论是db扣减还是缓存扣减，都要使用增量方式完成。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><ul>
+<li><a href="https://segmentfault.com/a/1190000017387491" target="_blank" rel="external">link1</a></li>
+<li><a href="https://zhangxh20.github.io/2017/09/04/redis/cacheCollapse/" target="_blank" rel="external">link2</a></li>
+<li><a href="https://yq.aliyun.com/articles/540337" target="_blank" rel="external">link3</a></li>
+<li><a href="https://www.jishuwen.com/d/2Hnm" target="_blank" rel="external">link4</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/06/redis实践/" data-id="cjrrzufsh00009vfycyo6gobn" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/01/27/SOA方法论/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ancien</strong>
+      <div class="article-nav-title">SOA架构总结</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Mot-clés</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Nuage de mot-clés</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Articles récents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/02/06/redis实践/">redis实践</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/27/SOA方法论/">SOA架构总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/27/笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》/">笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/DevOps核心目标与方法体系/">DevOps核心目标与方法体系</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
