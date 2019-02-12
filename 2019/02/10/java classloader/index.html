@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>java classloader详解 | Life Career</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="概述
+classloader是用来加载 Class 的。它负责将Class 的字节码形式转换成内存形式的 Class 对象。字节码可以来自于磁盘文件 .class，也可以是 jar 包里的 .class，也可以来自远程服务器提供的字节流，字节码的本质就是一个字节数组 []byte，它有特定的复杂的内部格式。
+JVM 运行并不是一次性加载所需要的全部类的，它是按需加载，也就是延迟加载。程序在运行的过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java classloader详解">
+<meta property="og:url" content="http://yoursite.com/2019/02/10/java classloader/index.html">
+<meta property="og:site_name" content="Life Career">
+<meta property="og:description" content="概述
+classloader是用来加载 Class 的。它负责将Class 的字节码形式转换成内存形式的 Class 对象。字节码可以来自于磁盘文件 .class，也可以是 jar 包里的 .class，也可以来自远程服务器提供的字节流，字节码的本质就是一个字节数组 []byte，它有特定的复杂的内部格式。
+JVM 运行并不是一次性加载所需要的全部类的，它是按需加载，也就是延迟加载。程序在运行的过">
+<meta property="og:image" content="http://yoursite.com/../images/classloader.png">
+<meta property="og:image" content="http://yoursite.com/../images/jvm_classloader.jpg">
+<meta property="og:image" content="http://yoursite.com/../images/classloader_parent_delegate.png">
+<meta property="og:updated_time" content="2019-02-10T16:49:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java classloader详解">
+<meta name="twitter:description" content="概述
+classloader是用来加载 Class 的。它负责将Class 的字节码形式转换成内存形式的 Class 对象。字节码可以来自于磁盘文件 .class，也可以是 jar 包里的 .class，也可以来自远程服务器提供的字节流，字节码的本质就是一个字节数组 []byte，它有特定的复杂的内部格式。
+JVM 运行并不是一次性加载所需要的全部类的，它是按需加载，也就是延迟加载。程序在运行的过">
+<meta name="twitter:image" content="http://yoursite.com/../images/classloader.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Life Career" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Life Career</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-java classloader" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/10/java classloader/" class="article-date">
+  <time datetime="2019-02-10T12:28:00.000Z" itemprop="datePublished">2019-02-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      java classloader详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li>classloader是用来加载 Class 的。它负责<font color="red">将Class 的字节码形式转换成内存形式的 Class 对象</font>。字节码可以来自于磁盘文件 <em>.class，也可以是 jar 包里的 </em>.class，也可以来自远程服务器提供的字节流，字节码的本质就是一个字节数组 []byte，它有特定的复杂的内部格式。</li>
+<li>JVM 运行并不是一次性加载所需要的全部类的，它是按需加载，也就是<font color="red">延迟加载</font>。程序在运行的过程中会逐渐遇到很多不认识的新类，这时候就会调用 ClassLoader 来加载这些类。加载完成后就会将 Class 对象存在 ClassLoader 里面，下次就不需要重新加载了。</li>
+<li><font color="red">虚拟机使用调用者 Class 对象的 ClassLoader 来加载当前未知的类。</font></li>
+<li>类名和classloader都相同，jvm才会视为同一个类（同一个Class对象）</li>
+<li>classLoader功能：<img src="../images/classloader.png" alt="image"></li>
+<li>核心方法<pre><code><br>package java.lang;<br>public abstract class ClassLoader {<br>  public Class loadClass(String name);<br>  protected Class defineClass(byte[] b);<br>  public URL getResource(String name);<br>  public Enumeration getResources(String name);<br>  public ClassLoader getParent();<br>}<br></code></pre></li>
+</ul>
+<h2 id="classloader设计思路"><a href="#classloader设计思路" class="headerlink" title="classloader设计思路"></a>classloader设计思路</h2><h3 id="jvm-classloader"><a href="#jvm-classloader" class="headerlink" title="jvm classloader"></a>jvm classloader</h3><ul>
+<li>Bootstrap Classloader<ul>
+<li>Bootstrap Classloader本身没有parent加载器，但是可以用作其它Classloader实例的parent classloader</li>
+<li>加载jvm运行时核心类库JAVA_HOME/lib/rt.jar中的java.util,java.nio,java.lang等</li>
+</ul>
+</li>
+<li>ExtClassLoader<ul>
+<li>负责加载jvm扩展类，位于 JAVA_HOME/lib/ext/*.jar中的类</li>
+<li>parent是Bootstrap Classloader</li>
+</ul>
+</li>
+<li>AppClassLoader<ul>
+<li>直接面向用户端的classloader，加载Classpath环境变量里定义的路径中的jar包和目录。我们自己的代码及二方/三方jar包通常都是这个类加载器加载</li>
+<li>parent是ExtClassLoader</li>
+</ul>
+</li>
+<li>类图结构 <img src="../images/jvm_classloader.jpg" alt="image"></li>
+</ul>
+<h3 id="双亲委派模式"><a href="#双亲委派模式" class="headerlink" title="双亲委派模式"></a>双亲委派模式</h3><ul>
+<li>什么是双亲委派<ul>
+<li>当一个ClassLoader实例需要加载某个类时，<ul>
+<li><ol>
+<li>首先由最顶层的类加载器Bootstrap ClassLoader试图加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果没加载到，则把任务转交给Extension ClassLoader试图加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果也没加载到，则转交给App ClassLoader 进行加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果它也没有加载得到的话，则返回给委托的发起者，由它到指定的文件系统或网络等URL中加载该类</li>
+</ol>
+</li>
+<li><ol>
+<li>如果它们都没有加载到这个类时，则抛出ClassNotFoundException异常</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>委派关系示意图<img src="../images/classloader_parent_delegate.png" alt="image"></li>
+</ul>
+</li>
+<li>为什么使用双亲委派<ul>
+<li>避免重复加载，当父亲已经加载了该类的时候，就没有必要子ClassLoader再加载一次</li>
+<li>安全性考虑，避免核心类库功能被随意替代</li>
+</ul>
+</li>
+</ul>
+<h3 id="Thread-contextClassLoader"><a href="#Thread-contextClassLoader" class="headerlink" title="Thread.contextClassLoader"></a>Thread.contextClassLoader</h3><ul>
+<li>SPI 的接口由 Java 核心库来提供，而这些 SPI 的实现代码则是作为 Java 应用所依赖的 jar 包被包含进类路径（CLASSPATH）里。SPI接口中的代码经常需要加载具体的实现类。那么问题来了，SPI的接口是Java核心库的一部分，是由<strong>启动类加载器(Bootstrap Classloader)来加载的；SPI的实现类是由系统类加载器(System ClassLoader)</strong>来加载的。</li>
+<li>Bootstrap Classloader是无法找到 SPI 的实现类的，因为依照双亲委派模型，BootstrapClassloader无法委派AppClassLoader来加载类。</li>
+<li>而线程上下文类加载器破坏了“双亲委派模型”，可以在执行线程中抛弃双亲委派加载链模式，使程序可以逆向使用类加载器。</li>
+<li>两种使用场景<ul>
+<li><ol>
+<li>SPI。当高层提供了统一接口让低层去实现，同时又要是在高层加载（或实例化）低层的类时，必须通过线程上下文类加载器来帮助高层的ClassLoader找到并加载该类。</li>
+</ol>
+</li>
+<li><ol>
+<li>当使用本类托管类加载，然而加载本类的ClassLoader未知时，为了隔离不同的调用者，可以取调用者各自的线程上下文类加载器代为托管。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="classloader应用"><a href="#classloader应用" class="headerlink" title="classloader应用"></a>classloader应用</h2><h3 id="自定义从远程文件创建class对象"><a href="#自定义从远程文件创建class对象" class="headerlink" title="自定义从远程文件创建class对象"></a>自定义从远程文件创建class对象</h3><ul>
+<li><pre><code>
+public class NetworkClassLoader extends ClassLoader {  
+  private String rootUrl;  
+  @Override 
+  protected Class<?> findClass(String name) throws ClassNotFoundException {  
+      Class clazz = null;//this.findLoadedClass(name); // 父类已加载     
+      //if (clazz == null) {  //检查该类是否已被加载过  
+          byte[] classData = getClassData(name);  //根据类的二进制名称,获得该class文件的字节码数组  
+          if (classData == null) {  
+              throw new ClassNotFoundException();  
+          }  
+          clazz = defineClass(name, classData, 0, classData.length);  //将class的字节码数组转换成Class类的实例  
+      //}   
+      return clazz;  
+  }  
+  private byte[] getClassData(String name) {  
+      InputStream is = null;  
+      String path = classNameToPath(name);  
+      URL url = new URL(path);  
+      byte[] buff = new byte[1024*4];  
+      int len = -1;  
+      is = url.openStream();  
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+      while((len = is.read(buff)) != -1) {  
+          baos.write(buff,0,len);  
+      }  
+      return baos.toByteArray();  
+  }   
+  private String classNameToPath(String name) {  
+      return rootUrl + "/" + name.replace(".", "/") + ".class";  
+  }  
+}
+</code></pre>
+
+</li>
+</ul>
+<h3 id="dubbo-中的classloader"><a href="#dubbo-中的classloader" class="headerlink" title="dubbo 中的classloader"></a>dubbo 中的classloader</h3><h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="https://www.jianshu.com/p/c3a49a4b2efb" target="_blank" rel="external">Java ClassLoader 透析</a></li>
+<li><a href="https://www.jianshu.com/p/6e5c2b463b2a" target="_blank" rel="external">深入分析Java ClassLoader原理</a></li>
+<li><a href="https://blog.csdn.net/yangcheng33/article/details/52631940" target="_blank" rel="external">真正理解线程上下文类加载器（多案例分析）</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/10/java classloader/" data-id="cjs1hnfbt0000sxfylkrp1d0t" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/classloader/">classloader</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/02/06/redis实践/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ancien</strong>
+      <div class="article-nav-title">redis实践</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Mot-clés</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/classloader/">classloader</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Nuage de mot-clés</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/classloader/" style="font-size: 10px;">classloader</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/jvm/" style="font-size: 10px;">jvm</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Articles récents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/02/10/java classloader/">java classloader详解</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/06/redis实践/">redis实践</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/27/SOA方法论/">SOA架构总结</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/27/笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》/">笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 SeventyNine<br>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

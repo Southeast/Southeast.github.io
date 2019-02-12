@@ -61,6 +61,162 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-java classloader" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/10/java classloader/" class="article-date">
+  <time datetime="2019-02-10T12:28:00.000Z" itemprop="datePublished">2019-02-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/02/10/java classloader/">java classloader详解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li>classloader是用来加载 Class 的。它负责<font color="red">将Class 的字节码形式转换成内存形式的 Class 对象</font>。字节码可以来自于磁盘文件 <em>.class，也可以是 jar 包里的 </em>.class，也可以来自远程服务器提供的字节流，字节码的本质就是一个字节数组 []byte，它有特定的复杂的内部格式。</li>
+<li>JVM 运行并不是一次性加载所需要的全部类的，它是按需加载，也就是<font color="red">延迟加载</font>。程序在运行的过程中会逐渐遇到很多不认识的新类，这时候就会调用 ClassLoader 来加载这些类。加载完成后就会将 Class 对象存在 ClassLoader 里面，下次就不需要重新加载了。</li>
+<li><font color="red">虚拟机使用调用者 Class 对象的 ClassLoader 来加载当前未知的类。</font></li>
+<li>类名和classloader都相同，jvm才会视为同一个类（同一个Class对象）</li>
+<li>classLoader功能：<img src="../images/classloader.png" alt="image"></li>
+<li>核心方法<pre><code><br>package java.lang;<br>public abstract class ClassLoader {<br>  public Class loadClass(String name);<br>  protected Class defineClass(byte[] b);<br>  public URL getResource(String name);<br>  public Enumeration getResources(String name);<br>  public ClassLoader getParent();<br>}<br></code></pre></li>
+</ul>
+<h2 id="classloader设计思路"><a href="#classloader设计思路" class="headerlink" title="classloader设计思路"></a>classloader设计思路</h2><h3 id="jvm-classloader"><a href="#jvm-classloader" class="headerlink" title="jvm classloader"></a>jvm classloader</h3><ul>
+<li>Bootstrap Classloader<ul>
+<li>Bootstrap Classloader本身没有parent加载器，但是可以用作其它Classloader实例的parent classloader</li>
+<li>加载jvm运行时核心类库JAVA_HOME/lib/rt.jar中的java.util,java.nio,java.lang等</li>
+</ul>
+</li>
+<li>ExtClassLoader<ul>
+<li>负责加载jvm扩展类，位于 JAVA_HOME/lib/ext/*.jar中的类</li>
+<li>parent是Bootstrap Classloader</li>
+</ul>
+</li>
+<li>AppClassLoader<ul>
+<li>直接面向用户端的classloader，加载Classpath环境变量里定义的路径中的jar包和目录。我们自己的代码及二方/三方jar包通常都是这个类加载器加载</li>
+<li>parent是ExtClassLoader</li>
+</ul>
+</li>
+<li>类图结构 <img src="../images/jvm_classloader.jpg" alt="image"></li>
+</ul>
+<h3 id="双亲委派模式"><a href="#双亲委派模式" class="headerlink" title="双亲委派模式"></a>双亲委派模式</h3><ul>
+<li>什么是双亲委派<ul>
+<li>当一个ClassLoader实例需要加载某个类时，<ul>
+<li><ol>
+<li>首先由最顶层的类加载器Bootstrap ClassLoader试图加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果没加载到，则把任务转交给Extension ClassLoader试图加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果也没加载到，则转交给App ClassLoader 进行加载</li>
+</ol>
+</li>
+<li><ol>
+<li>如果它也没有加载得到的话，则返回给委托的发起者，由它到指定的文件系统或网络等URL中加载该类</li>
+</ol>
+</li>
+<li><ol>
+<li>如果它们都没有加载到这个类时，则抛出ClassNotFoundException异常</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>委派关系示意图<img src="../images/classloader_parent_delegate.png" alt="image"></li>
+</ul>
+</li>
+<li>为什么使用双亲委派<ul>
+<li>避免重复加载，当父亲已经加载了该类的时候，就没有必要子ClassLoader再加载一次</li>
+<li>安全性考虑，避免核心类库功能被随意替代</li>
+</ul>
+</li>
+</ul>
+<h3 id="Thread-contextClassLoader"><a href="#Thread-contextClassLoader" class="headerlink" title="Thread.contextClassLoader"></a>Thread.contextClassLoader</h3><ul>
+<li>SPI 的接口由 Java 核心库来提供，而这些 SPI 的实现代码则是作为 Java 应用所依赖的 jar 包被包含进类路径（CLASSPATH）里。SPI接口中的代码经常需要加载具体的实现类。那么问题来了，SPI的接口是Java核心库的一部分，是由<strong>启动类加载器(Bootstrap Classloader)来加载的；SPI的实现类是由系统类加载器(System ClassLoader)</strong>来加载的。</li>
+<li>Bootstrap Classloader是无法找到 SPI 的实现类的，因为依照双亲委派模型，BootstrapClassloader无法委派AppClassLoader来加载类。</li>
+<li>而线程上下文类加载器破坏了“双亲委派模型”，可以在执行线程中抛弃双亲委派加载链模式，使程序可以逆向使用类加载器。</li>
+<li>两种使用场景<ul>
+<li><ol>
+<li>SPI。当高层提供了统一接口让低层去实现，同时又要是在高层加载（或实例化）低层的类时，必须通过线程上下文类加载器来帮助高层的ClassLoader找到并加载该类。</li>
+</ol>
+</li>
+<li><ol>
+<li>当使用本类托管类加载，然而加载本类的ClassLoader未知时，为了隔离不同的调用者，可以取调用者各自的线程上下文类加载器代为托管。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="classloader应用"><a href="#classloader应用" class="headerlink" title="classloader应用"></a>classloader应用</h2><h3 id="自定义从远程文件创建class对象"><a href="#自定义从远程文件创建class对象" class="headerlink" title="自定义从远程文件创建class对象"></a>自定义从远程文件创建class对象</h3><ul>
+<li><pre><code>
+public class NetworkClassLoader extends ClassLoader {  
+  private String rootUrl;  
+  @Override 
+  protected Class<?> findClass(String name) throws ClassNotFoundException {  
+      Class clazz = null;//this.findLoadedClass(name); // 父类已加载     
+      //if (clazz == null) {  //检查该类是否已被加载过  
+          byte[] classData = getClassData(name);  //根据类的二进制名称,获得该class文件的字节码数组  
+          if (classData == null) {  
+              throw new ClassNotFoundException();  
+          }  
+          clazz = defineClass(name, classData, 0, classData.length);  //将class的字节码数组转换成Class类的实例  
+      //}   
+      return clazz;  
+  }  
+  private byte[] getClassData(String name) {  
+      InputStream is = null;  
+      String path = classNameToPath(name);  
+      URL url = new URL(path);  
+      byte[] buff = new byte[1024*4];  
+      int len = -1;  
+      is = url.openStream();  
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+      while((len = is.read(buff)) != -1) {  
+          baos.write(buff,0,len);  
+      }  
+      return baos.toByteArray();  
+  }   
+  private String classNameToPath(String name) {  
+      return rootUrl + "/" + name.replace(".", "/") + ".class";  
+  }  
+}
+</code></pre>
+
+</li>
+</ul>
+<h3 id="dubbo-中的classloader"><a href="#dubbo-中的classloader" class="headerlink" title="dubbo 中的classloader"></a>dubbo 中的classloader</h3><h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="https://www.jianshu.com/p/c3a49a4b2efb" target="_blank" rel="external">Java ClassLoader 透析</a></li>
+<li><a href="https://www.jianshu.com/p/6e5c2b463b2a" target="_blank" rel="external">深入分析Java ClassLoader原理</a></li>
+<li><a href="https://blog.csdn.net/yangcheng33/article/details/52631940" target="_blank" rel="external">真正理解线程上下文类加载器（多案例分析）</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/10/java classloader/" data-id="cjs1hnfbt0000sxfylkrp1d0t" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/classloader/">classloader</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jvm/">jvm</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-redis实践" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/02/06/redis实践/" class="article-date">
@@ -874,7 +1030,9 @@ return rs;
 </li>
 </ul>
 <h3 id="重入锁ReentrantLock"><a href="#重入锁ReentrantLock" class="headerlink" title="重入锁ReentrantLock"></a>重入锁ReentrantLock</h3><ul>
-<li>线程不会被自己阻塞。当前线程可以重复修改state（条件与其它线程不一致）<br>读写锁ReadWriteLock</li>
+<li>线程不会被自己阻塞。当前线程可以重复修改state（条件与其它线程不一致）</li>
+</ul>
+<h3 id="读写锁ReadWriteLock"><a href="#读写锁ReadWriteLock" class="headerlink" title="读写锁ReadWriteLock"></a>读写锁ReadWriteLock</h3><ul>
 <li>readLock()、writeLock()</li>
 <li>一个变量维护多种状态，使用按位切割使用的方法</li>
 </ul>
@@ -980,6 +1138,11 @@ return rs;
 <li>必须先获取锁，才能通过wait/notify，如果锁是排他的，这会不会没有意义？wait操作会释放其对应的锁！！</li>
 <li>producer/consumer中的生产和消费者怎样实现公平策略（先被阻塞的线程在notify之后先执行）？增加同步队列，从队列中完成调度，而不依赖CPU的调度。例如AQS中当前线程执行后，通过队列链表唤醒后续节点unparkSuccessor(h)</li>
 <li>Java为什么效率比其它语言高？垃圾回收、简单易用的并发组件（thanks to Doug Lea）</li>
+<li>一些并发最佳实践原则：<ul>
+<li>给线程起可追踪的名字，包括单个线程，线程池</li>
+<li></li>
+</ul>
+</li>
 </ul>
 
       
@@ -1054,6 +1217,58 @@ return rs;
 <li>让开发者自行完成大部分工作</li>
 </ul>
 </li>
+</ul>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><h3 id="jenkins实现持续发布"><a href="#jenkins实现持续发布" class="headerlink" title="jenkins实现持续发布"></a>jenkins实现持续发布</h3><ul>
+<li>tomcat发布<ul>
+<li>服务上下线</li>
+<li>负载均衡上下线</li>
+<li>服务检测</li>
+</ul>
+</li>
+<li>前端发布<ul>
+<li>资源上线</li>
+<li>cdn同步</li>
+</ul>
+</li>
+<li>脚本/配置发布<ul>
+<li>git统一管理代码和配置 </li>
+<li>启动脚本同步</li>
+<li>系统配置/etc/hosts</li>
+<li>elk配置 logstash配置，elasticsearch配置 </li>
+<li>服务器列表</li>
+</ul>
+</li>
+</ul>
+<h3 id="icinga集群实现系统监控报表"><a href="#icinga集群实现系统监控报表" class="headerlink" title="icinga集群实现系统监控报表"></a>icinga集群实现系统监控报表</h3><ul>
+<li>redis集群监控<ul>
+<li>shell命令自动化生成redis节点监控配置，共计约1000个节点</li>
+<li>集群模式，1master，16个worker，防止load过高问题</li>
+<li>监控属性配置，服务状态、连接数、内存、碎片率、命中数、CPU使用率</li>
+<li>短信报警</li>
+</ul>
+</li>
+<li>ecs基础监控<ul>
+<li>磁盘/CPU/内存</li>
+<li>ecs自带报警</li>
+</ul>
+</li>
+<li>tomcat服务器监控</li>
+<li>监控策略    <ul>
+<li>下线配置</li>
+<li>报警策略</li>
+</ul>
+</li>
+</ul>
+<h3 id="ELK业务监控报表"><a href="#ELK业务监控报表" class="headerlink" title="ELK业务监控报表"></a>ELK业务监控报表</h3><ul>
+<li>异常日志监控</li>
+<li>抓取监控，时间、状态、各业务线各代理商的时间和状态</li>
+<li>数据访问层监控（执行时间，异常）</li>
+</ul>
+<h3 id="自动化shell脚本"><a href="#自动化shell脚本" class="headerlink" title="自动化shell脚本"></a>自动化shell脚本</h3><ul>
+<li>发布脚本appctl.sh appctl1.sh appctl2.sh</li>
+<li>ssh-key免登</li>
+<li>测试环境相关脚本</li>
+<li>icinga集群部署脚本，自动生成监控文件</li>
 </ul>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
 <li><a href="https://www.infoq.cn/article/detail-analysis-of-devops" target="_blank" rel="external">detail-analysis-of-devops</a></li>
@@ -2104,102 +2319,6 @@ match =&gt; { &quot;message&quot; =&gt; [&quot;%{JAVA_EXCEPTION_SIGNATURE:except
 
 
   
-    <article id="post-旅行基础数据搜索" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/12/20/旅行基础数据搜索/" class="article-date">
-  <time datetime="2018-12-20T09:40:59.000Z" itemprop="datePublished">2018-12-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="旅行基础数据搜索"><a href="#旅行基础数据搜索" class="headerlink" title="旅行基础数据搜索"></a>旅行基础数据搜索</h1><ul>
-<li>支持旅行基础数据的全文搜索</li>
-<li>支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等</li>
-<li>支持的行业数据包括<ul>
-<li>地理数据：国家/地区/省份/城市</li>
-<li>POI数据：餐厅/景点/地标/酒店</li>
-</ul>
-</li>
-</ul>
-<h2 id="索引构建"><a href="#索引构建" class="headerlink" title="索引构建"></a>索引构建</h2><ul>
-<li>使用logstash <a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="external">jdbc input plugin</a>从数据库导入数据</li>
-<li>数据导入。配置驱动、user、password、sql</li>
-<li>指定doc_id保证数据唯一性，比如用表明+id拼一个字段作为document_id，在elasticsearch output插件中指定document_id，防止数据重复导入</li>
-<li>定时调度。配置schedule语句</li>
-<li>实现示例<pre><code><br>jdbc {<pre><code>jdbc_driver_library =&gt; &quot;/home/jdy/jdy-elk/logstash-5.3.0/vendor/jdbc/mysql-connector-java-5.1.35.jar&quot;
-jdbc_driver_class =&gt; &quot;com.mysql.jdbc.Driver&quot;
-jdbc_connection_string =&gt; &quot;jdbc:mysql://59.110.207.194:3306/mytrip_basic&quot;
-jdbc_user =&gt; &quot;jdy_db_admin&quot;
-jdbc_password =&gt; &quot;******&quot;
-schedule =&gt; &quot;0 * * * * &quot;
-statement =&gt; &quot;SELECT p.*, c.name as countryName, &apos;province&apos; as table_name, CONCAT(&apos;PROVINCE-&apos;, provinceID) as doc_id FROM mytrip_basic.sys_province p le
-</code></pre>ft join mytrip_basic.sys_country c on p.countryID=c.countryID where provinceID in (29)”<br>}<br>filter {<br>}<br>output {<br>  elasticsearch {<pre><code>hosts =&gt; &quot;10.30.137.118:9200&quot;
-document_id =&gt; &quot;%{[doc_id]}&quot;
-index =&gt; &quot;logstash-jdbc-basic&quot;
-</code></pre>  }<br>}<br></code></pre></li>
-</ul>
-<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><ul>
-<li>主要的查询语法<ul>
-<li>Match Query。全文检索（full text query），ES会先对请求进行解析(analyze)，得到多个单独的词汇，逐个查询并综合评分，相当于google的搜索机制</li>
-<li>Term Query。直接查询单独的term（要求term完全匹配），主要针对结构化的数据，例如数字、日期、枚举等，这些字段都是.keyword类型的field。</li>
-<li>Bool组合。对多个Match Query和/或TermQuery进行组合查询</li>
-</ul>
-</li>
-<li>前缀查询<ul>
-<li>对Term Query可以支持前缀查询，尤其用户输入过程中一般要实现类似提示的效果，需要通过前缀查询进行支持</li>
-<li>filter。相比Query，filter可以省去评分计算等过程，比Query的速度要更快，因此在不需要评分的场景应尽量使用filter替代query</li>
-</ul>
-</li>
-<li>大小写处理。<ul>
-<li>通过jdbc input插件的lowercase_column_names选项，指定想要小写处理的表属性    - 如果不使用动态mapping（dynamic mapping），可以通过ES mapping，指定某些字段为小写，之后用小写查询</li>
-<li>注意需要显示指定某些字段进行小写处理，有些大小写混用的id类属性，全部转为小写会造成数据错误，例如服务器的hostName，Base64编码的属性等</li>
-<li>我们在实际处理过程中没有改变存储的大小写，而是针对属性值的实际情况将查询串进行特殊处理（如小写、大写、首字母大写等）</li>
-</ul>
-</li>
-<li>全拼音/拼音首字母<ul>
-<li>有条件的进行拼音手工维护，能够保证准确率，如beijing，bj，shanghai，shh</li>
-<li>通过github一些资源来生成拼音</li>
-</ul>
-</li>
-<li>Boost设置。boost&gt;1可以增加某一子查询的评分重要程度。例如，我们认为在查询过程中name匹配应该比其他内容的匹配更重要，因此我们把name的boost设置为5.0</li>
-<li>完整的查询方案<pre><code><br>{<br>  “query”: {<pre><code>&quot;filter&quot;: [
-    {&quot;term&quot;: {&quot;table_name&quot;: &quot;hotel&quot;} }
-],
-&quot;bool: {
-    &quot;should: [
-        {&quot;match&quot;: {&quot;name&quot;: {&quot;query&quot;: keyword, &quot;operator&quot;: &quot;or&quot;}}},
-        {&quot;match&quot;: {&quot;enname&quot;: keyword}},
-        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordLowerCase}},
-        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordLowerCase}},
-        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
-        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
-        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordFirstCapital}},
-        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordFirstCapital}},
-        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}},
-        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}}
-    ]
-},
-&quot;minimum_should_match&quot;: 1
-</code></pre>  },<br>  “size”:200,<br>  “_source”: true<br>}<br></code></pre></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Partager</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -2216,7 +2335,7 @@ index =&gt; &quot;logstash-jdbc-basic&quot;
   <div class="widget-wrap">
     <h3 class="widget-title">Mot-clés</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/classloader/">classloader</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -2226,7 +2345,7 @@ index =&gt; &quot;logstash-jdbc-basic&quot;
   <div class="widget-wrap">
     <h3 class="widget-title">Nuage de mot-clés</h3>
     <div class="widget tagcloud">
-      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/classloader/" style="font-size: 10px;">classloader</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/jvm/" style="font-size: 10px;">jvm</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -2248,6 +2367,10 @@ index =&gt; &quot;logstash-jdbc-basic&quot;
       <ul>
         
           <li>
+            <a href="/2019/02/10/java classloader/">java classloader详解</a>
+          </li>
+        
+          <li>
             <a href="/2019/02/06/redis实践/">redis实践</a>
           </li>
         
@@ -2261,10 +2384,6 @@ index =&gt; &quot;logstash-jdbc-basic&quot;
         
           <li>
             <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
-          </li>
-        
-          <li>
-            <a href="/2019/01/26/DevOps核心目标与方法体系/">DevOps核心目标与方法体系</a>
           </li>
         
       </ul>

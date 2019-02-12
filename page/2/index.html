@@ -61,6 +61,102 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-旅行基础数据搜索" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/12/20/旅行基础数据搜索/" class="article-date">
+  <time datetime="2018-12-20T09:40:59.000Z" itemprop="datePublished">2018-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="旅行基础数据搜索"><a href="#旅行基础数据搜索" class="headerlink" title="旅行基础数据搜索"></a>旅行基础数据搜索</h1><ul>
+<li>支持旅行基础数据的全文搜索</li>
+<li>支持数据全部属性的搜索，包括名称、拼音、简拼、英文名称、内容介绍等</li>
+<li>支持的行业数据包括<ul>
+<li>地理数据：国家/地区/省份/城市</li>
+<li>POI数据：餐厅/景点/地标/酒店</li>
+</ul>
+</li>
+</ul>
+<h2 id="索引构建"><a href="#索引构建" class="headerlink" title="索引构建"></a>索引构建</h2><ul>
+<li>使用logstash <a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="external">jdbc input plugin</a>从数据库导入数据</li>
+<li>数据导入。配置驱动、user、password、sql</li>
+<li>指定doc_id保证数据唯一性，比如用表明+id拼一个字段作为document_id，在elasticsearch output插件中指定document_id，防止数据重复导入</li>
+<li>定时调度。配置schedule语句</li>
+<li>实现示例<pre><code><br>jdbc {<pre><code>jdbc_driver_library =&gt; &quot;/home/jdy/jdy-elk/logstash-5.3.0/vendor/jdbc/mysql-connector-java-5.1.35.jar&quot;
+jdbc_driver_class =&gt; &quot;com.mysql.jdbc.Driver&quot;
+jdbc_connection_string =&gt; &quot;jdbc:mysql://59.110.207.194:3306/mytrip_basic&quot;
+jdbc_user =&gt; &quot;jdy_db_admin&quot;
+jdbc_password =&gt; &quot;******&quot;
+schedule =&gt; &quot;0 * * * * &quot;
+statement =&gt; &quot;SELECT p.*, c.name as countryName, &apos;province&apos; as table_name, CONCAT(&apos;PROVINCE-&apos;, provinceID) as doc_id FROM mytrip_basic.sys_province p le
+</code></pre>ft join mytrip_basic.sys_country c on p.countryID=c.countryID where provinceID in (29)”<br>}<br>filter {<br>}<br>output {<br>  elasticsearch {<pre><code>hosts =&gt; &quot;10.30.137.118:9200&quot;
+document_id =&gt; &quot;%{[doc_id]}&quot;
+index =&gt; &quot;logstash-jdbc-basic&quot;
+</code></pre>  }<br>}<br></code></pre></li>
+</ul>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><ul>
+<li>主要的查询语法<ul>
+<li>Match Query。全文检索（full text query），ES会先对请求进行解析(analyze)，得到多个单独的词汇，逐个查询并综合评分，相当于google的搜索机制</li>
+<li>Term Query。直接查询单独的term（要求term完全匹配），主要针对结构化的数据，例如数字、日期、枚举等，这些字段都是.keyword类型的field。</li>
+<li>Bool组合。对多个Match Query和/或TermQuery进行组合查询</li>
+</ul>
+</li>
+<li>前缀查询<ul>
+<li>对Term Query可以支持前缀查询，尤其用户输入过程中一般要实现类似提示的效果，需要通过前缀查询进行支持</li>
+<li>filter。相比Query，filter可以省去评分计算等过程，比Query的速度要更快，因此在不需要评分的场景应尽量使用filter替代query</li>
+</ul>
+</li>
+<li>大小写处理。<ul>
+<li>通过jdbc input插件的lowercase_column_names选项，指定想要小写处理的表属性    - 如果不使用动态mapping（dynamic mapping），可以通过ES mapping，指定某些字段为小写，之后用小写查询</li>
+<li>注意需要显示指定某些字段进行小写处理，有些大小写混用的id类属性，全部转为小写会造成数据错误，例如服务器的hostName，Base64编码的属性等</li>
+<li>我们在实际处理过程中没有改变存储的大小写，而是针对属性值的实际情况将查询串进行特殊处理（如小写、大写、首字母大写等）</li>
+</ul>
+</li>
+<li>全拼音/拼音首字母<ul>
+<li>有条件的进行拼音手工维护，能够保证准确率，如beijing，bj，shanghai，shh</li>
+<li>通过github一些资源来生成拼音</li>
+</ul>
+</li>
+<li>Boost设置。boost&gt;1可以增加某一子查询的评分重要程度。例如，我们认为在查询过程中name匹配应该比其他内容的匹配更重要，因此我们把name的boost设置为5.0</li>
+<li>完整的查询方案<pre><code><br>{<br>  “query”: {<pre><code>&quot;filter&quot;: [
+    {&quot;term&quot;: {&quot;table_name&quot;: &quot;hotel&quot;} }
+],
+&quot;bool: {
+    &quot;should: [
+        {&quot;match&quot;: {&quot;name&quot;: {&quot;query&quot;: keyword, &quot;operator&quot;: &quot;or&quot;}}},
+        {&quot;match&quot;: {&quot;enname&quot;: keyword}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordLowerCase}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordLowerCase, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;fs.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;pinyin.keyword&quot;: keywordFirstCapital}},
+        {&quot;prefix&quot;: {&quot;name.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}},
+        {&quot;prefix&quot;: {&quot;enname.keyword&quot;: {&quot;value&quot;: keywordFirstCapital, &quot;boost&quot;: 5.0}}}
+    ]
+},
+&quot;minimum_should_match&quot;: 1
+</code></pre>  },<br>  “size”:200,<br>  “_source”: true<br>}<br></code></pre></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/12/20/旅行基础数据搜索/" data-id="cjpwf1wq500004eqhj9cgcq64" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-筋斗云ELK集群" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/12/19/筋斗云ELK集群/" class="article-date">
@@ -1431,170 +1527,6 @@ public void init(){
 
 
   
-    <article id="post-分布式服务监控 - 概述" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/03/23/分布式服务监控 - 概述/" class="article-date">
-  <time datetime="2017-03-23T06:58:10.000Z" itemprop="datePublished">2017-03-23</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="分布式服务监控-概述"><a href="#分布式服务监控-概述" class="headerlink" title="分布式服务监控 - 概述"></a>分布式服务监控 - 概述</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li>目标</li>
-<li>概述</li>
-</ul>
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><ul>
-<li>收集并存储一定时期内的服务器系统状态、网络状态、核心组件的核心指标，常见服务（mysql、redis等）的服务指标</li>
-<li>7*24小时对上述指标进行<font color="blue">监控报警</font>，对超过指定阈值的可疑指标发出报警（邮件或短信通知）。区别于dapper和pinpoint的分布式全局调用追踪</li>
-<li>对上述指标数据提供<font color="blue">数据报表</font>功能，便于全面的跟踪查看系统的运行状态</li>
-</ul>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
-<li><i>Application Performance Management(应用性能管理，简称APM)</i>：In the fields of information technology and systems management, application performance management is the <font color="blue">monitoring and management of performance and availability of software applications</font>. APM strives to detect and diagnose complex application performance problems to maintain an expected level of service.</li>
-<li><font color="blue">商用软件</font>，目前市面上有不少商用的APM管理软件，如<a href="http://www.toushibao.com/" target="_blank" rel="external">oneAPM</a>、<a href="">透视宝</a>等。在监控的目标机器上安装agent，通过agent采集数据推送到服务商的server端，server端提供数据报表展示和监控报警功能。使用这些服务，可以快速的搭建起自己的主机和服务监控，只需要安装相应的agent，并配置相关服务的配置文件如redis、mysql等，主机本身disk、memory、cpu、traffic等指标通常默认支持，不需额外配置；缺点是价格不低，一般要几十块钱每主机每月。</li>
-<li><font color="blue">开源软件</font>，我们的集群规模大约在100台左右，一年的价格算下来就在4万块左右，从节约成本的角度我们选择了开源的技术方案。另外作为一个合格的技术人员，一定要有创造一切的雄心！比较常用的开源监控软件有Nagios、Icinga、Zabbix，比较如下，还有更多其它方案可以参考这篇<a href="https://www.serverdensity.com/monitor/linux/how-to/" target="_blank" rel="external">文章</a>，以及serverfalut这篇<a href="http://serverfault.com/questions/44/what-tool-do-you-use-to-monitor-your-servers" target="_blank" rel="external">帖子</a><ul>
-<li><a href="http://www.zabbix.com/" target="_blank" rel="external">Zabbix</a>：自带报表更能，安装简单</li>
-<li><a href="https://www.nagios.org/" target="_blank" rel="external">Nagios</a>: 使用最广泛，支持所有平台、扩展性好，<font color="red">部署相对复杂</font>、图表需要插件扩展支持</li>
-<li><a href="">Icinga2</a>: nagios的fork，是为了解决nagios的更新慢、反馈慢等问题而设立的项目。覆盖Nagios所有功能，更新快、社区活跃</li>
-</ul>
-</li>
-<li>我们最终选用的方案是icinga，考虑的因素包括：nagios的使用广泛、icinga社区的活跃度非常高、以及icinga的分布式支持</li>
-<li>icingaweb2监控示意图，<font color="red">通过这些页面可以全面的掌握集群机器和服务的动态</font><ul>
-<li>首页：首页显示菜单及当前服务器和服务存在的主要问题（Service Problems)，所有的问题都会以红色警报提示 <img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/2fde37d8db8c7cd5bab1009a0e2cfb87/image.png" alt="image"></li>
-<li>hosts: hosts菜单显示所有服务器状态<img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/e6b93b170310e44fab86a6ea88fee96d/image.png" alt="image"></li>
-<li>hostgroups：hostgroups按分组管理所有的服务器 <img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/70c0f97ecb898bea9bbd0a3d82709ee2/image.png" alt="image"></li>
-<li>servicegroups：按分组管理所有的服务<img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/cdbd4f1daf0ac4680b8b241b3022f2eb/image.png" alt="image"></li>
-</ul>
-</li>
-</ul>
-<h2 id="领域模型"><a href="#领域模型" class="headerlink" title="领域模型"></a>领域模型</h2><h3 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h3><ul>
-<li>Master</li>
-<li>Satelite</li>
-<li>Client</li>
-</ul>
-<h3 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h3><ul>
-<li>features<ul>
-<li>通过icinga command line interface命令控制feature，管理通知（notification）、命令（command）、ido-mysql等</li>
-<li><img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/65a5420a9c21575e17679f1071163cc0/image.png" alt="image"></li>
-</ul>
-</li>
-<li>Template</li>
-<li>Command（icinga监控命令） <ul>
-<li>Check Commands</li>
-<li>示例：<pre><code><br>object CheckCommand “check_redis” {<br> command = [ PluginDir + “/check_redis.pl”]<br> arguments = {<br>   “-H” = “$redis_host$”<br>   “-p” = “$redis_port$”<br>   “-x” = “$redis_pwd$”<br>   “-a” = “mem_fragmentation_ratio,connected_clients,keyspace_hits,used_memory_rss,total_connections_received,blocked_clients”<br>   “-w” = “~,100,~,300M,~,~”<br>   “-c” = “1.0:20,300,~,500M,~,~”<br> }<br>}<br></code></pre></li>
-<li>Notification Commands</li>
-<li>Event Commands</li>
-</ul>
-</li>
-<li>Service配置<pre><code><br>  apply Service “check-cache-redis” {<pre><code>import &quot;generic-service&quot;
-check_command = &quot;check_redis&quot;
-vars.redis_host = host.address
-vars.redis_port = &quot;7136&quot;
-vars.redis_pwd = &quot;j^dy@&quot;
-assign where host.name == &quot;icinga-cache1.jindouyun.com&quot;
-</code></pre>  }<br>  </code></pre></li>
-<li>groups配置，使用apply rules表达式（Apply Rules Expression)批量指定group<pre><code><br>  //服务器分组<br>  object HostGroup “cache-servers” {<pre><code>display_name = &quot;Cache Servers&quot;
-assign where match(&quot;*cache*&quot;, host.name)
-</code></pre>  }<br>  //服务分组<br>  object ServiceGroup “redis” {<pre><code>display_name = &quot;Redis Checks&quot;
-assign where match(&quot;check_redis&quot;, service.check_command)
-</code></pre>  }<br>  </code></pre></li>
-</ul>
-<h2 id="icinga实践"><a href="#icinga实践" class="headerlink" title="icinga实践"></a>icinga实践</h2><h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><ul>
-<li>分布式</li>
-<li>插件扩展</li>
-<li>安全性</li>
-</ul>
-<h3 id="master安装"><a href="#master安装" class="headerlink" title="master安装"></a>master安装</h3><ul>
-<li>安装icinga2<ul>
-<li>yum install -y <a href="https://packages.icinga.com/epel/7/release/noarch/icinga-rpm-release-7-1.el7.centos.noarch.rpm" target="_blank" rel="external">https://packages.icinga.com/epel/7/release/noarch/icinga-rpm-release-7-1.el7.centos.noarch.rpm</a></li>
-<li>yum install -y icinga2</li>
-<li>chkconfig icinga2 on</li>
-<li>service icinga2 start</li>
-</ul>
-</li>
-<li>安装httpd<ul>
-<li>yum install -y httpd</li>
-<li>chkconfig httpd on</li>
-<li>service httpd start</li>
-</ul>
-</li>
-<li>安装nagios插件<ul>
-<li>yum install -y nagios-plugins-all</li>
-</ul>
-</li>
-<li>安装、初始化mysql库<ul>
-<li>DB IDO（DataBase Icinga Data Output）</li>
-<li>安装mysql：yum install -y mysql-server mysql &amp;&amp; chkconfig mysqld on &amp;&amp; service mysqld start &amp;&amp; mysql_secure_installation</li>
-<li>yum install -y icinga2-ido-mysql &amp;&amp; icinga2 feature enable ido-mysql</li>
-<li>配置文件位于/etc/icinga2/features-available，修改默认密码</li>
-</ul>
-</li>
-<li>安装icinga web2<ul>
-<li>cinga2 feature enable command</li>
-<li>systemctl restart icinga2.service</li>
-<li>sudo usermod -a -G icingacmd apache</li>
-<li>id apache</li>
-<li>sudo yum install icingaweb2 icingacli -y</li>
-<li>sudo icingacli setup config webserver apache –document-root /usr/share/icingaweb2/public</li>
-<li>sudo systemctl restart httpd.service</li>
-<li>sudo icingacli setup token create</li>
-</ul>
-</li>
-<li>安装高亮插件 install vim highlighting plugin<ul>
-<li>yum install vim-icinga2</li>
-<li>touch ~/.vimrc</li>
-<li>echo “syntax on” &gt;&gt; ~/.vimrc</li>
-</ul>
-</li>
-<li>节点设置，使用<a href="https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/distributed-monitoring?highlight-search=Host%20certificate%20common%20name#distributed-monitoring-security" target="_blank" rel="external">icinga2 node wizard</a><ul>
-<li>注意master节点的zone.conf文件，需要修改master zone名称为“master”，不能使用默认的NodeName</li>
-<li>注意生成ssl key用于master/client加密通讯</li>
-</ul>
-</li>
-</ul>
-<h3 id="client安装"><a href="#client安装" class="headerlink" title="client安装"></a>client安装</h3><ul>
-<li>节点设置，使用<a href="https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/distributed-monitoring?highlight-search=Host%20certificate%20common%20name#distributed-monitoring-security" target="_blank" rel="external">icinga2 node wizard</a><ul>
-<li>连接的建立方式，一般从master/satelite机器向client机器建立连接，client机器不需要建立向master/satelite机器的连接（不需要知道master/satelite机器连接）</li>
-</ul>
-</li>
-</ul>
-<h3 id="服务器上线监控"><a href="#服务器上线监控" class="headerlink" title="服务器上线监控"></a>服务器上线监控</h3><ul>
-<li>定时通过网络查看服务器是否在线</li>
-<li><img src="https://code.aliyun.com/jindouyuncode/jdy-solution-master/uploads/15119d43ec776b90babfd6ad7532f8c0/image.png" alt="image"></li>
-<li>hostalive 默认的服务器监控命令<pre><code><br>object Host “icinga-cache1.jindouyun.com” {<br>check_command = “hostalive”<br>address = “10.28.204.99”<br>vars.client_endpoint = name //follows the convention that host name == endpoint name<br>vars.type = “cache”<br>}<br></code></pre></li>
-<li>ssh 通过指定端口连接服务器，确定服务器是否在线<pre><code><br>object Host “icinga-train-pricenode04.jindouyun.com” {<br>check_command = “ssh”<br>vars.client_endpoint = name<br>vars.ssh_address = “221.1.1.1”<br>vars.ssh_port = “12345”<br>vars.type = “node”<br>}<br></code></pre></li>
-</ul>
-<h3 id="redis监控"><a href="#redis监控" class="headerlink" title="redis监控"></a>redis监控</h3><h3 id="ssdb监控"><a href="#ssdb监控" class="headerlink" title="ssdb监控"></a>ssdb监控</h3><h3 id="外部插件"><a href="#外部插件" class="headerlink" title="外部插件"></a>外部插件</h3><ul>
-<li>icinga大量使用perl脚本作为外部插件的实现方式，安装perl<ul>
-<li>安装CPAN：yum install perl-CPAN</li>
-<li>cpan:&gt; force install Redis</li>
-<li>下载插件脚本并赋予执行权限</li>
-</ul>
-</li>
-<li>常用外部插件<ul>
-<li>报表：graphite</li>
-<li>nagios-plugin自带的check_redis.pl等插件</li>
-<li>自己实现短信插件（TODO）</li>
-</ul>
-</li>
-</ul>
-<h1 id="高级主题"><a href="#高级主题" class="headerlink" title="高级主题"></a>高级主题</h1><h2 id="load过高问题"><a href="#load过高问题" class="headerlink" title="load过高问题"></a>load过高问题</h2><h2 id="集群搭设"><a href="#集群搭设" class="headerlink" title="集群搭设"></a>集群搭设</h2>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/23/分布式服务监控 - 概述/" data-id="cjps0hy9m000cs6qharzph80x" class="article-share-link">Partager</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -1611,7 +1543,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Mot-clés</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/classloader/">classloader</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -1621,7 +1553,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Nuage de mot-clés</h3>
     <div class="widget tagcloud">
-      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/classloader/" style="font-size: 10px;">classloader</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/jvm/" style="font-size: 10px;">jvm</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -1643,6 +1575,10 @@ assign where match(&quot;check_redis&quot;, service.check_command)
       <ul>
         
           <li>
+            <a href="/2019/02/10/java classloader/">java classloader详解</a>
+          </li>
+        
+          <li>
             <a href="/2019/02/06/redis实践/">redis实践</a>
           </li>
         
@@ -1656,10 +1592,6 @@ assign where match(&quot;check_redis&quot;, service.check_command)
         
           <li>
             <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
-          </li>
-        
-          <li>
-            <a href="/2019/01/26/DevOps核心目标与方法体系/">DevOps核心目标与方法体系</a>
           </li>
         
       </ul>
