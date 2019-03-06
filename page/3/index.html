@@ -61,6 +61,61 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-操作系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/27/操作系统/" class="article-date">
+  <time datetime="2017-04-27T06:08:59.000Z" itemprop="datePublished">2017-04-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><ul>
+<li>CPU核心概念<ul>
+<li>中断</li>
+<li>寄存器</li>
+<li>CPU MODE：内核态、用户态</li>
+</ul>
+</li>
+<li>实时操作系统<ul>
+<li>CPU时间片算法：</li>
+<li>抢占/非抢占</li>
+<li>Timer</li>
+</ul>
+</li>
+<li>OS核心功能组件<ul>
+<li>内存管理</li>
+<li>I/O管理</li>
+<li>GPU</li>
+<li>网络</li>
+<li>多媒体</li>
+</ul>
+</li>
+</ul>
+<h3 id="RTOS-design"><a href="#RTOS-design" class="headerlink" title="RTOS design"></a>RTOS design</h3><ul>
+<li><font color="blue">根据已有的CPU文档（ARM Quad A7 core）、主板文档（BCM2835 ARM peripherals），对底层硬件进行操作，包括寄存器、内存、GPU等</font></li>
+<li>封装底层硬件、为上层应用提供API，可以查阅<font color="red">Linux Kernel</font>的lib，你们要求application跨平台，可以查阅<font color="red">Java JVM的跨平台设计</font></li>
+<li>realtime的关键应该是抢占式调度，需要基于中断实现</li>
+<li>四核CPU，要实现多核并发，主要是协调四个CPU同时工作。比如给4个CPU各分配一个任务，任务完成后怎么通知其它CPU，并协调下一步指令执行。应该是<font color="red">基于cpu的mailbox去实现</font>，关注一下QA7文档的mailbox部分。另外就是查一下线程/进程的状态转换模型和调度模型</li>
+<li>内存寻址要搞清楚虚拟地址和物理地址之间的转换，再看一下文档的Memory Manage Unit(MMU)和Direct Memory Access（DMA）</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/27/操作系统/" data-id="cjps0hy9p000es6qh1668zcne" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-分布式服务监控 - 概述" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/03/23/分布式服务监控 - 概述/" class="article-date">
@@ -423,7 +478,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Mot-clés</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/classloader/">classloader</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DevOps/">DevOps</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PAXOS/">PAXOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Polyglot/">Polyglot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SOA/">SOA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bigdata/">bigdata</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/classloader/">classloader</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/elasticsearch/">elasticsearch</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-linux-ops/">shell,linux,ops</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式/">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技术内幕/">技术内幕</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/用户触达/">用户触达</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/笔记/">笔记</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运维-DevOps/">运维,DevOps</a></li></ul>
     </div>
   </div>
 
@@ -433,7 +488,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Nuage de mot-clés</h3>
     <div class="widget tagcloud">
-      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/classloader/" style="font-size: 10px;">classloader</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/jvm/" style="font-size: 10px;">jvm</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
+      <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/PAXOS/" style="font-size: 10px;">PAXOS</a> <a href="/tags/Polyglot/" style="font-size: 10px;">Polyglot</a> <a href="/tags/SOA/" style="font-size: 10px;">SOA</a> <a href="/tags/bigdata/" style="font-size: 10px;">bigdata</a> <a href="/tags/classloader/" style="font-size: 10px;">classloader</a> <a href="/tags/elasticsearch/" style="font-size: 15px;">elasticsearch</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/jvm/" style="font-size: 10px;">jvm</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/shell-linux-ops/" style="font-size: 10px;">shell,linux,ops</a> <a href="/tags/zookeeper/" style="font-size: 10px;">zookeeper</a> <a href="/tags/分布式/" style="font-size: 10px;">分布式</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/技术内幕/" style="font-size: 15px;">技术内幕</a> <a href="/tags/用户触达/" style="font-size: 10px;">用户触达</a> <a href="/tags/笔记/" style="font-size: 20px;">笔记</a> <a href="/tags/设计模式/" style="font-size: 10px;">设计模式</a> <a href="/tags/运维-DevOps/" style="font-size: 10px;">运维,DevOps</a>
     </div>
   </div>
 
@@ -442,7 +497,7 @@ assign where match(&quot;check_redis&quot;, service.check_command)
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">March 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li></ul>
     </div>
   </div>
 
@@ -453,6 +508,10 @@ assign where match(&quot;check_redis&quot;, service.check_command)
     <h3 class="widget-title">Articles récents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/03/06/翻译：成为多语种的程序员（Being a Polyglot Programmer）/">翻译：成为多语种的程序员（Being a Polyglot Programmer）</a>
+          </li>
         
           <li>
             <a href="/2019/02/10/java classloader/">java classloader详解</a>
@@ -468,10 +527,6 @@ assign where match(&quot;check_redis&quot;, service.check_command)
         
           <li>
             <a href="/2019/01/27/笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》/">笔记——《从PAXOS到Zookeeper——分布式一致性原理与实践》</a>
-          </li>
-        
-          <li>
-            <a href="/2019/01/26/笔记——《java并发编程的艺术》/">笔记——《java并发编程的艺术》</a>
           </li>
         
       </ul>
